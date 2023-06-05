@@ -23,7 +23,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     }
 
     @Override
-    public void saveRestaurant(RestaurantModel restaurantModel, String tokenWithBearerPrefix) {
+    public RestaurantModel saveRestaurant(RestaurantModel restaurantModel, String tokenWithBearerPrefix) {
         if(isContainsRestaurantNameOnlyNumbers(restaurantModel.getName())) {
             throw new InvalidDataException("The name of the restaurant cannot only contain numbers");
         }
@@ -33,7 +33,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
         if(!user.getRol().equals("PROPIETARIO")) {
             throw new AccessDeniedException("The user id does not have the required role to use this action");
         }
-        restaurantPersistencePort.saveRestaurant(restaurantModel);
+        return restaurantPersistencePort.saveRestaurant(restaurantModel);
     }
 
     private void validateRestaurantFieldsEmpty(RestaurantModel restaurantModel) {

@@ -1,24 +1,41 @@
 package com.reto.plazoleta.domain.model;
 
 public class EmployeeRestaurantModel {
-    private Long idEmployeeRestaurant;
-    private RestaurantModel idRestaurant;
+
+    private Long idRestaurantEmployee;
+    private Long idUserEmployee;
+    private Long idRestaurant;
+
     public EmployeeRestaurantModel() {
     }
-    public EmployeeRestaurantModel(Long idEmployeeRestaurant, RestaurantModel idRestaurant) {
-        this.idEmployeeRestaurant = idEmployeeRestaurant;
+
+    public EmployeeRestaurantModel(Long idRestaurantEmployee, Long idUserEmployee, Long idRestaurant) {
+        this.idRestaurantEmployee = idRestaurantEmployee;
+        this.idUserEmployee = idUserEmployee;
         this.idRestaurant = idRestaurant;
     }
-    public Long getIdEmployeeRestaurant() {
-        return idEmployeeRestaurant;
+
+    public Long getIdRestaurantEmployee() {
+        return idRestaurantEmployee;
     }
-    public void setIdEmployeeRestaurant(Long idEmployeeRestaurant) {
-        this.idEmployeeRestaurant = idEmployeeRestaurant;
+
+    public void setIdRestaurantEmployee(Long idRestaurantEmployee) {
+        this.idRestaurantEmployee = idRestaurantEmployee;
     }
-    public RestaurantModel getIdRestaurant() {
+
+    public Long getIdUserEmployee() {
+        return idUserEmployee;
+    }
+
+    public void setIdUserEmployee(Long idUserEmployee) {
+        this.idUserEmployee = idUserEmployee;
+    }
+
+    public Long getIdRestaurant() {
         return idRestaurant;
     }
-    public void setIdRestaurant(RestaurantModel idRestaurant) {
+
+    public void setIdRestaurant(Long idRestaurant) {
         this.idRestaurant = idRestaurant;
     }
 }
