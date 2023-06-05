@@ -14,15 +14,10 @@ import javax.persistence.*;
 @Setter
 @Table(name = "EmployeeRestaurant")
 public class EmployeeRestaurantEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idEmployeeRestaurant;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Restaurant", referencedColumnName = "idRestaurant")
-    private RestaurantEntity restaurantEntity;
-
-    private Long idUser;
-
-
+    private Long idRestaurantEmployee;
+    private Long idUserEmployee;
+    private Long idRestaurant;
 }

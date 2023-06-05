@@ -35,4 +35,20 @@ public class UserGatewayImpl implements IUserGateway {
                 })
                 .block();
     }
+
+    @Override
+    public User getUserByEmailInTheToken(String email, String tokenWithPrefixBearer) {
+        return webClient.get().uri(uriBuilder -> uriBuilder.path("user/get-user-by-email")
+                        .queryParam("email", email)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, tokenWithPrefixBearer)
+                .exchangeToMono( clientResponse -> {
+                    if(clientResponse.statusCode().is2xxSuccessful()) {
+                        return clientResponse.bodyToMono(User.class);
+                    } else {
+                        return clientResponse.createException().flatMap(Mono::error);
+                    }
+                })
+                .block();
+    }
 }
