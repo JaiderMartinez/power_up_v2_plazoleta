@@ -27,7 +27,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -204,5 +204,29 @@ class OwnerRestaurantControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.OBJECT_NOT_FOUND.getMessage()));
+    }
+
+    @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
+    @Test
+    void test_enableOrDisableDishByStatusField_withTheRequestParamIdDishFoundAndRequestParamStatusFromTypeBooleanValidAndTokenValid_shouldResponseStatusOKAndFieldIdDishModifiedFieldStatus() {
+
+    }
+
+    @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
+    @Test
+    void test_enableOrDisableDishByStatusField_withTheRequestParamIdDishFoundButDishDoesNotBelongsToYourRestaurantAndRequestParamStatusFromTypeBooleanValidAndTokenValid_shouldResponseStatusConflict() {
+
+    }
+
+    @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
+    @Test
+    void test_enableOrDisableDishByStatusField_withRequestParamFromFieldStatusTypeInvalidAndTokenValid_shouldResponseStatusBadRequest() {
+
+    }
+
+    @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
+    @Test
+    void test_enableOrDisableDishByStatusField_withRequestParamFromFieldIdDishNotFoundAndTokenInValid_shouldResponseStatusNotFound() {
+
     }
 }
