@@ -14,5 +14,5 @@ import java.util.List;
 public class CreateOrderRequestDto {
 
     private Long idRestaurant;
-    private List<DishFromOrderAndAmountRequestDto> orderDish;
+    private List<DishFromOrderAndAmountRequestDto> listDishes;
 }

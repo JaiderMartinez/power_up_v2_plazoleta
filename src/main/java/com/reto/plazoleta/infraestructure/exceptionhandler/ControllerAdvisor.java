@@ -1,5 +1,6 @@
 package com.reto.plazoleta.infraestructure.exceptionhandler;
 
+import com.reto.plazoleta.domain.exception.CustomerCanNotOrderException;
 import com.reto.plazoleta.domain.exception.DishNotExistsException;
 import com.reto.plazoleta.domain.exception.EmptyFieldsException;
 import com.reto.plazoleta.domain.exception.InvalidDataException;
@@ -82,4 +83,10 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(MESSAGE, authenticationException.getMessage()));
     }
 
+    @ExceptionHandler(CustomerCanNotOrderException.class)
+    public ResponseEntity<Map<String, String>> handleCustomerCanNotOrderException(
+            CustomerCanNotOrderException ignoredCustomerCanNotOrderException) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.ORDER_IN_PROCESS.getMessage()));
+    }
 }
