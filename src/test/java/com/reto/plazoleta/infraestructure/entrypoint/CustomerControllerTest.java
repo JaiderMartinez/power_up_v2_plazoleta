@@ -1,9 +1,10 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.reto.plazoleta.application.dto.request.CreateOrderRequestDto;
+import com.reto.plazoleta.application.dto.request.OrderRequestDto;
 import com.reto.plazoleta.application.dto.request.DishFromOrderAndAmountRequestDto;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
+import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.CategoryEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.DishEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.EmployeeRestaurantEntity;
@@ -27,6 +28,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -37,8 +39,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -78,6 +78,9 @@ class CustomerControllerTest {
 
     @MockBean
     private IUserGateway userGateway;
+
+    @MockBean
+    private JwtProvider jwtProvider;
 
     private List<DishEntity> listDishEntities;
 
@@ -189,10 +192,11 @@ class CustomerControllerTest {
         List<DishFromOrderAndAmountRequestDto> listDishAndAmountRequest = new ArrayList<>();
         listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(0).getIdDish(), listDishEntities.get(0).getName(), 4));
         listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(1).getIdDish(), listDishEntities.get(1).getName(), 2));
-        CreateOrderRequestDto createOrderRequest = new CreateOrderRequestDto(1L, listDishAndAmountRequest);
+        OrderRequestDto createOrderRequest = new OrderRequestDto(1L, listDishAndAmountRequest);
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
-        when(this.userGateway.getUserByEmailInTheToken(any(String.class), eq(TOKE_WITH_PREFIX_BEARER))).thenReturn(userAuthenticatedByToken);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
+        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         this.mockMvc.perform(post(REGISTER_ORDER_API_PATH)
                         .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER)
                         .content(this.objectMapper.writeValueAsString(createOrderRequest))
@@ -203,14 +207,15 @@ class CustomerControllerTest {
 
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_registerOrderFromCustomer_withAndTheFieldsCompleteFromCreateOrderRequestDtoButUserHasAnOrderInProcessAndTokenValid_ShouldResponseAStatusConflict() throws Exception {
+    void test_registerOrderFromCustomer_withTheFieldsCompleteFromCreateOrderRequestDtoButUserHasAnOrderInProcessAndTokenValid_ShouldResponseAStatusConflict() throws Exception {
         List<DishFromOrderAndAmountRequestDto> listDishAndAmountRequest = new ArrayList<>();
         listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(0).getIdDish(), listDishEntities.get(0).getName(), 4));
         listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(1).getIdDish(), listDishEntities.get(1).getName(), 2));
-        CreateOrderRequestDto createOrderRequest = new CreateOrderRequestDto(2L, listDishAndAmountRequest);
+        OrderRequestDto createOrderRequest = new OrderRequestDto(2L, listDishAndAmountRequest);
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
-        when(this.userGateway.getUserByEmailInTheToken(any(String.class), eq(TOKE_WITH_PREFIX_BEARER))).thenReturn(userAuthenticatedByToken);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
+        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         this.mockMvc.perform(post(REGISTER_ORDER_API_PATH)
                         .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER)
                         .content(this.objectMapper.writeValueAsString(createOrderRequest))
@@ -225,10 +230,11 @@ class CustomerControllerTest {
         List<DishFromOrderAndAmountRequestDto> listDishAndAmountRequest = new ArrayList<>();
         listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(0).getIdDish(), listDishEntities.get(0).getName(), 4));
         listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(1).getIdDish(), listDishEntities.get(1).getName(), 2));
-        CreateOrderRequestDto createOrderRequest = new CreateOrderRequestDto(3L, listDishAndAmountRequest);
+        OrderRequestDto createOrderRequest = new OrderRequestDto(3L, listDishAndAmountRequest);
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
-        when(this.userGateway.getUserByEmailInTheToken(any(String.class), eq(TOKE_WITH_PREFIX_BEARER))).thenReturn(userAuthenticatedByToken);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
+        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         this.mockMvc.perform(post(REGISTER_ORDER_API_PATH)
                         .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER)
                         .content(this.objectMapper.writeValueAsString(createOrderRequest))
@@ -243,10 +249,11 @@ class CustomerControllerTest {
         List<DishFromOrderAndAmountRequestDto> listDishAndAmountRequest = new ArrayList<>();
         listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(10L, listDishEntities.get(0).getName(), 4));
         listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(1).getIdDish(), listDishEntities.get(1).getName(), 2));
-        CreateOrderRequestDto createOrderRequest = new CreateOrderRequestDto(1L, listDishAndAmountRequest);
+        OrderRequestDto createOrderRequest = new OrderRequestDto(1L, listDishAndAmountRequest);
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
-        when(this.userGateway.getUserByEmailInTheToken(any(String.class), eq(TOKE_WITH_PREFIX_BEARER))).thenReturn(userAuthenticatedByToken);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
+        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         this.mockMvc.perform(post(REGISTER_ORDER_API_PATH)
                         .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER)
                         .content(this.objectMapper.writeValueAsString(createOrderRequest))

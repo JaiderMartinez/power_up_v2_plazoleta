@@ -1,6 +1,6 @@
 package com.reto.plazoleta.application.handler.impl;
 
-import com.reto.plazoleta.application.dto.request.CreateOrderRequestDto;
+import com.reto.plazoleta.application.dto.request.OrderRequestDto;
 import com.reto.plazoleta.application.dto.response.OrderCreatedResponseDto;
 import com.reto.plazoleta.application.dto.response.RestaurantResponsePageableDto;
 import com.reto.plazoleta.application.handler.ICustomerService;
@@ -34,9 +34,9 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    public OrderCreatedResponseDto saveOrder(CreateOrderRequestDto createOrderRequestDto, String tokenWithPrefixBearer) {
+    public OrderCreatedResponseDto saveOrder(OrderRequestDto createOrderRequestDto, String tokenWithPrefixBearer) {
         final OrderModel orderRequestModel = this.orderRequestMapper.toOrderModel(createOrderRequestDto);
-        final List<OrderDishModel> orderDishRequestModelList = createOrderRequestDto.getListDishes().stream().map(this.orderRequestMapper::toOrderDishModel).collect(Collectors.toList());
+        final List<OrderDishModel> orderDishRequestModelList = createOrderRequestDto.getDishlist().stream().map(this.orderRequestMapper::toOrderDishModel).collect(Collectors.toList());
         return orderResponseMapper.toCreateOrderResponseDto(this.orderServicePort.saveOrder(orderRequestModel, orderDishRequestModelList, tokenWithPrefixBearer));
     }
 }

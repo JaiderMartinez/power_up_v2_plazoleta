@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface IOrderServicePort {
 
-    OrderModel saveOrder(OrderModel orderModel, List<OrderDishModel> listOrderDishModelWithValueOfNameFromDishAndAmountOfDishes, String tokenWithPrefixBearer);
+    OrderModel saveOrder(OrderModel orderModelRequest, List<OrderDishModel> listOrderDishModelWithValueOfNameFromDishAndAmountOfDishes, String tokenWithPrefixBearer);
 }

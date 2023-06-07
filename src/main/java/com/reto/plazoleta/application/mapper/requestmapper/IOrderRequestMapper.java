@@ -1,6 +1,6 @@
 package com.reto.plazoleta.application.mapper.requestmapper;
 
-import com.reto.plazoleta.application.dto.request.CreateOrderRequestDto;
+import com.reto.plazoleta.application.dto.request.OrderRequestDto;
 import com.reto.plazoleta.application.dto.request.DishFromOrderAndAmountRequestDto;
 import com.reto.plazoleta.domain.model.OrderDishModel;
 import com.reto.plazoleta.domain.model.OrderModel;
@@ -12,7 +12,7 @@ import org.mapstruct.ReportingPolicy;
 public interface IOrderRequestMapper {
 
     @Mapping(target = "restaurantModel.idRestaurant", source = "idRestaurant")
-    OrderModel toOrderModel(CreateOrderRequestDto createOrderRequestDto);
+    OrderModel toOrderModel(OrderRequestDto createOrderRequestDto);
 
     @Mapping(target = "amount", source = "amount")
     @Mapping(target = "dishModel.idDish", source = "idDish")

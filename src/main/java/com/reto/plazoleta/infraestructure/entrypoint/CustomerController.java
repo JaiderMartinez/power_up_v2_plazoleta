@@ -1,6 +1,6 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
-import com.reto.plazoleta.application.dto.request.CreateOrderRequestDto;
+import com.reto.plazoleta.application.dto.request.OrderRequestDto;
 import com.reto.plazoleta.application.dto.response.OrderCreatedResponseDto;
 import com.reto.plazoleta.application.dto.response.RestaurantResponsePageableDto;
 import com.reto.plazoleta.application.handler.ICustomerService;
@@ -59,11 +59,11 @@ public class CustomerController {
     public ResponseEntity<OrderCreatedResponseDto> registerOrderFromCustomer(@Parameter(
             description = "Object to make an order",
             required = true,
-            schema = @Schema(implementation = CreateOrderRequestDto.class))
-            @RequestBody CreateOrderRequestDto createOrderRequestDto, @Parameter(
+            schema = @Schema(implementation = OrderRequestDto.class))
+            @RequestBody OrderRequestDto createOrderRequestDto, @Parameter(
             description = "The authentication token with Bearer prefix for search the idUserCustomer",
             required = true, schema = @Schema(type = "String", format = "jwt"))
             @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithBearerPrefix) {
-        return new ResponseEntity<>(customerService.saveOrder(createOrderRequestDto, tokenWithBearerPrefix), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.customerService.saveOrder(createOrderRequestDto, tokenWithBearerPrefix), HttpStatus.CREATED);
     }
 }
