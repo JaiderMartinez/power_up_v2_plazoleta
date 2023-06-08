@@ -1,10 +1,12 @@
 package com.reto.plazoleta.infraestructure.configuration;
 
 import com.reto.plazoleta.domain.api.IOwnerRestaurantServicePort;
+import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.spi.ICategoryPersistencePort;
 import com.reto.plazoleta.domain.spi.IDishPersistencePort;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.domain.usecase.OwnerRestaurantUseCase;
+import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.mapper.IDishEntityMapper;
 import com.reto.plazoleta.infraestructure.drivenadapter.persistence.DishJpaAdapter;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.IDishRepository;
@@ -20,6 +22,8 @@ public class DishBeanConfiguration {
     private final IDishEntityMapper dishEntityMapper;
     private final ICategoryPersistencePort categoryPersistencePort;
     private final IRestaurantPersistencePort restaurantPersistencePort;
+    private final IUserGateway userGateway;
+    private final JwtProvider jwtProvider;
 
     @Bean
     public IDishPersistencePort dishPersistencePort() {
@@ -28,6 +32,6 @@ public class DishBeanConfiguration {
 
     @Bean
     public IOwnerRestaurantServicePort ownerRestaurantServicePort(){
-        return new OwnerRestaurantUseCase(dishPersistencePort(), restaurantPersistencePort, categoryPersistencePort);
+        return new OwnerRestaurantUseCase(dishPersistencePort(), restaurantPersistencePort, categoryPersistencePort, userGateway, jwtProvider);
     }
 }
