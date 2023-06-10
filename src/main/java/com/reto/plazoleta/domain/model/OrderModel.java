@@ -3,6 +3,7 @@ package com.reto.plazoleta.domain.model;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class OrderModel {
 
@@ -12,6 +13,7 @@ public class OrderModel {
     private StatusOrder status;
     private EmployeeRestaurantModel employeeRestaurantModel;
     private RestaurantModel restaurantModel;
+    private List<OrderDishModel> ordersDishesModel;
 
     public OrderModel() {
     }
@@ -24,6 +26,17 @@ public class OrderModel {
         this.status = status;
         this.employeeRestaurantModel = employeeRestaurantModel;
         this.restaurantModel = restaurantModel;
+    }
+
+    public OrderModel(Long idOrder, Long idUserCustomer, LocalDate date, StatusOrder status,
+                      EmployeeRestaurantModel employeeRestaurantModel, RestaurantModel restaurantModel, List<OrderDishModel> ordersDishes) {
+        this.idOrder = idOrder;
+        this.idUserCustomer = idUserCustomer;
+        this.date = date;
+        this.status = status;
+        this.employeeRestaurantModel = employeeRestaurantModel;
+        this.restaurantModel = restaurantModel;
+        this.ordersDishesModel = ordersDishes;
     }
 
     public Long getIdOrder() {
@@ -72,5 +85,13 @@ public class OrderModel {
 
     public void setRestaurantModel(RestaurantModel restaurantModel) {
         this.restaurantModel = restaurantModel;
+    }
+
+    public List<OrderDishModel> getOrdersDishesModel() {
+        return ordersDishesModel;
+    }
+
+    public void setOrdersDishesModel(List<OrderDishModel> ordersDishesModel) {
+        this.ordersDishesModel = ordersDishesModel;
     }
 }

@@ -8,7 +8,6 @@ import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.domain.usecase.OrderUseCase;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
-import com.reto.plazoleta.infraestructure.drivenadapter.mapper.IOrderDishEntityMapper;
 import com.reto.plazoleta.infraestructure.drivenadapter.mapper.IOrderEntityMapper;
 import com.reto.plazoleta.infraestructure.drivenadapter.persistence.OrderDishJpaAdapter;
 import com.reto.plazoleta.infraestructure.drivenadapter.persistence.OrderJpaAdapter;
@@ -27,9 +26,8 @@ public class OrderBeanConfiguration {
     private final IUserGateway userGateway;
     private final IRestaurantPersistencePort restaurantPersistencePort;
     private final IDishPersistencePort dishPersistencePort;
-    private final IOrderDishRepository orderDishRepository;
-    private final IOrderDishEntityMapper orderDishEntityMapper;
     private final JwtProvider jwtProvider;
+    private final IOrderDishRepository orderDishRepository;
 
     @Bean
     public IOrderPersistencePort orderPersistencePort() {
@@ -38,12 +36,12 @@ public class OrderBeanConfiguration {
 
     @Bean
     public IOrderDishPersistencePort orderDishPersistencePort() {
-        return new OrderDishJpaAdapter(this.orderDishRepository, this.orderDishEntityMapper);
+        return new OrderDishJpaAdapter(this.orderDishRepository, this.orderEntityMapper);
     }
 
     @Bean
     public IOrderServicePort orderServicePort() {
         return new OrderUseCase(this.orderPersistencePort(), this.restaurantPersistencePort, this.dishPersistencePort,
-                this.userGateway, orderDishPersistencePort(), this.jwtProvider);
+                this.userGateway, this.jwtProvider, orderDishPersistencePort());
     }
 }

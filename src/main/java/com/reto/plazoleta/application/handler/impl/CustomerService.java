@@ -35,8 +35,9 @@ public class CustomerService implements ICustomerService {
 
     @Override
     public OrderCreatedResponseDto saveOrder(OrderRequestDto createOrderRequestDto, String tokenWithPrefixBearer) {
-        final OrderModel orderRequestModel = this.orderRequestMapper.toOrderModel(createOrderRequestDto);
-        final List<OrderDishModel> orderDishRequestModelList = createOrderRequestDto.getDishlist().stream().map(this.orderRequestMapper::toOrderDishModel).collect(Collectors.toList());
-        return orderResponseMapper.toCreateOrderResponseDto(this.orderServicePort.saveOrder(orderRequestModel, orderDishRequestModelList, tokenWithPrefixBearer));
+        OrderModel orderRequestModel = this.orderRequestMapper.toOrderModel(createOrderRequestDto);
+        final List<OrderDishModel> ordersDishesRequest = createOrderRequestDto.getDishesWithAmount().stream().map(this.orderRequestMapper::toOrderDishModel).collect(Collectors.toList());
+        orderRequestModel.setOrdersDishesModel(ordersDishesRequest);
+        return this.orderResponseMapper.toCreateOrderResponseDto(orderServicePort.saveOrder(orderRequestModel, tokenWithPrefixBearer));
     }
 }

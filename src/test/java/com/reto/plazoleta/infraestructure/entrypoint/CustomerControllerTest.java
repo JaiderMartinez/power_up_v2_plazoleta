@@ -8,6 +8,7 @@ import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.CategoryEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.DishEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.EmployeeRestaurantEntity;
+import com.reto.plazoleta.infraestructure.drivenadapter.entity.OrderDishEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.OrderEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.RestaurantEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
@@ -15,6 +16,7 @@ import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.ICategoryRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.IDishRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.IEmployeeRepository;
+import com.reto.plazoleta.infraestructure.drivenadapter.repository.IOrderDishRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.IOrderRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.IRestaurantRepository;
 import com.reto.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
@@ -39,6 +41,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -75,6 +78,9 @@ class CustomerControllerTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private IOrderDishRepository orderDishRepository;
 
     @MockBean
     private IUserGateway userGateway;
@@ -117,7 +123,11 @@ class CustomerControllerTest {
 
         EmployeeRestaurantEntity employeeRestaurantEntityExpected = new EmployeeRestaurantEntity(1L,2L, 2L);
         this.employeeRepository.save(employeeRestaurantEntityExpected);
-        this.orderRepository.save(new OrderEntity(1L, 1L, LocalDate.now(), StatusOrder.EN_PREPARACION,employeeRestaurantEntityExpected, restaurantList.get(1)));
+
+        OrderDishEntity orderDishEntity = new OrderDishEntity();
+        orderDishEntity.setAmount(4);
+        orderDishEntity.setDishEntity(listDishEntities.get(0));
+        this.orderRepository.save(new OrderEntity(1L, 1L, LocalDate.now(), StatusOrder.EN_PREPARACION,employeeRestaurantEntityExpected, restaurantList.get(1), asList(orderDishEntity)));
     }
 
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
@@ -163,9 +173,10 @@ class CustomerControllerTest {
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
     void test_getAllRestaurantsByOrderByNameAsc_withPageSizeOneAndNotDataFound_ShouldThrowAStatusNoContent() throws Exception {
-        restaurantRepository.deleteAll();
-        this.dishRepository.deleteAll();
         this.orderRepository.deleteAll();
+        this.orderDishRepository.deleteAll();
+        this.dishRepository.deleteAll();
+        restaurantRepository.deleteAll();
         mockMvc.perform(get(RESTAURANT_API_PATH)
                         .param(PAGE_SIZE_PARAM, "1")
                         .contentType(MediaType.APPLICATION_JSON))

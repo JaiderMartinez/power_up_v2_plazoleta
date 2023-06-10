@@ -27,12 +27,15 @@ public class OrderDishEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_pedido_plato")
     private Long idOrderDish;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_pedido", referencedColumnName = "id_pedido")
     private OrderEntity orderEntity;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_plato", referencedColumnName = "idDish")
     private DishEntity dishEntity;
+
     @Column(name = "cantidad")
     private Integer amount;
 }

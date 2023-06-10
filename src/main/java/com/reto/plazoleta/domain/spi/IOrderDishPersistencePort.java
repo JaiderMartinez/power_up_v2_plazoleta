@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface IOrderDishPersistencePort {
 
-    void saveAllOrdersDishes(List<OrderDishModel> orderDishModelList);
+    List<OrderDishModel> saveAllOrdersDishes(List<OrderDishModel> orderDishModelList);
 }

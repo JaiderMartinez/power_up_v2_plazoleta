@@ -28,36 +28,41 @@ public class OrderUseCase implements IOrderServicePort {
     private final IRestaurantPersistencePort restaurantPersistencePort;
     private final IDishPersistencePort dishPersistencePort;
     private final IUserGateway userGateway;
-    private final IOrderDishPersistencePort orderDishPersistencePort;
     private final JwtProvider jwtProvider;
+    private final IOrderDishPersistencePort orderDishPersistencePort;
 
     public OrderUseCase(IOrderPersistencePort orderPersistencePort, IRestaurantPersistencePort restaurantPersistencePort,
                         IDishPersistencePort dishPersistencePort, IUserGateway userGateway,
-                        IOrderDishPersistencePort orderDishPersistencePort, JwtProvider jwtProvider) {
+                        JwtProvider jwtProvider, IOrderDishPersistencePort orderDishPersistencePort) {
         this.orderPersistencePort = orderPersistencePort;
         this.restaurantPersistencePort = restaurantPersistencePort;
         this.dishPersistencePort = dishPersistencePort;
         this.userGateway = userGateway;
-        this.orderDishPersistencePort = orderDishPersistencePort;
         this.jwtProvider = jwtProvider;
+        this.orderDishPersistencePort = orderDishPersistencePort;
     }
 
     @Override
-    public OrderModel saveOrder(OrderModel orderModelRequest, List<OrderDishModel> listOrderDishModelWithValueOfNameFromDishAndAmountOfDishes, String tokenWithPrefixBearer) {
+    public OrderModel saveOrder(OrderModel orderModelRequest, String tokenWithPrefixBearer) {
         String emailFromUserAuthenticated = getEmailFromUserAuthenticatedByTokenWithPrefixBearer(tokenWithPrefixBearer);
         final User userCustomerFound = getUserByEmail(emailFromUserAuthenticated, tokenWithPrefixBearer);
-        Long idRestaurantFromRequest = orderModelRequest.getRestaurantModel().getIdRestaurant();
-        validateRestaurantAndCheckStatusOfOtherUserOrdersInTheSameRestaurant(orderModelRequest.getRestaurantModel().getIdRestaurant(), userCustomerFound.getIdUser());
+        validateRestaurant(orderModelRequest.getRestaurantModel().getIdRestaurant());
+        checkStatusFromUserOrdersInARestaurant(orderModelRequest.getRestaurantModel().getIdRestaurant(), userCustomerFound.getIdUser());
+
+        List<OrderDishModel> ordersDishesModelsRequest = orderModelRequest.getOrdersDishesModel();
 
         orderModelRequest.setIdUserCustomer(userCustomerFound.getIdUser());
         orderModelRequest.setDate(LocalDate.now());
         orderModelRequest.setStatus(StatusOrder.PENDIENTE);
-        final OrderModel orderSavedModel = this.orderPersistencePort.saveOrder(orderModelRequest);
+        orderModelRequest.setOrdersDishesModel(new ArrayList<>());
+        OrderModel orderModelSaved = this.orderPersistencePort.saveOrder(orderModelRequest);
 
-        List<OrderDishModel> addOrderAndQuantityByFullDish = createOrderDishList(orderSavedModel, listOrderDishModelWithValueOfNameFromDishAndAmountOfDishes, idRestaurantFromRequest);
-        this.orderDishPersistencePort.saveAllOrdersDishes(addOrderAndQuantityByFullDish);
+        orderModelSaved.setOrdersDishesModel(ordersDishesModelsRequest);
+        List<OrderDishModel> addOrderAndAmountOfDish = createOrdersDishesComplete(orderModelSaved);
 
-        return orderSavedModel;
+        List<OrderDishModel> orderDishModelsSaved = this.orderDishPersistencePort.saveAllOrdersDishes(addOrderAndAmountOfDish);
+        orderModelSaved.setOrdersDishesModel(orderDishModelsSaved);
+        return orderModelSaved;
     }
 
     private String getEmailFromUserAuthenticatedByTokenWithPrefixBearer(String tokenWithPrefixBearer) {
@@ -68,34 +73,35 @@ public class OrderUseCase implements IOrderServicePort {
         return this.userGateway.getUserByEmailInTheToken(email, tokenWithPrefixBearer);
     }
 
-    private void validateRestaurantAndCheckStatusOfOtherUserOrdersInTheSameRestaurant(Long idRestaurant, Long idUserCustomer) {
+    private void validateRestaurant(Long idRestaurant) {
         final RestaurantModel restaurantFoundModel = this.restaurantPersistencePort.findByIdRestaurant(idRestaurant);
         if (restaurantFoundModel == null)
             throw new ObjectNotFoundException("The restaurant in the order does not exist");
+    }
 
+    private void checkStatusFromUserOrdersInARestaurant(Long idRestaurant, Long idUserCustomer) {
         final List<OrderModel> listOfOrdersFromUserFromSameRestaurant = this.orderPersistencePort.findByIdUserCustomerAndIdRestaurant(
-                        idUserCustomer, restaurantFoundModel.getIdRestaurant())
-                .stream().filter(order -> !order.getStatus().equals(StatusOrder.CANCELADO) && !order.getStatus().equals(StatusOrder.ENTREGADO))
+                         idUserCustomer, idRestaurant).stream()
+                .filter(order -> !order.getStatus().equals(StatusOrder.CANCELADO) && !order.getStatus().equals(StatusOrder.ENTREGADO))
                 .collect(Collectors.toList());
         if (!listOfOrdersFromUserFromSameRestaurant.isEmpty())
             throw new CustomerHasAOrderInProcessException("The customer user has an order in process");
     }
 
-    private List<OrderDishModel> createOrderDishList(OrderModel orderModel, List<OrderDishModel> orderDishModels, Long idRestaurant) {
-        List<OrderDishModel> addOrderAndQuantityByFullDish = new ArrayList<>();
-        for (OrderDishModel orderDishModel : orderDishModels) {
+    private List<OrderDishModel> createOrdersDishesComplete(OrderModel orderModel) {
+        List<OrderDishModel> ordersDishesModelToSave = new ArrayList<>();
+        for (OrderDishModel orderDishModel : orderModel.getOrdersDishesModel()) {
             DishModel dishFoundWithValueInAllItsFields = this.dishPersistencePort.findById(orderDishModel.getDishModel().getIdDish());
-
-            if (dishFoundWithValueInAllItsFields == null)
+            if (dishFoundWithValueInAllItsFields == null) {
                 throw new DishNotExistsException("The dish does not exist");
-            if (dishFoundWithValueInAllItsFields.getRestaurantModel().getIdRestaurant().equals(idRestaurant)) {
+            } else if (dishFoundWithValueInAllItsFields.getRestaurantModel().getIdRestaurant().equals(orderModel.getRestaurantModel().getIdRestaurant())) {
                 OrderDishModel orderDishModelToSave = new OrderDishModel();
                 orderDishModelToSave.setOrderModel(orderModel);
                 orderDishModelToSave.setDishModel(dishFoundWithValueInAllItsFields);
                 orderDishModelToSave.setAmount(orderDishModel.getAmount());
-                addOrderAndQuantityByFullDish.add(orderDishModelToSave);
+                ordersDishesModelToSave.add(orderDishModelToSave);
             }
         }
-        return addOrderAndQuantityByFullDish;
+        return ordersDishesModelToSave;
     }
 }

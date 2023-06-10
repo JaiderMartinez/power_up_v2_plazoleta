@@ -14,7 +14,6 @@ public interface IOrderRequestMapper {
     @Mapping(target = "restaurantModel.idRestaurant", source = "idRestaurant")
     OrderModel toOrderModel(OrderRequestDto createOrderRequestDto);
 
-    @Mapping(target = "amount", source = "amount")
     @Mapping(target = "dishModel.idDish", source = "idDish")
     @Mapping(target = "dishModel.name", source = "name")
     OrderDishModel toOrderDishModel(DishFromOrderAndAmountRequestDto dishFromOrderAndAmountRequestDto);

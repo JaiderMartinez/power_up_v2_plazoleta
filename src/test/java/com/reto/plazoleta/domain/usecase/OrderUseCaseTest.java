@@ -57,8 +57,6 @@ class OrderUseCaseTest {
     @Mock
     private JwtProvider jwtProvider;
 
-    private List<DishModel> dishModelListExpected = new ArrayList<>();
-    private List<OrderDishModel> listOrderDishModelWithValueOfNameFromDishAndAmountOfDishesExpected = new ArrayList<>();
     private static final String EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN = "";
     private static final String TOKEN_WITH_PREFIX_BEARER = "Bearer + Token";
 
@@ -70,20 +68,22 @@ class OrderUseCaseTest {
 
         RestaurantModel restaurantModelExpected = new RestaurantModel(1L, "Restaurante 1", "Dirección 1", "3014896273", "http://restaurante1.com", 111111L, 1L);
 
-        dishModelListExpected.add(new DishModel(1L, "name", "description", 300000.0, "http://image.png", true,
-                restaurantModelExpected, new CategoryModel(1L, "name", "description")));
-
         OrderModel orderModelExpected = new OrderModel();
         orderModelExpected.setIdUserCustomer(userAuthenticatedByToken.getIdUser());
         orderModelExpected.setDate(LocalDate.now());
         orderModelExpected.setStatus(StatusOrder.PENDIENTE);
         orderModelExpected.setRestaurantModel(restaurantModelExpected);
 
+        List<DishModel> dishModelListExpected = new ArrayList<>();
+        dishModelListExpected.add(new DishModel(1L, "name", "description", 300000.0, "http://image.png", true,
+                restaurantModelExpected, new CategoryModel(1L, "name", "description")));
+
+        List<OrderDishModel> orderDishesRequest = new ArrayList<>();
+        orderDishesRequest.add(new OrderDishModel(1L, orderModelExpected, dishModelListExpected.get(0), 4));
+
         OrderModel orderModelRequest = new OrderModel();
         orderModelRequest.setRestaurantModel(restaurantModelExpected);
-
-        listOrderDishModelWithValueOfNameFromDishAndAmountOfDishesExpected.add(new OrderDishModel(1L, orderModelExpected, dishModelListExpected.get(0), 4));
-
+        orderModelRequest.setOrdersDishesModel(orderDishesRequest);
         when(this.jwtProvider.getAuthentication("+ Token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, null));
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantModelExpected);
@@ -91,7 +91,7 @@ class OrderUseCaseTest {
         when(this.orderPersistencePort.saveOrder(orderModelRequest)).thenReturn(orderModelExpected);
         when(this.dishPersistencePort.findById(dishModelListExpected.get(0).getIdDish())).thenReturn(dishModelListExpected.get(0));
         //When
-        final OrderModel orderSavedModel = this.orderUseCase.saveOrder(orderModelRequest, listOrderDishModelWithValueOfNameFromDishAndAmountOfDishesExpected, TOKEN_WITH_PREFIX_BEARER);
+        final OrderModel orderSavedModel = this.orderUseCase.saveOrder(orderModelRequest, TOKEN_WITH_PREFIX_BEARER);
         //Then
         verify(this.jwtProvider, times(1)).getAuthentication("+ Token");
         verify(this.userGateway, times(1)).getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER);
@@ -118,8 +118,8 @@ class OrderUseCaseTest {
         orderModelExpected.setStatus(StatusOrder.PENDIENTE);
         orderModelExpected.setRestaurantModel(restaurantModelExpected);
 
-        OrderModel orderModelRequest = new OrderModel();
-        orderModelRequest.setRestaurantModel(restaurantModelExpected);
+        OrderModel orderModelRequestAndUserWithAnOrderInProcess = new OrderModel();
+        orderModelRequestAndUserWithAnOrderInProcess.setRestaurantModel(restaurantModelExpected);
 
         when(this.jwtProvider.getAuthentication("+ Token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, null));
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
@@ -128,7 +128,7 @@ class OrderUseCaseTest {
         //When
         CustomerHasAOrderInProcessException messageException = assertThrows(
                 CustomerHasAOrderInProcessException.class,
-                () -> this.orderUseCase.saveOrder(orderModelRequest, listOrderDishModelWithValueOfNameFromDishAndAmountOfDishesExpected, TOKEN_WITH_PREFIX_BEARER));
+                () -> this.orderUseCase.saveOrder(orderModelRequestAndUserWithAnOrderInProcess, TOKEN_WITH_PREFIX_BEARER));
         //Then
         verify(this.jwtProvider, times(1)).getAuthentication("+ Token");
         verify(this.userGateway, times(1)).getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER);
@@ -150,8 +150,12 @@ class OrderUseCaseTest {
         orderModelExpected.setStatus(StatusOrder.PENDIENTE);
         orderModelExpected.setRestaurantModel(restaurantModelExpected);
 
+        DishModel dishModelRequest = new DishModel();
+        dishModelRequest.setIdDish(1L);
+
         OrderModel orderModelRequest = new OrderModel();
         orderModelRequest.setRestaurantModel(restaurantModelExpected);
+        orderModelRequest.setOrdersDishesModel(asList(new OrderDishModel(1L, orderModelExpected, dishModelRequest, 4)));
 
         when(this.jwtProvider.getAuthentication("+ Token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, null));
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
@@ -159,7 +163,7 @@ class OrderUseCaseTest {
         //When
         ObjectNotFoundException messageException = assertThrows(
                 ObjectNotFoundException.class,
-                () -> this.orderUseCase.saveOrder(orderModelRequest, listOrderDishModelWithValueOfNameFromDishAndAmountOfDishesExpected, TOKEN_WITH_PREFIX_BEARER));
+                () -> this.orderUseCase.saveOrder(orderModelRequest, TOKEN_WITH_PREFIX_BEARER));
         //Then
         verify(this.jwtProvider, times(1)).getAuthentication("+ Token");
         verify(this.userGateway, times(1)).getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER);
@@ -175,35 +179,36 @@ class OrderUseCaseTest {
 
         RestaurantModel restaurantModelExpected = new RestaurantModel(1L, "Restaurante 1", "Dirección 1", "3014896273", "http://restaurante1.com", 111111L, 1L);
 
-        dishModelListExpected.add(new DishModel(1L, "name", "description", 300000.0, "http://image.png", true,
-                restaurantModelExpected, new CategoryModel(1L, "name", "description")));
-
         OrderModel orderModelExpected = new OrderModel();
         orderModelExpected.setIdUserCustomer(userAuthenticatedByToken.getIdUser());
         orderModelExpected.setDate(LocalDate.now());
         orderModelExpected.setStatus(StatusOrder.PENDIENTE);
         orderModelExpected.setRestaurantModel(restaurantModelExpected);
 
+        DishModel dishModelRequest = new DishModel();
+        dishModelRequest.setIdDish(1L);
+
         OrderModel orderModelRequest = new OrderModel();
         orderModelRequest.setRestaurantModel(restaurantModelExpected);
-
-        listOrderDishModelWithValueOfNameFromDishAndAmountOfDishesExpected.add(new OrderDishModel(1L, orderModelExpected, dishModelListExpected.get(0), 4));
+        orderModelRequest.setOrdersDishesModel(asList(new OrderDishModel(1L, orderModelExpected, dishModelRequest, 4)));
 
         when(this.jwtProvider.getAuthentication("+ Token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, null));
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantModelExpected);
         when(this.orderPersistencePort.findByIdUserCustomerAndIdRestaurant(1L, userAuthenticatedByToken.getIdUser())).thenReturn(Collections.emptyList());
         when(this.orderPersistencePort.saveOrder(orderModelRequest)).thenReturn(orderModelExpected);
+        when(this.dishPersistencePort.findById(dishModelRequest.getIdDish())).thenReturn(null);
+        //When
         DishNotExistsException messageException = assertThrows(
                 DishNotExistsException.class,
-                () -> this.orderUseCase.saveOrder(orderModelRequest, listOrderDishModelWithValueOfNameFromDishAndAmountOfDishesExpected, TOKEN_WITH_PREFIX_BEARER));
+                () -> this.orderUseCase.saveOrder(orderModelRequest, TOKEN_WITH_PREFIX_BEARER));
         //Then
         verify(this.jwtProvider, times(1)).getAuthentication("+ Token");
         verify(this.userGateway, times(1)).getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER);
         verify(this.restaurantPersistencePort, times(1)).findByIdRestaurant(1L);
         verify(this.orderPersistencePort, times(1)).findByIdUserCustomerAndIdRestaurant(1L, userAuthenticatedByToken.getIdUser());
         verify(this.orderPersistencePort, times(1)).saveOrder(orderModelRequest);
-        verify(this.dishPersistencePort, times(1)).findById(dishModelListExpected.get(0).getIdDish());
+        verify(this.dishPersistencePort, times(1)).findById(dishModelRequest.getIdDish());
         assertEquals("The dish does not exist", messageException.getMessage());
     }
 }
