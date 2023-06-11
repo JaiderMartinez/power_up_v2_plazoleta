@@ -2,11 +2,13 @@ package com.reto.plazoleta.application.mapper.requestmapper;
 
 import com.reto.plazoleta.application.dto.request.CreateDishRequestDto;
 import com.reto.plazoleta.application.dto.request.UpdateDishRequestDto;
+import com.reto.plazoleta.application.dto.request.DishUpdateStatusRequestDto;
 import com.reto.plazoleta.domain.model.DishModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface IDishRequestMapper {
 
     @Mapping(target = "restaurantModel.idRestaurant", source = "createDishRequestDto.idRestaurant")
@@ -23,4 +25,8 @@ public interface IDishRequestMapper {
     @Mapping(target = "price", source = "updateDishRequestDto.price")
     @Mapping(target = "descriptionDish", source = "updateDishRequestDto.descriptionDish")
     DishModel toDishModel(UpdateDishRequestDto updateDishRequestDto);
+
+    @Mapping(target = "restaurantModel.idRestaurant", source = "updateDishStatusRequestDto.idRestaurant")
+    @Mapping(target = "stateDish", source = "updateDishStatusRequestDto.active")
+    DishModel toDishModelWithValueInFieldsIdRestaurantAndIsActive(DishUpdateStatusRequestDto updateDishStatusRequestDto);
 }
