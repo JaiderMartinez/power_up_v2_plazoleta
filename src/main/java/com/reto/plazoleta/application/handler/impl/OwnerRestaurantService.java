@@ -1,6 +1,8 @@
 package com.reto.plazoleta.application.handler.impl;
 
 import com.reto.plazoleta.application.dto.request.CreateDishRequestDto;
+import com.reto.plazoleta.application.dto.request.DishUpdateStatusRequestDto;
+import com.reto.plazoleta.application.dto.response.DishStatusResponseDto;
 import com.reto.plazoleta.application.dto.response.RestaurantEmployeeResponseDto;
 import com.reto.plazoleta.application.dto.request.RestaurantEmployeeRequestDto;
 import com.reto.plazoleta.application.dto.response.CreateDishResponseDto;
@@ -13,6 +15,7 @@ import com.reto.plazoleta.application.mapper.responsemapper.IDishResponseMapper;
 import com.reto.plazoleta.application.mapper.responsemapper.IEmployeeResponseMapper;
 import com.reto.plazoleta.domain.api.IEmployeeRestaurantServicePort;
 import com.reto.plazoleta.domain.api.IOwnerRestaurantServicePort;
+import com.reto.plazoleta.domain.model.DishModel;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,5 +52,12 @@ public class OwnerRestaurantService implements IOwnerRestaurantService {
         final EmployeeRestaurantModel employeeRestaurantSavedModel = this.employeeRestaurantServicePort.saveEmployeeRestaurant(
                                                     employeeRestaurantRequestModel, tokenWithBearerPrefix);
         return this.employeeResponseMapper.toRestaurantEmployeeResponseDto(employeeRestaurantSavedModel);
+    }
+
+    @Override
+    public DishStatusResponseDto enableOrDisableDishByFieldStatus(DishUpdateStatusRequestDto updateDishStatusRequest, String tokenWithBearerPrefix) {
+        final DishModel dishModelRequest = this.dishRequestMapper.toDishModelWithValueInFieldsIdRestaurantAndIsActive(updateDishStatusRequest);
+        final DishModel dishModelUpdatedTheFieldIsActive = this.ownerRestaurantServicePort.enableOrDisableDishByFieldStatusAndIdRestaurantAndIdDish(dishModelRequest, tokenWithBearerPrefix);
+        return this.dishResponseMapper.toDishStatusResponseDto(dishModelUpdatedTheFieldIsActive);
     }
 }
