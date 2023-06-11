@@ -108,4 +108,28 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.pageable.pageSize").value(5))
                 .andExpect(jsonPath("$.pageable.pageNumber").value(0));
     }
+
+    @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
+    @Test
+    void test_getDishesFromARestaurantAndGroupedByCategoryPaginated_withRequestParamSizeItemsAndIdRestaurantValueValid_shouldResponseAnListFromDishesPaginatedAndGroupedByCategoryAndAStatusOK() {
+
+    }
+
+    @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
+    @Test
+    void test_getDishesFromARestaurantAndGroupedByCategoryPaginated_withRequestParamIdRestaurantEmpty_shouldResponseAStatusBadRequest() {
+
+    }
+
+    @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
+    @Test
+    void test_getDishesFromARestaurantAndGroupedByCategoryPaginated_withRestaurantNotFoundFromIdRestaurantRequestParamValue_shouldResponseAStatusNotFound() {
+
+    }
+
+    @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
+    @Test
+    void test_getDishesFromARestaurantAndGroupedByCategoryPaginated_withRequestParamSizeItemsAndIdRestaurantValidButNotFoundData_shouldResponseAStatusNotFound() {
+
+    }
 }
