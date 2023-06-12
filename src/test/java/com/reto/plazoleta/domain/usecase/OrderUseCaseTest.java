@@ -57,16 +57,20 @@ class OrderUseCaseTest {
     @Mock
     private JwtProvider jwtProvider;
 
-    private static final String EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN = "";
+    private static final String EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN = "customer@customer.com";
     private static final String TOKEN_WITH_PREFIX_BEARER = "Bearer + Token";
 
     @Test
-    void test_saveOrder_withAllFieldsValidInOrderModelAndListOfDishModelCompleteAndTokenValid_shouldReturnObjectOrderModelSavedInDataBase() {
+    void test_saveOrder_withAllFieldsValidInObjectAsOrderModelAndListOfDishModelCorrectAndTokenValid_shouldReturnObjectOrderModelSavedInDataBase() {
         //Given
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
 
         RestaurantModel restaurantModelExpected = new RestaurantModel(1L, "Restaurante 1", "Dirección 1", "3014896273", "http://restaurante1.com", 111111L, 1L);
+
+        List<DishModel> dishesListExpected = new ArrayList<>();
+        dishesListExpected.add(new DishModel(1L, "name", "description", 300000.0, "http://image.png", true,
+                restaurantModelExpected, new CategoryModel(1L, "name", "description")));
 
         OrderModel orderModelExpected = new OrderModel();
         orderModelExpected.setIdUserCustomer(userAuthenticatedByToken.getIdUser());
@@ -74,22 +78,18 @@ class OrderUseCaseTest {
         orderModelExpected.setStatus(StatusOrder.PENDIENTE);
         orderModelExpected.setRestaurantModel(restaurantModelExpected);
 
-        List<DishModel> dishModelListExpected = new ArrayList<>();
-        dishModelListExpected.add(new DishModel(1L, "name", "description", 300000.0, "http://image.png", true,
-                restaurantModelExpected, new CategoryModel(1L, "name", "description")));
-
-        List<OrderDishModel> orderDishesRequest = new ArrayList<>();
-        orderDishesRequest.add(new OrderDishModel(1L, orderModelExpected, dishModelListExpected.get(0), 4));
+        List<OrderDishModel> ordersDishesRequest = new ArrayList<>();
+        ordersDishesRequest.add(new OrderDishModel(1L, orderModelExpected, dishesListExpected.get(0), 4));
 
         OrderModel orderModelRequest = new OrderModel();
         orderModelRequest.setRestaurantModel(restaurantModelExpected);
-        orderModelRequest.setOrdersDishesModel(orderDishesRequest);
+        orderModelRequest.setOrdersDishesModel(ordersDishesRequest);
         when(this.jwtProvider.getAuthentication("+ Token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, null));
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantModelExpected);
         when(this.orderPersistencePort.findByIdUserCustomerAndIdRestaurant(1L, userAuthenticatedByToken.getIdUser())).thenReturn(Collections.emptyList());
         when(this.orderPersistencePort.saveOrder(orderModelRequest)).thenReturn(orderModelExpected);
-        when(this.dishPersistencePort.findById(dishModelListExpected.get(0).getIdDish())).thenReturn(dishModelListExpected.get(0));
+        when(this.dishPersistencePort.findById(dishesListExpected.get(0).getIdDish())).thenReturn(dishesListExpected.get(0));
         //When
         final OrderModel orderSavedModel = this.orderUseCase.saveOrder(orderModelRequest, TOKEN_WITH_PREFIX_BEARER);
         //Then
@@ -98,7 +98,7 @@ class OrderUseCaseTest {
         verify(this.restaurantPersistencePort, times(1)).findByIdRestaurant(1L);
         verify(this.orderPersistencePort, times(1)).findByIdUserCustomerAndIdRestaurant(1L, userAuthenticatedByToken.getIdUser());
         verify(this.orderPersistencePort, times(1)).saveOrder(orderModelRequest);
-        verify(this.dishPersistencePort, times(1)).findById(dishModelListExpected.get(0).getIdDish());
+        verify(this.dishPersistencePort, times(1)).findById(dishesListExpected.get(0).getIdDish());
         assertEquals(orderModelExpected.getRestaurantModel().getIdRestaurant(), orderSavedModel.getRestaurantModel().getIdRestaurant());
         assertEquals(orderModelExpected.getStatus(), orderSavedModel.getStatus());
         assertEquals(orderModelExpected.getDate(), orderSavedModel.getDate());
@@ -106,7 +106,7 @@ class OrderUseCaseTest {
     }
 
     @Test
-    void test_saveOrder_withAllFieldsValidInOrderModelAndListOfDishesCompleteButUserHasAnOrderInProcessAndTokenValid_shouldThrowCustomerHasAOrderInProcessException() {
+    void test_saveOrder_withAllFieldsValidInOrderModelAndListOfDishesValidButCustomerHasAnOrderInProcessAndTokenValid_shouldThrowCustomerHasAOrderInProcessException() {
         //Given
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
