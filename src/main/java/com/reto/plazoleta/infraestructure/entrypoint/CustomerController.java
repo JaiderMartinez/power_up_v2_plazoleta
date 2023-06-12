@@ -55,7 +55,7 @@ public class CustomerController {
             @ApiResponse(responseCode = "409", description = "The customer has a order in process")
     })
     @PreAuthorize(value = "hasRole('CLIENTE')")
-    @PostMapping(value = "make-an-order")
+    @PostMapping(value = "order")
     public ResponseEntity<OrderCreatedResponseDto> registerOrderFromCustomer(@Parameter(
             description = "Object to make an order",
             required = true,

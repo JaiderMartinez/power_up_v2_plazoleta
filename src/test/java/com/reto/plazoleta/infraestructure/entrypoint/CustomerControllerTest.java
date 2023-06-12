@@ -97,7 +97,7 @@ class CustomerControllerTest {
     private static final String ROLE_CUSTOMER = "CLIENTE";
     private static final String RESTAURANT_API_PATH = "/micro-small-square/restaurants";
     private static final String PAGE_SIZE_PARAM = "sizeItemsByPages";
-    private static final String REGISTER_ORDER_API_PATH = "/micro-small-square/make-an-order";
+    private static final String REGISTER_ORDER_API_PATH = "/micro-small-square/order";
     private static final String TOKE_WITH_PREFIX_BEARER = "Bearer + token";
     private static final String NAME_OF_THE_ENTITY_ORDER = "pedidos";
     private static final String NAME_OF_THE_COLUM_PRIMARY_KEY_OF_ORDER_ENTITY = "id_pedido";
