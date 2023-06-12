@@ -60,10 +60,11 @@ public class CustomerController {
             description = "Object to make an order",
             required = true,
             schema = @Schema(implementation = OrderRequestDto.class))
-            @RequestBody OrderRequestDto createOrderRequestDto, @Parameter(
+            @RequestBody OrderRequestDto orderRequestDto, @Parameter(
             description = "The authentication token with Bearer prefix for search the idUserCustomer",
             required = true, schema = @Schema(type = "String", format = "jwt"))
             @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithBearerPrefix) {
-        return new ResponseEntity<>(this.customerService.saveOrder(createOrderRequestDto, tokenWithBearerPrefix), HttpStatus.CREATED);
+        final OrderCreatedResponseDto orderRegistered = this.customerService.saveOrder(orderRequestDto, tokenWithBearerPrefix);
+        return new ResponseEntity<>(orderRegistered, HttpStatus.CREATED);
     }
 }

@@ -5,7 +5,7 @@ import com.reto.plazoleta.domain.model.OrderModel;
 import org.mapstruct.Mapper;
 
 @Mapper
-public interface IOrderResponseMapper {
+public interface ICustomerResponseMapper {
 
     OrderCreatedResponseDto toCreateOrderResponseDto(OrderModel orderModel);
 }

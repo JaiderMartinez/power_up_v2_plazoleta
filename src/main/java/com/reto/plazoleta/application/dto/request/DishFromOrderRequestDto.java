@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DishFromOrderAndAmountRequestDto {
+public class DishFromOrderRequestDto {
 
     private Long idDish;
     private String name;

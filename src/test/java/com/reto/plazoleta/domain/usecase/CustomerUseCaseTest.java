@@ -34,10 +34,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class OrderUseCaseTest {
+class CustomerUseCaseTest {
 
     @InjectMocks
-    private OrderUseCase orderUseCase;
+    private CustomerUseCase customerUseCase;
 
     @Mock
     private IOrderPersistencePort orderPersistencePort;
@@ -91,7 +91,7 @@ class OrderUseCaseTest {
         when(this.orderPersistencePort.saveOrder(orderModelRequest)).thenReturn(orderModelExpected);
         when(this.dishPersistencePort.findById(dishesListExpected.get(0).getIdDish())).thenReturn(dishesListExpected.get(0));
         //When
-        final OrderModel orderSavedModel = this.orderUseCase.saveOrder(orderModelRequest, TOKEN_WITH_PREFIX_BEARER);
+        final OrderModel orderSavedModel = this.customerUseCase.saveOrder(orderModelRequest, TOKEN_WITH_PREFIX_BEARER);
         //Then
         verify(this.jwtProvider, times(1)).getAuthentication("+ Token");
         verify(this.userGateway, times(1)).getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER);
@@ -128,7 +128,7 @@ class OrderUseCaseTest {
         //When
         CustomerHasAOrderInProcessException messageException = assertThrows(
                 CustomerHasAOrderInProcessException.class,
-                () -> this.orderUseCase.saveOrder(orderModelRequestAndUserWithAnOrderInProcess, TOKEN_WITH_PREFIX_BEARER));
+                () -> this.customerUseCase.saveOrder(orderModelRequestAndUserWithAnOrderInProcess, TOKEN_WITH_PREFIX_BEARER));
         //Then
         verify(this.jwtProvider, times(1)).getAuthentication("+ Token");
         verify(this.userGateway, times(1)).getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER);
@@ -163,7 +163,7 @@ class OrderUseCaseTest {
         //When
         ObjectNotFoundException messageException = assertThrows(
                 ObjectNotFoundException.class,
-                () -> this.orderUseCase.saveOrder(orderModelRequest, TOKEN_WITH_PREFIX_BEARER));
+                () -> this.customerUseCase.saveOrder(orderModelRequest, TOKEN_WITH_PREFIX_BEARER));
         //Then
         verify(this.jwtProvider, times(1)).getAuthentication("+ Token");
         verify(this.userGateway, times(1)).getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER);
@@ -201,7 +201,7 @@ class OrderUseCaseTest {
         //When
         DishNotExistsException messageException = assertThrows(
                 DishNotExistsException.class,
-                () -> this.orderUseCase.saveOrder(orderModelRequest, TOKEN_WITH_PREFIX_BEARER));
+                () -> this.customerUseCase.saveOrder(orderModelRequest, TOKEN_WITH_PREFIX_BEARER));
         //Then
         verify(this.jwtProvider, times(1)).getAuthentication("+ Token");
         verify(this.userGateway, times(1)).getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER);

@@ -1,8 +1,8 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reto.plazoleta.application.dto.request.DishFromOrderRequestDto;
 import com.reto.plazoleta.application.dto.request.OrderRequestDto;
-import com.reto.plazoleta.application.dto.request.DishFromOrderAndAmountRequestDto;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.CategoryEntity;
@@ -200,9 +200,9 @@ class CustomerControllerTest {
     void test_registerOrderFromCustomer_withAllFieldsCompleteAndValidInTheObjectOrderRequestDtoAndTokenValid_ShouldResponseAStatusCreatedAndTheValueFromFieldIdOrderSavedInTheDataBase() throws Exception {
         this.orderRepository.deleteAll();
         this.jdbcTemplate.execute("ALTER TABLE " + NAME_OF_THE_ENTITY_ORDER + " ALTER COLUMN " + NAME_OF_THE_COLUM_PRIMARY_KEY_OF_ORDER_ENTITY + " RESTART WITH 1");
-        List<DishFromOrderAndAmountRequestDto> listDishAndAmountRequest = new ArrayList<>();
-        listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(0).getIdDish(), listDishEntities.get(0).getName(), 4));
-        listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(1).getIdDish(), listDishEntities.get(1).getName(), 2));
+        List<DishFromOrderRequestDto> listDishAndAmountRequest = new ArrayList<>();
+        listDishAndAmountRequest.add(new DishFromOrderRequestDto(listDishEntities.get(0).getIdDish(), listDishEntities.get(0).getName(), 4));
+        listDishAndAmountRequest.add(new DishFromOrderRequestDto(listDishEntities.get(1).getIdDish(), listDishEntities.get(1).getName(), 2));
         OrderRequestDto createOrderRequest = new OrderRequestDto(1L, listDishAndAmountRequest);
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
@@ -220,9 +220,9 @@ class CustomerControllerTest {
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
     void test_registerOrderFromCustomer_withAllFieldsCompletedAndValidFromOrderRequestDtoButCustomerHasAnOrderInProcessAndTokenValid_ShouldResponseAStatusConflict() throws Exception {
-        List<DishFromOrderAndAmountRequestDto> listDishAndAmountRequest = new ArrayList<>();
-        listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(0).getIdDish(), listDishEntities.get(0).getName(), 4));
-        listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(1).getIdDish(), listDishEntities.get(1).getName(), 2));
+        List<DishFromOrderRequestDto> listDishAndAmountRequest = new ArrayList<>();
+        listDishAndAmountRequest.add(new DishFromOrderRequestDto(listDishEntities.get(0).getIdDish(), listDishEntities.get(0).getName(), 4));
+        listDishAndAmountRequest.add(new DishFromOrderRequestDto(listDishEntities.get(1).getIdDish(), listDishEntities.get(1).getName(), 2));
         OrderRequestDto createOrderRequest = new OrderRequestDto(2L, listDishAndAmountRequest);
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
@@ -239,9 +239,9 @@ class CustomerControllerTest {
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
     void test_registerOrderFromCustomer_withNoExistsARestaurantWhereTheValueBeEqualTheFieldIdRestaurantFromObjectOrderRequestDtoAndTokenValid_ShouldResponseAStatusNotFound() throws Exception {
-        List<DishFromOrderAndAmountRequestDto> listDishAndAmountRequest = new ArrayList<>();
-        listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(0).getIdDish(), listDishEntities.get(0).getName(), 4));
-        listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(1).getIdDish(), listDishEntities.get(1).getName(), 2));
+        List<DishFromOrderRequestDto> listDishAndAmountRequest = new ArrayList<>();
+        listDishAndAmountRequest.add(new DishFromOrderRequestDto(listDishEntities.get(0).getIdDish(), listDishEntities.get(0).getName(), 4));
+        listDishAndAmountRequest.add(new DishFromOrderRequestDto(listDishEntities.get(1).getIdDish(), listDishEntities.get(1).getName(), 2));
         OrderRequestDto createOrderRequest = new OrderRequestDto(3L, listDishAndAmountRequest);
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
@@ -258,9 +258,9 @@ class CustomerControllerTest {
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
     void test_registerOrderFromCustomer_withNoSuchDishExistsWhereEqualTheValueOfTheIdDishFieldOfTheObjectOrderRequestDtoAndTokenValid_ShouldResponseAStatusNotFound() throws Exception {
-        List<DishFromOrderAndAmountRequestDto> listDishAndAmountRequest = new ArrayList<>();
-        listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(10L, listDishEntities.get(0).getName(), 4));
-        listDishAndAmountRequest.add(new DishFromOrderAndAmountRequestDto(listDishEntities.get(1).getIdDish(), listDishEntities.get(1).getName(), 2));
+        List<DishFromOrderRequestDto> listDishAndAmountRequest = new ArrayList<>();
+        listDishAndAmountRequest.add(new DishFromOrderRequestDto(10L, listDishEntities.get(0).getName(), 4));
+        listDishAndAmountRequest.add(new DishFromOrderRequestDto(listDishEntities.get(1).getIdDish(), listDishEntities.get(1).getName(), 2));
         OrderRequestDto createOrderRequest = new OrderRequestDto(1L, listDishAndAmountRequest);
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);

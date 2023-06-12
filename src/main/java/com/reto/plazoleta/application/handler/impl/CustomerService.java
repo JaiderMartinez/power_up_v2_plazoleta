@@ -4,10 +4,10 @@ import com.reto.plazoleta.application.dto.request.OrderRequestDto;
 import com.reto.plazoleta.application.dto.response.OrderCreatedResponseDto;
 import com.reto.plazoleta.application.dto.response.RestaurantResponsePageableDto;
 import com.reto.plazoleta.application.handler.ICustomerService;
-import com.reto.plazoleta.application.mapper.requestmapper.IOrderRequestMapper;
+import com.reto.plazoleta.application.mapper.requestmapper.ICustomerRequestMapper;
 import com.reto.plazoleta.application.mapper.requestmapper.IRestaurantRequestMapper;
-import com.reto.plazoleta.application.mapper.responsemapper.IOrderResponseMapper;
-import com.reto.plazoleta.domain.api.IOrderServicePort;
+import com.reto.plazoleta.application.mapper.responsemapper.ICustomerResponseMapper;
+import com.reto.plazoleta.domain.api.ICustomerServicePort;
 import com.reto.plazoleta.domain.api.IRestaurantServicePort;
 import com.reto.plazoleta.domain.model.OrderDishModel;
 import com.reto.plazoleta.domain.model.OrderModel;
@@ -24,9 +24,9 @@ public class CustomerService implements ICustomerService {
 
     private final IRestaurantServicePort restaurantServicePort;
     private final IRestaurantRequestMapper restaurantRequestMapper;
-    private final IOrderServicePort orderServicePort;
-    private final IOrderRequestMapper orderRequestMapper;
-    private final IOrderResponseMapper orderResponseMapper;
+    private final ICustomerServicePort customerServicePort;
+    private final ICustomerRequestMapper customerRequestMapper;
+    private final ICustomerResponseMapper customerResponseMapper;
 
     @Override
     public Page<RestaurantResponsePageableDto> getAllRestaurantsByOrderByNameAsc(int numberPage, int sizeItems) {
@@ -35,9 +35,9 @@ public class CustomerService implements ICustomerService {
 
     @Override
     public OrderCreatedResponseDto saveOrder(OrderRequestDto createOrderRequestDto, String tokenWithPrefixBearer) {
-        OrderModel orderRequestModel = this.orderRequestMapper.toOrderModel(createOrderRequestDto);
-        final List<OrderDishModel> ordersDishesRequest = createOrderRequestDto.getDishesWithAmount().stream().map(this.orderRequestMapper::toOrderDishModel).collect(Collectors.toList());
+        OrderModel orderRequestModel = this.customerRequestMapper.toOrderModel(createOrderRequestDto);
+        final List<OrderDishModel> ordersDishesRequest = createOrderRequestDto.getDishes().stream().map(this.customerRequestMapper::toOrderDishModel).collect(Collectors.toList());
         orderRequestModel.setOrdersDishesModel(ordersDishesRequest);
-        return this.orderResponseMapper.toCreateOrderResponseDto(orderServicePort.saveOrder(orderRequestModel, tokenWithPrefixBearer));
+        return this.customerResponseMapper.toCreateOrderResponseDto(customerServicePort.saveOrder(orderRequestModel, tokenWithPrefixBearer));
     }
 }
