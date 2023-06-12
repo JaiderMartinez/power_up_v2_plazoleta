@@ -5,8 +5,8 @@ import com.reto.plazoleta.domain.model.OrderModel;
 import java.util.List;
 
 public interface IOrderPersistencePort {
+
     OrderModel saveOrder(OrderModel orderModel);
 
-    List<OrderModel> getAllOrders();
-
+    List<OrderModel> findByIdUserCustomerAndIdRestaurant(Long idUser, Long idRestaurant);
 }
