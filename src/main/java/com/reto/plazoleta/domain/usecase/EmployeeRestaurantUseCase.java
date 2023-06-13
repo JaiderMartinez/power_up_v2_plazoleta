@@ -15,7 +15,6 @@ import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
 import com.reto.plazoleta.infraestructure.exception.NoDataFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 public class EmployeeRestaurantUseCase implements IEmployeeRestaurantServicePort {
 
@@ -50,9 +49,9 @@ public class EmployeeRestaurantUseCase implements IEmployeeRestaurantServicePort
     public Page<OrderModel> getAllOrdersFilterByStatusAndSizeItemsByPage(Integer sizeItems, Integer pageNumber, String status, String tokenWithPrefixBearer) {
         User userEmployeeFound = this.userGateway.getUserByEmailInTheToken(getEmailFromToken(tokenWithPrefixBearer), tokenWithPrefixBearer);
         EmployeeRestaurantModel employeeFromRestaurantFound = getRestaurantFromEmployeeByIdUserEmployeeAndValidateIfExistsTheRestaurant(userEmployeeFound.getIdUser());
-        Pageable pageable = PageRequest.of(pageNumber, sizeItems);
         StatusOrder statusOrder = StatusOrder.valueOf(status.toUpperCase());
-        Page<OrderModel> ordersPaginatedByFieldStatus = this.orderPersistencePort.findAllByRestaurantEntityIdRestaurantAndStatusOrder(pageable, employeeFromRestaurantFound.getIdRestaurant(), statusOrder);
+        Page<OrderModel> ordersPaginatedByFieldStatus = this.orderPersistencePort
+                    .findAllByRestaurantEntityIdRestaurantAndStatusOrder(PageRequest.of(pageNumber, sizeItems), employeeFromRestaurantFound.getIdRestaurant(), statusOrder);
         if (ordersPaginatedByFieldStatus.isEmpty())
             throw new NoDataFoundException();
         return ordersPaginatedByFieldStatus;
