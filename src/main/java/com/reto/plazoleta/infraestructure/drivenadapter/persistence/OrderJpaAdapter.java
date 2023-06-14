@@ -36,4 +36,9 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
     public Page<OrderModel> findAllByRestaurantEntityIdRestaurantAndStatusOrder(Pageable pageable, Long idRestaurant, StatusOrder status) {
         return this.orderRepository.findAllByRestaurantEntityIdRestaurantAndStatus(pageable, idRestaurant, status).map(orderEntityMapper::toOrderModel);
     }
+
+    @Override
+    public OrderModel findByIdOrder(Long idOrder) {
+        return this.orderEntityMapper.toOrderModel(this.orderRepository.findById(idOrder).orElse(null));
+    }
 }

@@ -2,6 +2,8 @@ package com.reto.plazoleta.domain.usecase;
 
 import com.reto.plazoleta.domain.api.IEmployeeRestaurantServicePort;
 import com.reto.plazoleta.domain.exception.ObjectNotFoundException;
+import com.reto.plazoleta.domain.exception.OrderInProcessException;
+import com.reto.plazoleta.domain.exception.OrderNotExistsException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
 import com.reto.plazoleta.domain.model.OrderModel;
@@ -15,6 +17,9 @@ import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
 import com.reto.plazoleta.infraestructure.exception.NoDataFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EmployeeRestaurantUseCase implements IEmployeeRestaurantServicePort {
 
@@ -68,5 +73,35 @@ public class EmployeeRestaurantUseCase implements IEmployeeRestaurantServicePort
         if (restaurantModel == null)
             throw new ObjectNotFoundException("Restaurant not Exist");
         return restaurantFromEmployeeFound;
+    }
+
+    @Override
+    public List<OrderModel> assignEmployeeToOrderAndChangeStatusToInPreparation(List<Long> idOrders, String tokenWithPrefixBearer) {
+        User userEmployeeFound = this.userGateway.getUserByEmailInTheToken(getEmailFromToken(tokenWithPrefixBearer), tokenWithPrefixBearer);
+        EmployeeRestaurantModel employeeFromRestaurantFound = getRestaurantFromEmployeeByIdUserEmployeeAndValidateIfExistsTheRestaurant(userEmployeeFound.getIdUser());
+        return getOrdersAssignedEmployeeAndUpdatedStatus(idOrders, employeeFromRestaurantFound);
+    }
+
+    private List<OrderModel> getOrdersAssignedEmployeeAndUpdatedStatus(List<Long> idOrders, EmployeeRestaurantModel employeeRestaurantToSave) {
+        List<OrderModel> employeeAssignedToOrdersAndStatusUpdated = new ArrayList<>();
+        for (Long idOrder : idOrders) {
+            OrderModel orderFoundToAssignEmployee = orderPersistencePort.findByIdOrder(idOrder);
+            validateOrderIfExistsAndIfOrderIsAlreadyInProcessAndIfEmployeeBelongsToRestaurantFromOrder(orderFoundToAssignEmployee, employeeRestaurantToSave);
+            orderFoundToAssignEmployee.setEmployeeRestaurantModel(employeeRestaurantToSave);
+            orderFoundToAssignEmployee.setStatus(StatusOrder.EN_PREPARACION);
+            OrderModel orderUpdated = orderPersistencePort.saveOrder(orderFoundToAssignEmployee);
+            employeeAssignedToOrdersAndStatusUpdated.add(orderUpdated);
+        }
+        return employeeAssignedToOrdersAndStatusUpdated;
+    }
+
+    private void validateOrderIfExistsAndIfOrderIsAlreadyInProcessAndIfEmployeeBelongsToRestaurantFromOrder(OrderModel orderModelToValidate, EmployeeRestaurantModel employeeRestaurantToSave) {
+        if (orderModelToValidate == null) {
+            throw new OrderNotExistsException("The order no exist");
+        } else if (orderModelToValidate.getEmployeeRestaurantModel() != null) {
+            throw new OrderInProcessException("This order is in process");
+        } else if (!employeeRestaurantToSave.getIdRestaurant().equals(orderModelToValidate.getRestaurantModel().getIdRestaurant())) {
+            throw new OrderNotExistsException("The restaurant no belongs to this restaurant");
+        }
     }
 }

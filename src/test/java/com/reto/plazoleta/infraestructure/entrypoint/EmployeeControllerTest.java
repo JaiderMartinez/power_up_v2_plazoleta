@@ -1,9 +1,5 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.EmployeeRestaurantEntity;
@@ -66,6 +62,7 @@ class EmployeeControllerTest {
     private static final String PASSWORD_EMPLOYEE = "123";
     private static final String ROL_EMPLOYEE = "EMPLEADO";
     private static final String TOKEN_WITH_PREFIX_BEARER = "Bearer + token";
+    private static final String ASSIGN_AN_EMPLOYEE_TO_AN_ORDER_PATH = "";
 
     @BeforeAll
     void initializeTestEnvironment() {
@@ -101,7 +98,7 @@ class EmployeeControllerTest {
                         .param("sizeItems", "1")
                         .param("pageNumber", "0")
                         .param("status", "EN_PREPARACION")
-                .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pageable.pageSize").value(1))
                 .andExpect(jsonPath("$.pageable.pageNumber").value(0))
@@ -150,10 +147,10 @@ class EmployeeControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.OBJECT_NOT_FOUND.getMessage()));
     }
-  
-    @Test
-    void test_assignOrderAndChangeStatusToPending_withMultipleIdOrdersValidAndTokenCorrect_shouldReturnStatusOKAndAssignedIdOrders() {
 
+    @Test
+    void test_assignOrderAndChangeStatusToPending_withMultipleIdOrdersValidAndTokenCorrect_shouldReturnStatusOKAndAssignedIdOrders() throws Exception {
+        this.mockMvc.perform(MockMvcRequestBuilders.get(ASSIGN_AN_EMPLOYEE_TO_AN_ORDER_PATH));
     }
 
     @Test
@@ -173,6 +170,6 @@ class EmployeeControllerTest {
 
     @Test
     void test_assignOrderAndChangeStatusToPending_withOrderAlreadyAssignedAndCorrectToken_shouldReturnConflictStatus() {
-      
+
     }
 }
