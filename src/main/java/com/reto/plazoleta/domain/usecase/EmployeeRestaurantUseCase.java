@@ -85,12 +85,12 @@ public class EmployeeRestaurantUseCase implements IEmployeeRestaurantServicePort
     private List<OrderModel> getOrdersAssignedEmployeeAndUpdatedStatus(List<Long> idOrders, EmployeeRestaurantModel employeeRestaurantToSave) {
         List<OrderModel> employeeAssignedToOrdersAndStatusUpdated = new ArrayList<>();
         for (Long idOrder : idOrders) {
-            OrderModel orderFoundToAssignEmployee = orderPersistencePort.findByIdOrder(idOrder);
+            OrderModel orderFoundToAssignEmployee = this.orderPersistencePort.findByIdOrder(idOrder);
             validateOrderIfExistsAndIfOrderIsAlreadyInProcessAndIfEmployeeBelongsToRestaurantFromOrder(orderFoundToAssignEmployee, employeeRestaurantToSave);
             orderFoundToAssignEmployee.setEmployeeRestaurantModel(employeeRestaurantToSave);
             orderFoundToAssignEmployee.setStatus(StatusOrder.EN_PREPARACION);
-            OrderModel orderUpdated = orderPersistencePort.saveOrder(orderFoundToAssignEmployee);
-            employeeAssignedToOrdersAndStatusUpdated.add(orderUpdated);
+            this.orderPersistencePort.saveOrder(orderFoundToAssignEmployee);
+            employeeAssignedToOrdersAndStatusUpdated.add(orderFoundToAssignEmployee);
         }
         return employeeAssignedToOrdersAndStatusUpdated;
     }

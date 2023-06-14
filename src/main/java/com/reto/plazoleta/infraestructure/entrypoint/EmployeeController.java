@@ -60,9 +60,9 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "The restaurant that the employee belongs to does not exist"),
             @ApiResponse(responseCode = "409", description = "The order is already in process with another employee")
     })
-    @PatchMapping(value = "restaurant/orders")
+    @PatchMapping(value = "restaurant/order")
     @PreAuthorize(value = "hasRole('EMPLEADO')")
-    public ResponseEntity<List<AssignedOrdersResponseDto>> assignOrderAndChangeStatusToInPreparation(
+    public ResponseEntity<List<AssignedOrdersResponseDto>> assignEmployeeToOrderAndChangeStatusToInPreparation(
             @Parameter( description = "List of order identifiers to be assigned to the employee", schema = @Schema(implementation = List.class))
             @RequestParam(name = "idOrder") List<Long> idOrders,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithPrefixBearer) {

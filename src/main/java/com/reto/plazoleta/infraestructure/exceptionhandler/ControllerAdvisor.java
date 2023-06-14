@@ -102,7 +102,7 @@ public class ControllerAdvisor {
     @ExceptionHandler(OrderInProcessException.class)
     public ResponseEntity<Map<String, String>> handleOrderInProcessException(
             OrderInProcessException orderInProcessException) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Collections.singletonMap(MESSAGE, orderInProcessException.getMessage()));
     }
 }
