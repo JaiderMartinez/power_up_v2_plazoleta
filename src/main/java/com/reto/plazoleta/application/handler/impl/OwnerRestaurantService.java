@@ -1,17 +1,16 @@
 package com.reto.plazoleta.application.handler.impl;
 
-import com.reto.plazoleta.application.dto.request.CreateDishRequestDto;
-import com.reto.plazoleta.application.dto.request.DishUpdateStatusRequestDto;
+import com.reto.plazoleta.application.dto.request.DishCreateRequestDto;
 import com.reto.plazoleta.application.dto.response.DishStatusResponseDto;
 import com.reto.plazoleta.application.dto.response.RestaurantEmployeeResponseDto;
 import com.reto.plazoleta.application.dto.request.RestaurantEmployeeRequestDto;
-import com.reto.plazoleta.application.dto.response.CreateDishResponseDto;
+import com.reto.plazoleta.application.dto.response.DishCreatedResponseDto;
 import com.reto.plazoleta.application.dto.request.UpdateDishRequestDto;
 import com.reto.plazoleta.application.dto.response.UpdateDishResponseDto;
 import com.reto.plazoleta.application.handler.IOwnerRestaurantService;
-import com.reto.plazoleta.application.mapper.requestmapper.IDishRequestMapper;
-import com.reto.plazoleta.application.mapper.requestmapper.IEmployeeRestaurantRequestMapper;
-import com.reto.plazoleta.application.mapper.responsemapper.IDishResponseMapper;
+import com.reto.plazoleta.application.mapper.requestmapper.IOwnerRequestMapper;
+import com.reto.plazoleta.application.mapper.requestmapper.IEmployeeRequestMapper;
+import com.reto.plazoleta.application.mapper.responsemapper.IOwnerResponseMapper;
 import com.reto.plazoleta.application.mapper.responsemapper.IEmployeeResponseMapper;
 import com.reto.plazoleta.domain.api.IEmployeeServicePort;
 import com.reto.plazoleta.domain.api.IOwnerRestaurantServicePort;
@@ -28,36 +27,36 @@ import javax.transaction.Transactional;
 public class OwnerRestaurantService implements IOwnerRestaurantService {
 
     private final IOwnerRestaurantServicePort ownerRestaurantServicePort;
-    private final IDishRequestMapper dishRequestMapper;
-    private final IDishResponseMapper dishResponseMapper;
+    private final IOwnerRequestMapper ownerRequestMapper;
+    private final IOwnerResponseMapper ownerResponseMapper;
     private final IEmployeeServicePort employeeRestaurantServicePort;
-    private final IEmployeeRestaurantRequestMapper employeeRestaurantRequestMapper;
+    private final IEmployeeRequestMapper employeeRequestMapper;
     private final IEmployeeResponseMapper employeeResponseMapper;
 
     @Override
-    public CreateDishResponseDto saveDish(CreateDishRequestDto createDishRequestDto) {
-        return dishResponseMapper.toDishResponse(ownerRestaurantServicePort.saveDish(dishRequestMapper.updateDishRequestDtoToDishModel(createDishRequestDto)));
+    public DishCreatedResponseDto saveDish(DishCreateRequestDto createDishRequestDto) {
+        return this.ownerResponseMapper.dishModelToDishResponse(this.ownerRestaurantServicePort
+                .saveDish(this.ownerRequestMapper
+                        .updateDishRequestDtoToDishModel(createDishRequestDto)));
     }
 
     @Override
     public UpdateDishResponseDto updateDish(UpdateDishRequestDto updateDishRequestDto) {
-        return  dishResponseMapper.toDishUpdateResponse(ownerRestaurantServicePort
-                .updateDish(dishRequestMapper
+        return  this.ownerResponseMapper.dishModelToDishUpdateResponse(this.ownerRestaurantServicePort
+                .updateDish(this.ownerRequestMapper
                         .updateDishRequestDtoToDishModel(updateDishRequestDto)));
     }
 
     @Override
     public RestaurantEmployeeResponseDto saveUserEmployeeInTheRestaurant(RestaurantEmployeeRequestDto restaurantEmployeeRequestDto, String tokenWithBearerPrefix) {
-        final EmployeeRestaurantModel employeeRestaurantRequestModel = this.employeeRestaurantRequestMapper.toEmployeeRestaurantModel(restaurantEmployeeRequestDto);
-        final EmployeeRestaurantModel employeeRestaurantSavedModel = this.employeeRestaurantServicePort.saveEmployeeRestaurant(
-                                                    employeeRestaurantRequestModel, tokenWithBearerPrefix);
+        final EmployeeRestaurantModel employeeRestaurantRequestModel = this.employeeRequestMapper.restaurantEmployeeRequestDtoToEmployeeRestaurantModel(restaurantEmployeeRequestDto);
+        final EmployeeRestaurantModel employeeRestaurantSavedModel = this.employeeRestaurantServicePort.saveEmployeeRestaurant(employeeRestaurantRequestModel, tokenWithBearerPrefix);
         return this.employeeResponseMapper.toRestaurantEmployeeResponseDto(employeeRestaurantSavedModel);
     }
 
     @Override
-    public DishStatusResponseDto enableOrDisableDishByFieldStatus(DishUpdateStatusRequestDto updateDishStatusRequest, String tokenWithBearerPrefix) {
-        final DishModel dishModelRequest = this.dishRequestMapper.updateDishStatusRequestDtoToDishModel(updateDishStatusRequest);
-        final DishModel dishModelUpdatedTheFieldIsActive = this.ownerRestaurantServicePort.enableOrDisableDishByFieldStatusAndIdRestaurantAndIdDish(dishModelRequest, tokenWithBearerPrefix);
-        return this.dishResponseMapper.toDishStatusResponseDto(dishModelUpdatedTheFieldIsActive);
+    public DishStatusResponseDto enableOrDisableDishByFieldStatus(Long idDish, Long idRestaurant, boolean active, String tokenWithBearerPrefix) {
+        final DishModel dishModelUpdatedTheFieldIsActive = this.ownerRestaurantServicePort.enableOrDisableDishByFieldStatusAndIdRestaurantAndIdDish(idDish, idRestaurant, active, tokenWithBearerPrefix);
+        return this.ownerResponseMapper.dishModelToDishStatusResponseDto(dishModelUpdatedTheFieldIsActive);
     }
 }

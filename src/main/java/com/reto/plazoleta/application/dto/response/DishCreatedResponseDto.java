@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateDishResponseDto {
+public class DishCreatedResponseDto {
 
     private Long idDish;
 }

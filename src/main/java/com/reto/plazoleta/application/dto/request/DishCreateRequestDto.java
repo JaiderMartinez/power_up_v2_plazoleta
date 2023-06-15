@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateDishRequestDto {
+public class DishCreateRequestDto {
 
     private String name;
     private Double price;

@@ -35,16 +35,13 @@ public class AdminController {
             @ApiResponse(responseCode = "409", description = "There are empty fields")
     })
     @PreAuthorize(value = "hasRole('ADMINISTRADOR')")
-    @PostMapping(value = "/create-restaurant")
+    @PostMapping(value = "restaurant")
     public ResponseEntity<RestaurantCreatedResponseDto> saveRestaurant(@Parameter(
-            description = "The restaurant object to create",
-            required = true,
+            description = "The restaurant object to create", required = true,
             schema = @Schema(implementation = RequestToCreateRestaurantDto.class))
             @RequestBody RequestToCreateRestaurantDto requestToCreateRestaurantDto,
-            @Parameter(
-            description = "The authentication token with Bearer prefix",
-            required = true,
-            schema = @Schema(type = "String", format = "jwt"))
+            @Parameter( description = "The authentication token with Bearer prefix",
+            required = true, schema = @Schema(type = "String", format = "jwt"))
              @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithBearerPrefix) {
         RestaurantCreatedResponseDto restaurantCreated = adminService.saveRestaurant(requestToCreateRestaurantDto, tokenWithBearerPrefix);
         return new ResponseEntity<>(restaurantCreated, HttpStatus.CREATED);

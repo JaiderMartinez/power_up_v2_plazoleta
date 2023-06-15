@@ -26,14 +26,14 @@ public class CustomerService implements ICustomerService {
 
     @Override
     public Page<RestaurantResponsePageableDto> getAllRestaurantsByOrderByNameAsc(Integer numberPage, Integer sizeItems) {
-        return customerServicePort.findAllByOrderByNameAsc(numberPage, sizeItems).map(customerResponseMapper::toRestaurantResponse);
+        return this.customerServicePort.findAllByOrderByNameAsc(numberPage, sizeItems).map(this.customerResponseMapper::toRestaurantResponse);
     }
 
     @Override
     public OrderCreatedResponseDto saveOrder(OrderRequestDto createOrderRequestDto, String tokenWithPrefixBearer) {
-        OrderModel orderRequestModel = this.customerRequestMapper.toOrderModel(createOrderRequestDto);
-        final List<OrderDishModel> ordersDishesRequest = createOrderRequestDto.getDishes().stream().map(this.customerRequestMapper::toOrderDishModel).collect(Collectors.toList());
+        OrderModel orderRequestModel = this.customerRequestMapper.orderRequestDtoToOrderModel(createOrderRequestDto);
+        final List<OrderDishModel> ordersDishesRequest = createOrderRequestDto.getDishes().stream().map(this.customerRequestMapper::dishFromOrderRequestDtoToOrderDishModel).collect(Collectors.toList());
         orderRequestModel.setOrdersDishesModel(ordersDishesRequest);
-        return this.customerResponseMapper.toCreateOrderResponseDto(customerServicePort.saveOrder(orderRequestModel, tokenWithPrefixBearer));
+        return this.customerResponseMapper.toCreateOrderResponseDto(this.customerServicePort.saveOrder(orderRequestModel, tokenWithPrefixBearer));
     }
 }

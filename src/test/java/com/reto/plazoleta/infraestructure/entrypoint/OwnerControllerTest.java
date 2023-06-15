@@ -1,11 +1,11 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.reto.plazoleta.application.dto.request.CreateDishRequestDto;
+import com.reto.plazoleta.application.dto.request.DishCreateRequestDto;
 import com.reto.plazoleta.application.dto.request.RestaurantEmployeeRequestDto;
 import com.reto.plazoleta.application.dto.request.UpdateDishRequestDto;
-import com.reto.plazoleta.application.dto.request.DishUpdateStatusRequestDto;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
+import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.CategoryEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.DishEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.RestaurantEntity;
@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -43,15 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OwnerRestaurantControllerTest {
-
-    private static final String USERNAME_OWNER = "owner@owner.com";
-    private static final String PASSWORD_OWNER = "123";
-    private static final String ROL_OWNER = "PROPIETARIO";
-    private static final String CREATE_DISH = "/services-owner-restaurant/create-dish";
-    private static final String ADD_A_EMPLOYEE_TO_THE_RESTAURANT = "/services-owner-restaurant/add-employee-restaurant";
-
-    private static final String UPDATE_DISH = "/services-owner-restaurant/update-dish";
+class OwnerControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -68,24 +61,35 @@ class OwnerRestaurantControllerTest {
     @MockBean
     private IUserGateway userGateway;
 
-    private static final String TOKEN_VALID = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckBvd25lci5jb20iLCJpYXQiOjE2ODU4ODg5MDIsImV4cCI6MTY4ODQ4MDkwMiwibGFzdE5hbWUiOiJmb3Jlcm8iLCJuYW1lIjoiam9oYW5hIiwicm9sIjpbIlJPTEVfUFJPUElFVEFSSU8iXX0.MGH8lYVdreRx9dN5_BVW1X-ErRMhWNtFrKBXjuE2yAU";
+    @MockBean
+    private JwtProvider jwtProvider;
+
+    private static final String USERNAME_OWNER = "owner@owner.com";
+    private static final String PASSWORD_OWNER = "123";
+    private static final String ROL_OWNER = "PROPIETARIO";
+    private static final String CREATE_DISH = "/micro-small-square/restaurant/dish";
+    private static final String ADD_A_EMPLOYEE_TO_THE_RESTAURANT = "/micro-small-square/restaurant/employee";
+    private static final String UPDATE_DISH = "/micro-small-square/dish/update";
+    private static final String TOKEN_VALID = "Bearer + token";
     private static final String EMAIL_TAKEN_FROM_TOKEN = "owner@owner.com";
-    private  static final String PATH_DISH_UPDATE_STATUS = "/services-owner-restaurant/dish-update-status";
+    private  static final String PATH_RESTAURANT = "/micro-small-square/restaurant/";
+    private  static final String PATH_DISH = "/dish/";
+    private  static final String PATH_UPDATE_STATUS = "/update/status/";
 
     @BeforeAll
     void initializeTestEnvironment() {
-        restaurantRepository.save(new RestaurantEntity(1L, "salado", "bellavista",
+        this.restaurantRepository.save(new RestaurantEntity(1L, "salado", "bellavista",
                 "+123456779", "urlLogo", 108438453L, 15L));
-        categoryRepository.save(new CategoryEntity(1L, "salados", "salado"));
+        this.categoryRepository.save(new CategoryEntity(1L, "salados", "salado"));
 
-        dishRepository.save(new DishEntity(1L, "name", "description", 300000.0, "http://image.com", true, new RestaurantEntity(1L, "salado",
+        this.dishRepository.save(new DishEntity(1L, "name", "description", 300000.0, "http://image.com", true, new RestaurantEntity(1L, "salado",
                 "bellavista", "+123456779", "urlLogo", 108438453L, 15L), new CategoryEntity(1L, "salados", "salado")));
     }
 
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
     @Test
-    void test_saveDish_withCreateDishRequestDto_ShouldReturnADishWithStatusCreated() throws Exception {
-        CreateDishRequestDto dish = new CreateDishRequestDto("plato1", 20000.00, "description", "http://image.com",
+    void test_createDishFromARestaurant_withAllFieldsValidDishCreateRequestDto_ShouldReturnADishWithStatusCreated() throws Exception {
+        DishCreateRequestDto dish = new DishCreateRequestDto("plato1", 20000.00, "description", "http://image.com",
                 1L, 1L);
 
         mockMvc.perform(MockMvcRequestBuilders.post(CREATE_DISH)
@@ -98,8 +102,8 @@ class OwnerRestaurantControllerTest {
 
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
     @Test
-    void test_saveDish_withCreateDishRequestDto_ShouldThrowBadRequestExceptionIfCategoryNotExist() throws Exception {
-        CreateDishRequestDto dish = new CreateDishRequestDto("plato1", 20000.00, "description", "http://image.com",
+    void test_createDishFromARestaurant_withDishCreateRequestDtoWhereNotExistTheCategory_ShouldThrowBadRequestExceptionIfCategoryNotExist() throws Exception {
+        DishCreateRequestDto dish = new DishCreateRequestDto("plato1", 20000.00, "description", "http://image.com",
                 9L, 1L);
 
         mockMvc.perform(MockMvcRequestBuilders.post(CREATE_DISH)
@@ -111,8 +115,8 @@ class OwnerRestaurantControllerTest {
 
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
     @Test
-    void test_saveDish_withTheRestaurantNotExistInObjectCreateDishRequestDto_ShouldResponseAStatusNotFound() throws Exception {
-        CreateDishRequestDto dish = new CreateDishRequestDto("plato1", 20000.00, "description", "http://image.com",
+    void test_createDishFromARestaurant_withTheRestaurantNotExistInObjectDishCreateRequestDto_ShouldResponseAStatusNotFound() throws Exception {
+        DishCreateRequestDto dish = new DishCreateRequestDto("plato1", 20000.00, "description", "http://image.com",
                 1L, 9L);
 
         mockMvc.perform(MockMvcRequestBuilders.post(CREATE_DISH)
@@ -124,8 +128,8 @@ class OwnerRestaurantControllerTest {
 
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
     @Test
-    void test_saveDish_withZeroPriceInDishCreation_ShouldThrowBadRequestException() throws Exception {
-        CreateDishRequestDto dish = new CreateDishRequestDto("plato1", 0.0, "description", "http://image.com",
+    void test_createDishFromARestaurant_withZeroPriceInDishCreation_ShouldThrowBadRequestException() throws Exception {
+        DishCreateRequestDto dish = new DishCreateRequestDto("plato1", 0.0, "description", "http://image.com",
                 1L, 1L);
 
         mockMvc.perform(MockMvcRequestBuilders.post(CREATE_DISH)
@@ -137,8 +141,8 @@ class OwnerRestaurantControllerTest {
 
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
     @Test
-    void test_saveDish_withNegativePriceInDishCreation_ShouldThrowBadRequestException() throws Exception {
-        CreateDishRequestDto dish = new CreateDishRequestDto("plato1", -10.0, "description", "http://image.com",
+    void test_createDishFromARestaurant_withNegativePriceInDishCreation_ShouldThrowBadRequestException() throws Exception {
+        DishCreateRequestDto dish = new DishCreateRequestDto("plato1", -10.0, "description", "http://image.com",
                 1L, 1L);
 
         mockMvc.perform(MockMvcRequestBuilders.post(CREATE_DISH)
@@ -150,7 +154,7 @@ class OwnerRestaurantControllerTest {
   
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
     @Test
-    void test_updateDish_withUpdateDishRequestDto_ShouldStatusOk() throws Exception {
+    void test_updateDishPriceAndDescription_withUpdateDishRequestDto_ShouldStatusOk() throws Exception {
         final DishEntity dishSavedEntityExpected = this.dishRepository.save(new DishEntity(1L, "name", "descriptionDish", 15000.0, "http://imagen.jpeg",
                 true, new RestaurantEntity(1L, "salado", "bellavista", "+123456779", "urlLogo", 108438453L, 15L),
                         new CategoryEntity(1L, "salados", "salado")));
@@ -168,7 +172,7 @@ class OwnerRestaurantControllerTest {
   
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
     @Test
-    void test_updateDish_withInvalidRestaurant_ShouldThrowObjectNotFoundExceptionRestaurantNotPermitted() throws Exception {
+    void test_updateDishPriceAndDescription_withInvalidRestaurant_ShouldThrowObjectNotFoundExceptionRestaurantNotPermitted() throws Exception {
         RestaurantEntity restaurantOwnerDish = new RestaurantEntity(2L, "salado", "bellavista", "+123456779", "urlLogo", 108438453L, 15L);
 
         DishEntity dish = new DishEntity(1L, "name", "descriptionDish", 15000.0, "http://imagen.jpeg", true, restaurantOwnerDish, new CategoryEntity(1L, "salados", "salado"));
@@ -193,6 +197,7 @@ class OwnerRestaurantControllerTest {
         User userFoundByToken = new User();
         userFoundByToken.setIdUser(15L);
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_VALID)).thenReturn(userFoundByToken);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_TOKEN, null));
         this.mockMvc.perform(MockMvcRequestBuilders.post(ADD_A_EMPLOYEE_TO_THE_RESTAURANT)
                         .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID)
                         .content(objectMapper.writeValueAsString(restaurantEmployeeRequest))
@@ -210,6 +215,7 @@ class OwnerRestaurantControllerTest {
         User userFoundByToken = new User();
         userFoundByToken.setIdUser(18L);
         when(this.userGateway.getUserByEmailInTheToken(USERNAME_OWNER, TOKEN_VALID)).thenReturn(userFoundByToken);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_TOKEN, null));
         this.mockMvc.perform(MockMvcRequestBuilders.post(ADD_A_EMPLOYEE_TO_THE_RESTAURANT)
                         .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID)
                         .content(objectMapper.writeValueAsString(restaurantEmployeeRequestWhereIdOwnerRestaurantDoesNotHaveARestaurant))
@@ -221,35 +227,37 @@ class OwnerRestaurantControllerTest {
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
     @Test
     void test_enableOrDisableDishByFieldStatus_withFieldsCompleteAndValidFromObjectAsDishUpdateStatusRequestDtoAndTokenValid_shouldResponseStatusOKAndObjectAsDishStatusResponseDto() throws Exception {
-        DishUpdateStatusRequestDto dishUpdateRequest = new DishUpdateStatusRequestDto(1L, 1L, false);
         User userFoundByToken = new User();
         userFoundByToken.setIdUser(15L);
+        long restaurantValid = 1L;
+        long dishValid = 1L;
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_VALID)).thenReturn(userFoundByToken);
-        this.mockMvc.perform(MockMvcRequestBuilders.patch(PATH_DISH_UPDATE_STATUS)
-                        .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID)
-                        .content(objectMapper.writeValueAsString(dishUpdateRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_TOKEN, null));
+        this.mockMvc.perform(MockMvcRequestBuilders.patch(PATH_RESTAURANT + restaurantValid + PATH_DISH + dishValid + PATH_UPDATE_STATUS + false)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID))
                 .andExpect(jsonPath("$.idDish").value(1L))
                 .andExpect(jsonPath("$.name").value("name"))
                 .andExpect(jsonPath("$.active").value(false));
 
         verify(this.userGateway).getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_VALID);
+        verify(this.jwtProvider).getAuthentication("+ token");
     }
 
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
     @Test
     void test_enableOrDisableDishByFieldStatus_withDishUpdateStatusRequestDtoButTheValueFromFieldIdRestaurantNotBelongsToUserOwnerThisRestaurantAndTokenValid_shouldResponseStatusBadRequest() throws Exception {
-        DishUpdateStatusRequestDto dishUpdateRequest = new DishUpdateStatusRequestDto(1L, 1L, false);
         User userFoundByTokenWhereNotHasARestaurant = new User();
         userFoundByTokenWhereNotHasARestaurant.setIdUser(10L);
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_VALID)).thenReturn(userFoundByTokenWhereNotHasARestaurant);
-        this.mockMvc.perform(MockMvcRequestBuilders.patch(PATH_DISH_UPDATE_STATUS)
-                        .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID)
-                        .content(objectMapper.writeValueAsString(dishUpdateRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value(ExceptionResponse.INVALID_DATA.getMessage()));
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_TOKEN, null));
+        long restaurantDoesNotBelongsToUserOwner = 2L;
+        long dishValid = 1L;
+        this.mockMvc.perform(MockMvcRequestBuilders.patch(PATH_RESTAURANT + restaurantDoesNotBelongsToUserOwner + PATH_DISH + dishValid + PATH_UPDATE_STATUS + false)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID))
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.RESTAURANT_NOT_EXIST.getMessage()));
 
         verify(this.userGateway).getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_VALID);
+        verify(this.jwtProvider).getAuthentication("+ token");
     }
 
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
@@ -261,17 +269,18 @@ class OwnerRestaurantControllerTest {
         this.restaurantRepository.save(restaurantEntityExpected);
         this.dishRepository.save(new DishEntity(1L, "name", "description", 300000.0, "http://image.com", true, restaurantEntityExpected, new CategoryEntity(1L, "salados", "salado")));
 
-        DishUpdateStatusRequestDto dishUpdateRequest = new DishUpdateStatusRequestDto(1L, 2L, false);
         User userFoundByTokenWhereNotHasARestaurant = new User();
         userFoundByTokenWhereNotHasARestaurant.setIdUser(15L);
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_VALID)).thenReturn(userFoundByTokenWhereNotHasARestaurant);
-        this.mockMvc.perform(MockMvcRequestBuilders.patch(PATH_DISH_UPDATE_STATUS)
-                        .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID)
-                        .content(objectMapper.writeValueAsString(dishUpdateRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_TOKEN, null));
+        long restaurantDifferentFromOneOfTheDishToUpdateDishStatus  = 2L;
+        long dishValid = 1L;
+        this.mockMvc.perform(MockMvcRequestBuilders.patch(PATH_RESTAURANT + restaurantDifferentFromOneOfTheDishToUpdateDishStatus + PATH_DISH + dishValid + PATH_UPDATE_STATUS + false)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID))
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.INVALID_DATA.getMessage()));
 
         verify(this.userGateway).getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_VALID);
+        verify(this.jwtProvider).getAuthentication("+ token");
     }
 
     @Transactional
@@ -279,32 +288,34 @@ class OwnerRestaurantControllerTest {
     @Test
     void test_enableOrDisableDishByFieldStatus_withValueFromFieldIdDishNotFoundInDataBaseAndTokenValid_shouldResponseStatusNotFound() throws Exception {
         this.dishRepository.deleteAll();
-        DishUpdateStatusRequestDto dishUpdateRequest = new DishUpdateStatusRequestDto(2L, 1L, false);
         User userFoundByTokenWhereNotHasARestaurant = new User();
         userFoundByTokenWhereNotHasARestaurant.setIdUser(15L);
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_VALID)).thenReturn(userFoundByTokenWhereNotHasARestaurant);
-        this.mockMvc.perform(MockMvcRequestBuilders.patch(PATH_DISH_UPDATE_STATUS)
-                        .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID)
-                        .content(objectMapper.writeValueAsString(dishUpdateRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_TOKEN, null));
+        long restaurantValid = 1L;
+        long dishNotExist = 2L;
+        this.mockMvc.perform(MockMvcRequestBuilders.patch(PATH_RESTAURANT + restaurantValid + PATH_DISH + dishNotExist + PATH_UPDATE_STATUS + false)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID))
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.DISH_NOT_EXISTS.getMessage()));
 
         verify(this.userGateway).getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_VALID);
+        verify(this.jwtProvider).getAuthentication("+ token");
     }
 
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
     @Test
     void test_enableOrDisableDishByFieldStatus_withValueFromFieldIdRestaurantNotFoundInDataBaseAndTokenValid_shouldResponseStatusNotFound() throws Exception {
-        DishUpdateStatusRequestDto dishUpdateRequestWhereValueIdRestaurantNotExist = new DishUpdateStatusRequestDto(1L, 2L, false);
         User userFoundByTokenWhereNotHasARestaurant = new User();
         userFoundByTokenWhereNotHasARestaurant.setIdUser(15L);
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_VALID)).thenReturn(userFoundByTokenWhereNotHasARestaurant);
-        this.mockMvc.perform(MockMvcRequestBuilders.patch(PATH_DISH_UPDATE_STATUS)
-                        .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID)
-                        .content(objectMapper.writeValueAsString(dishUpdateRequestWhereValueIdRestaurantNotExist))
-                        .contentType(MediaType.APPLICATION_JSON))
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_TOKEN, null));
+        long restaurantNotExist = 10L;
+        long dishValid = 1L;
+        this.mockMvc.perform(MockMvcRequestBuilders.patch(PATH_RESTAURANT + restaurantNotExist + PATH_DISH + dishValid + PATH_UPDATE_STATUS + false)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID))
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.RESTAURANT_NOT_EXIST.getMessage()));
 
         verify(this.userGateway).getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_VALID);
+        verify(this.jwtProvider).getAuthentication("+ token");
     }
 }

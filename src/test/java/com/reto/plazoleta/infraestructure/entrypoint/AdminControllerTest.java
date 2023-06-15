@@ -38,7 +38,7 @@ class AdminControllerTest {
     @MockBean
     private IUserGateway userGateway;
 
-    private static final String CREATE_RESTAURANT_API_PATH = "/micro-small-square/create-restaurant";
+    private static final String CREATE_RESTAURANT_API_PATH = "/micro-small-square/restaurant";
     private static final String USERNAME_ADMIN = "admin@dmin.com";
     private static final String PASSWORD = "123";
     private static final String ROLE_ADMIN = "ADMINISTRADOR";

@@ -58,7 +58,7 @@ class EmployeeControllerTest {
     @Autowired
     private IOrderRepository orderRepository;
 
-    private static final String GET_ALL_ORDERS_BY_STATUS_PATH = "/micro-small-square/orders";
+    private static final String GET_ALL_ORDERS_BY_STATUS_PATH = "/micro-small-square/filters-orders";
     private static final String EMAIL_EMPLOYEE = "employee@employee";
     private static final String PASSWORD_EMPLOYEE = "123";
     private static final String ROL_EMPLOYEE = "EMPLEADO";

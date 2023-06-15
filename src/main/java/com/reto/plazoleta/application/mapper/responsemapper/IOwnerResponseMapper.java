@@ -1,6 +1,6 @@
 package com.reto.plazoleta.application.mapper.responsemapper;
 
-import com.reto.plazoleta.application.dto.response.CreateDishResponseDto;
+import com.reto.plazoleta.application.dto.response.DishCreatedResponseDto;
 import com.reto.plazoleta.application.dto.response.DishStatusResponseDto;
 import com.reto.plazoleta.application.dto.response.UpdateDishResponseDto;
 import com.reto.plazoleta.domain.model.DishModel;
@@ -8,12 +8,12 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper
-public interface IDishResponseMapper {
+public interface IOwnerResponseMapper {
 
-    CreateDishResponseDto toDishResponse(DishModel dishModel);
+    DishCreatedResponseDto dishModelToDishResponse(DishModel dishModel);
 
-    UpdateDishResponseDto toDishUpdateResponse(DishModel dishModel);
+    UpdateDishResponseDto dishModelToDishUpdateResponse(DishModel dishModel);
 
     @Mapping(target = "active", source = "dishModel.state")
-    DishStatusResponseDto toDishStatusResponseDto(DishModel dishModel);
+    DishStatusResponseDto dishModelToDishStatusResponseDto(DishModel dishModel);
 }

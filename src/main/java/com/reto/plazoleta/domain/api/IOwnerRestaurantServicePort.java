@@ -8,5 +8,5 @@ public interface IOwnerRestaurantServicePort {
 
     DishModel updateDish(DishModel dishModel);
 
-    DishModel enableOrDisableDishByFieldStatusAndIdRestaurantAndIdDish(DishModel dishModelRequest, String tokenWithBearerPrefix);
+    DishModel enableOrDisableDishByFieldStatusAndIdRestaurantAndIdDish(Long idDish, Long idRestaurant, boolean active, String tokenWithBearerPrefix);
 }

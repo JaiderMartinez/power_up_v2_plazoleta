@@ -56,8 +56,7 @@ public class CustomerController {
     @PreAuthorize(value = "hasRole('CLIENTE')")
     @PostMapping(value = "order")
     public ResponseEntity<OrderCreatedResponseDto> registerOrderFromCustomer(@Parameter(
-            description = "Object to make an order",
-            required = true,
+            description = "Object to make an order",required = true,
             schema = @Schema(implementation = OrderRequestDto.class))
             @RequestBody OrderRequestDto orderRequestDto, @Parameter(
             description = "The authentication token with Bearer prefix for search the idUserCustomer",

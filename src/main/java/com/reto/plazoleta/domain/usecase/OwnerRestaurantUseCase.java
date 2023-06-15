@@ -65,10 +65,10 @@ public class OwnerRestaurantUseCase implements IOwnerRestaurantServicePort {
     }
 
     @Override
-    public DishModel enableOrDisableDishByFieldStatusAndIdRestaurantAndIdDish(DishModel dishModelRequest, String tokenWithPrefixBearer) {
+    public DishModel enableOrDisableDishByFieldStatusAndIdRestaurantAndIdDish(Long idDish, Long idRestaurant, boolean active, String tokenWithPrefixBearer) {
         User userOwnerAuthenticated = getUserOwnerAuthenticated(tokenWithPrefixBearer);
-        validateRestaurantExistenceAndIfBelongsToUser(dishModelRequest.getRestaurantModel().getIdRestaurant(), userOwnerAuthenticated.getIdUser());
-        return validateDishExistenceAndIfBelongsDishToRestaurantShouldReturnTheDishUpdate(dishModelRequest);
+        validateRestaurantExistenceAndIfBelongsToUser(idRestaurant, userOwnerAuthenticated.getIdUser());
+        return validateDishExistenceAndIfBelongsDishToRestaurantShouldReturnTheDishSavedAndUpdate(idDish, idRestaurant, active);
     }
 
     private User getUserOwnerAuthenticated(String tokenWithPrefixBearer) {
@@ -85,14 +85,14 @@ public class OwnerRestaurantUseCase implements IOwnerRestaurantServicePort {
         }
     }
 
-    private DishModel validateDishExistenceAndIfBelongsDishToRestaurantShouldReturnTheDishUpdate(DishModel dishModel) {
-        DishModel dishFoundAndUpdateStatus = this.dishPersistencePort.findById(dishModel.getIdDish());
+    private DishModel validateDishExistenceAndIfBelongsDishToRestaurantShouldReturnTheDishSavedAndUpdate(Long idDish, Long idRestaurant, boolean active) {
+        DishModel dishFoundAndUpdateStatus = this.dishPersistencePort.findById(idDish);
         if (dishFoundAndUpdateStatus == null) {
             throw new DishNotExistsException("The dish does not exist");
-        } else if (!dishFoundAndUpdateStatus.getRestaurantModel().getIdRestaurant().equals(dishModel.getRestaurantModel().getIdRestaurant())) {
+        } else if (!dishFoundAndUpdateStatus.getRestaurantModel().getIdRestaurant().equals(idRestaurant)) {
             throw new InvalidDataException("The value of field idRestaurant does not match the dish's idRestaurant");
         }
-        dishFoundAndUpdateStatus.setState(dishModel.getState());
-        return dishFoundAndUpdateStatus;
+        dishFoundAndUpdateStatus.setState(active);
+        return this.dishPersistencePort.saveDish(dishFoundAndUpdateStatus);
     }
 }
