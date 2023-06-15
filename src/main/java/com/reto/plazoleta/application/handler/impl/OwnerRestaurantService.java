@@ -13,7 +13,7 @@ import com.reto.plazoleta.application.mapper.requestmapper.IDishRequestMapper;
 import com.reto.plazoleta.application.mapper.requestmapper.IEmployeeRestaurantRequestMapper;
 import com.reto.plazoleta.application.mapper.responsemapper.IDishResponseMapper;
 import com.reto.plazoleta.application.mapper.responsemapper.IEmployeeResponseMapper;
-import com.reto.plazoleta.domain.api.IEmployeeRestaurantServicePort;
+import com.reto.plazoleta.domain.api.IEmployeeServicePort;
 import com.reto.plazoleta.domain.api.IOwnerRestaurantServicePort;
 import com.reto.plazoleta.domain.model.DishModel;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
@@ -30,20 +30,20 @@ public class OwnerRestaurantService implements IOwnerRestaurantService {
     private final IOwnerRestaurantServicePort ownerRestaurantServicePort;
     private final IDishRequestMapper dishRequestMapper;
     private final IDishResponseMapper dishResponseMapper;
-    private final IEmployeeRestaurantServicePort employeeRestaurantServicePort;
+    private final IEmployeeServicePort employeeRestaurantServicePort;
     private final IEmployeeRestaurantRequestMapper employeeRestaurantRequestMapper;
     private final IEmployeeResponseMapper employeeResponseMapper;
 
     @Override
     public CreateDishResponseDto saveDish(CreateDishRequestDto createDishRequestDto) {
-        return dishResponseMapper.toDishResponse(ownerRestaurantServicePort.saveDish(dishRequestMapper.toDishModel(createDishRequestDto)));
+        return dishResponseMapper.toDishResponse(ownerRestaurantServicePort.saveDish(dishRequestMapper.updateDishRequestDtoToDishModel(createDishRequestDto)));
     }
 
     @Override
     public UpdateDishResponseDto updateDish(UpdateDishRequestDto updateDishRequestDto) {
         return  dishResponseMapper.toDishUpdateResponse(ownerRestaurantServicePort
                 .updateDish(dishRequestMapper
-                        .toDishModel(updateDishRequestDto)));
+                        .updateDishRequestDtoToDishModel(updateDishRequestDto)));
     }
 
     @Override
@@ -56,7 +56,7 @@ public class OwnerRestaurantService implements IOwnerRestaurantService {
 
     @Override
     public DishStatusResponseDto enableOrDisableDishByFieldStatus(DishUpdateStatusRequestDto updateDishStatusRequest, String tokenWithBearerPrefix) {
-        final DishModel dishModelRequest = this.dishRequestMapper.toDishModelWithValueInFieldsIdRestaurantAndIsActive(updateDishStatusRequest);
+        final DishModel dishModelRequest = this.dishRequestMapper.updateDishStatusRequestDtoToDishModel(updateDishStatusRequest);
         final DishModel dishModelUpdatedTheFieldIsActive = this.ownerRestaurantServicePort.enableOrDisableDishByFieldStatusAndIdRestaurantAndIdDish(dishModelRequest, tokenWithBearerPrefix);
         return this.dishResponseMapper.toDishStatusResponseDto(dishModelUpdatedTheFieldIsActive);
     }

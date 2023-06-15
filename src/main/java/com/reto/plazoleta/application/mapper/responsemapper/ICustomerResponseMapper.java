@@ -3,13 +3,17 @@ package com.reto.plazoleta.application.mapper.responsemapper;
 import com.reto.plazoleta.application.dto.response.OrderCreatedResponseDto;
 import com.reto.plazoleta.application.dto.response.OrdersDishesPaginatedResponseDto;
 import com.reto.plazoleta.application.dto.response.OrdersPaginatedResponseDto;
+import com.reto.plazoleta.application.dto.response.RestaurantResponsePageableDto;
 import com.reto.plazoleta.domain.model.OrderDishModel;
 import com.reto.plazoleta.domain.model.OrderModel;
+import com.reto.plazoleta.domain.model.RestaurantModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper
 public interface ICustomerResponseMapper {
+
+    RestaurantResponsePageableDto toRestaurantResponse(RestaurantModel restaurantModel);
 
     OrderCreatedResponseDto toCreateOrderResponseDto(OrderModel orderModel);
 

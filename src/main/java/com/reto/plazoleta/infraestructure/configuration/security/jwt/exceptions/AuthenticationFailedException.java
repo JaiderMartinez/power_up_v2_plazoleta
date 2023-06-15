@@ -1,4 +1,4 @@
-package com.reto.plazoleta.infraestructure.configuration.security.exception;
+package com.reto.plazoleta.infraestructure.configuration.security.jwt.exceptions;
 
 public class AuthenticationFailedException extends RuntimeException{
 

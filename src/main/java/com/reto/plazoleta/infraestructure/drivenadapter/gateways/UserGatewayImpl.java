@@ -1,6 +1,6 @@
 package com.reto.plazoleta.infraestructure.drivenadapter.gateways;
 
-import com.reto.plazoleta.infraestructure.configuration.security.exception.UserDoesNotExistException;
+import com.reto.plazoleta.infraestructure.drivenadapter.gateways.exceptions.UserDoesNotExistException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

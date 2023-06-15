@@ -16,6 +16,9 @@ import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
 import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.domain.exception.NoDataFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -40,6 +43,14 @@ public class CustomerUseCase implements ICustomerServicePort {
         this.userGateway = userGateway;
         this.jwtProvider = jwtProvider;
         this.orderDishPersistencePort = orderDishPersistencePort;
+    }
+
+    @Override
+    public Page<RestaurantModel> findAllByOrderByNameAsc(Integer numberPage, Integer sizeItems) {
+        Page<RestaurantModel> resultRestaurantsPageable = this.restaurantPersistencePort
+                                            .findAllByOrderByNameAsc(PageRequest.of(numberPage, sizeItems));
+        if (resultRestaurantsPageable.isEmpty()) throw new NoDataFoundException();
+        return resultRestaurantsPageable;
     }
 
     @Override

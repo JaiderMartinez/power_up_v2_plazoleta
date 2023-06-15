@@ -15,7 +15,7 @@ public interface IDishRequestMapper {
     @Mapping(target = "categoryModel.idCategory", source = "createDishRequestDto.idCategory")
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "idDish", ignore = true)
-    DishModel toDishModel(CreateDishRequestDto createDishRequestDto);
+    DishModel updateDishRequestDtoToDishModel(CreateDishRequestDto createDishRequestDto);
 
     @Mapping(target = "restaurantModel.idRestaurant", source = "updateDishRequestDto.idRestaurant")
     @Mapping(target = "name", ignore = true)
@@ -24,9 +24,9 @@ public interface IDishRequestMapper {
     @Mapping(target = "categoryModel", ignore = true)
     @Mapping(target = "price", source = "updateDishRequestDto.price")
     @Mapping(target = "description", source = "updateDishRequestDto.description")
-    DishModel toDishModel(UpdateDishRequestDto updateDishRequestDto);
+    DishModel updateDishRequestDtoToDishModel(UpdateDishRequestDto updateDishRequestDto);
 
     @Mapping(target = "restaurantModel.idRestaurant", source = "updateDishStatusRequestDto.idRestaurant")
     @Mapping(target = "state", source = "updateDishStatusRequestDto.active")
-    DishModel toDishModelWithValueInFieldsIdRestaurantAndIsActive(DishUpdateStatusRequestDto updateDishStatusRequestDto);
+    DishModel updateDishStatusRequestDtoToDishModel(DishUpdateStatusRequestDto updateDishStatusRequestDto);
 }

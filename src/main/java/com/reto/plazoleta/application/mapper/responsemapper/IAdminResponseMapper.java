@@ -5,7 +5,7 @@ import com.reto.plazoleta.domain.model.RestaurantModel;
 import org.mapstruct.Mapper;
 
 @Mapper
-public interface IRestaurantResponseMapper {
+public interface IAdminResponseMapper {
 
-    RestaurantCreatedResponseDto toRestaurantCreatedResponseDto(RestaurantModel restaurantModel);
+    RestaurantCreatedResponseDto restaurantModelToRestaurantCreatedResponseDto(RestaurantModel restaurantModel);
 }

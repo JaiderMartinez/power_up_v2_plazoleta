@@ -1,4 +1,4 @@
-package com.reto.plazoleta.infraestructure.configuration.security.exception;
+package com.reto.plazoleta.infraestructure.drivenadapter.gateways.exceptions;
 
 public class UserDoesNotExistException extends RuntimeException{
 

@@ -16,11 +16,16 @@ import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
 import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.domain.exception.NoDataFoundException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import java.time.LocalDate;
@@ -59,6 +64,37 @@ class CustomerUseCaseTest {
 
     private static final String EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN = "customer@customer.com";
     private static final String TOKEN_WITH_PREFIX_BEARER = "Bearer + Token";
+
+    @Test
+    void test_findAllOrderByNameAsc_withIntAsSizeItemsGreaterThanZero_ShouldReturnListRestaurantPageableWithAllFields() {
+        //Given
+        List<RestaurantModel> restaurantList = new ArrayList<>();
+        restaurantList.add(new RestaurantModel(1L, "Restaurante 1", "Dirección 1", "3014896273", "http://restaurante1.com", 111111L, 1L));
+        restaurantList.add(new RestaurantModel(2L, "Restaurante 2", "Dirección 2", "3224196283", "http://restaurante2.com", 222222L, 2L));
+        Page<RestaurantModel> pageableRestaurantsExpected = new PageImpl<>(restaurantList);
+        when(restaurantPersistencePort.findAllByOrderByNameAsc(PageRequest.of(0, 10))).thenReturn(pageableRestaurantsExpected);
+        //When
+        Page<RestaurantModel> result = this.customerUseCase.findAllByOrderByNameAsc(0, 10);
+        //Then
+        verify(this.restaurantPersistencePort, times(1)).findAllByOrderByNameAsc(PageRequest.of(0, 10));
+        assertEquals(pageableRestaurantsExpected, result);
+        assertEquals(pageableRestaurantsExpected.getTotalElements(), result.getTotalElements());
+        assertEquals(pageableRestaurantsExpected.toList().get(0).getPhone(), result.toList().get(0).getPhone());
+        assertEquals(pageableRestaurantsExpected.toList().get(1).getNit(), result.toList().get(1).getNit());
+    }
+
+    @Test
+    void test_findAllOrderByNameAsc_withIntAsSizeItemsGreaterThanZeroAndNoDataFound_ShouldThrowNoDataFoundException() {
+        //Given
+        Integer numberPage = 0;
+        Integer sizeItems = 10;
+        when(restaurantPersistencePort.findAllByOrderByNameAsc(PageRequest.of(numberPage, sizeItems))).thenReturn(Page.empty());
+        // When & Then
+        Assertions.assertThrows(
+                NoDataFoundException.class,
+                () -> this.customerUseCase.findAllByOrderByNameAsc(numberPage, sizeItems)
+        );
+    }
 
     @Test
     void test_saveOrder_withAllFieldsValidInObjectAsOrderModelAndListOfDishModelCorrectAndTokenValid_shouldReturnObjectOrderModelSavedInDataBase() {

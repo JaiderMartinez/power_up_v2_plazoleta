@@ -3,7 +3,7 @@ package com.reto.plazoleta.infraestructure.entrypoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reto.plazoleta.application.dto.request.RequestToCreateRestaurantDto;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
-import com.reto.plazoleta.infraestructure.configuration.security.exception.UserDoesNotExistException;
+import com.reto.plazoleta.infraestructure.drivenadapter.gateways.exceptions.UserDoesNotExistException;
 import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
 import com.reto.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 import org.junit.jupiter.api.Test;

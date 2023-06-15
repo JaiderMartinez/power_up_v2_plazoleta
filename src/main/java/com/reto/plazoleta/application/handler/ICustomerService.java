@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 
 public interface ICustomerService {
 
-    Page<RestaurantResponsePageableDto> getAllRestaurantsByOrderByNameAsc(int numberPage, int sizeItems);
+    Page<RestaurantResponsePageableDto> getAllRestaurantsByOrderByNameAsc(Integer numberPage, Integer sizeItems);
 
     OrderCreatedResponseDto saveOrder(OrderRequestDto createOrderRequestDto, String tokenWithPrefixBearer);
 }

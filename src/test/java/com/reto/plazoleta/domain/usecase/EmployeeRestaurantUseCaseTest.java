@@ -13,7 +13,7 @@ import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
 import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
-import com.reto.plazoleta.infraestructure.exception.NoDataFoundException;
+import com.reto.plazoleta.domain.exception.NoDataFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
