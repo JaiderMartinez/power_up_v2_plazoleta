@@ -13,20 +13,20 @@ public interface IDishRequestMapper {
 
     @Mapping(target = "restaurantModel.idRestaurant", source = "createDishRequestDto.idRestaurant")
     @Mapping(target = "categoryModel.idCategory", source = "createDishRequestDto.idCategory")
-    @Mapping(target = "stateDish", ignore = true)
+    @Mapping(target = "state", ignore = true)
     @Mapping(target = "idDish", ignore = true)
     DishModel toDishModel(CreateDishRequestDto createDishRequestDto);
 
     @Mapping(target = "restaurantModel.idRestaurant", source = "updateDishRequestDto.idRestaurant")
     @Mapping(target = "name", ignore = true)
-    @Mapping(target = "imageDish", ignore = true)
-    @Mapping(target = "stateDish", ignore = true)
+    @Mapping(target = "urlImageDish", ignore = true)
+    @Mapping(target = "state", ignore = true)
     @Mapping(target = "categoryModel", ignore = true)
     @Mapping(target = "price", source = "updateDishRequestDto.price")
-    @Mapping(target = "descriptionDish", source = "updateDishRequestDto.descriptionDish")
+    @Mapping(target = "description", source = "updateDishRequestDto.description")
     DishModel toDishModel(UpdateDishRequestDto updateDishRequestDto);
 
     @Mapping(target = "restaurantModel.idRestaurant", source = "updateDishStatusRequestDto.idRestaurant")
-    @Mapping(target = "stateDish", source = "updateDishStatusRequestDto.active")
+    @Mapping(target = "state", source = "updateDishStatusRequestDto.active")
     DishModel toDishModelWithValueInFieldsIdRestaurantAndIsActive(DishUpdateStatusRequestDto updateDishStatusRequestDto);
 }

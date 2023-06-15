@@ -3,7 +3,7 @@ package com.reto.plazoleta.domain.usecase;
 import com.reto.plazoleta.domain.api.ICustomerServicePort;
 import com.reto.plazoleta.domain.exception.CustomerHasAOrderInProcessException;
 import com.reto.plazoleta.domain.exception.DishNotExistsException;
-import com.reto.plazoleta.domain.exception.ObjectNotFoundException;
+import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.model.DishModel;
 import com.reto.plazoleta.domain.model.OrderDishModel;
@@ -76,7 +76,7 @@ public class CustomerUseCase implements ICustomerServicePort {
     private void validateRestaurant(Long idRestaurant) {
         final RestaurantModel restaurantFoundModel = this.restaurantPersistencePort.findByIdRestaurant(idRestaurant);
         if (restaurantFoundModel == null)
-            throw new ObjectNotFoundException("The restaurant in the order does not exist");
+            throw new RestaurantNotExistException("The restaurant in the order does not exist");
     }
 
     private void checkStatusFromUserOrdersInARestaurant(Long idRestaurant, Long idUserCustomer) {

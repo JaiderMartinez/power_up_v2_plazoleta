@@ -155,7 +155,7 @@ class EmployeeControllerTest {
         this.mockMvc.perform(MockMvcRequestBuilders.get(GET_ALL_ORDERS_BY_STATUS_PATH)
                         .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(ExceptionResponse.OBJECT_NOT_FOUND.getMessage()));
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.RESTAURANT_NOT_EXIST.getMessage()));
     }
 
     @Transactional
@@ -211,7 +211,7 @@ class EmployeeControllerTest {
                         .param(REQUEST_PARAM_ID_ORDER, "4")
                         .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(ExceptionResponse.OBJECT_NOT_FOUND.getMessage()));
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.RESTAURANT_NOT_EXIST.getMessage()));
     }
 
     @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})

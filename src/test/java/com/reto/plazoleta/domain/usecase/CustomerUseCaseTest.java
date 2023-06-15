@@ -2,7 +2,7 @@ package com.reto.plazoleta.domain.usecase;
 
 import com.reto.plazoleta.domain.exception.CustomerHasAOrderInProcessException;
 import com.reto.plazoleta.domain.exception.DishNotExistsException;
-import com.reto.plazoleta.domain.exception.ObjectNotFoundException;
+import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.model.CategoryModel;
 import com.reto.plazoleta.domain.model.DishModel;
@@ -161,8 +161,8 @@ class CustomerUseCaseTest {
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(null);
         //When
-        ObjectNotFoundException messageException = assertThrows(
-                ObjectNotFoundException.class,
+        RestaurantNotExistException messageException = assertThrows(
+                RestaurantNotExistException.class,
                 () -> this.customerUseCase.saveOrder(orderModelRequest, TOKEN_WITH_PREFIX_BEARER));
         //Then
         verify(this.jwtProvider, times(1)).getAuthentication("+ Token");

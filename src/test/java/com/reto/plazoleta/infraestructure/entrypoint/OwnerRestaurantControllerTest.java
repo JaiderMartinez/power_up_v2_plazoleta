@@ -111,15 +111,15 @@ class OwnerRestaurantControllerTest {
 
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
     @Test
-    void test_saveDish_withCreateDishRequestDto_ShouldThrowBadRequestExceptionIfRestaurantNotExist() throws Exception {
+    void test_saveDish_withTheRestaurantNotExistInObjectCreateDishRequestDto_ShouldResponseAStatusNotFound() throws Exception {
         CreateDishRequestDto dish = new CreateDishRequestDto("plato1", 20000.00, "description", "http://image.com",
                 1L, 9L);
 
         mockMvc.perform(MockMvcRequestBuilders.post(CREATE_DISH)
                         .content(objectMapper.writeValueAsString(dish))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value(ExceptionResponse.INVALID_DATA.getMessage()));
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.RESTAURANT_NOT_EXIST.getMessage()));
     }
 
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
@@ -215,7 +215,7 @@ class OwnerRestaurantControllerTest {
                         .content(objectMapper.writeValueAsString(restaurantEmployeeRequestWhereIdOwnerRestaurantDoesNotHaveARestaurant))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(ExceptionResponse.OBJECT_NOT_FOUND.getMessage()));
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.RESTAURANT_NOT_EXIST.getMessage()));
     }
 
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
@@ -303,7 +303,7 @@ class OwnerRestaurantControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, TOKEN_VALID)
                         .content(objectMapper.writeValueAsString(dishUpdateRequestWhereValueIdRestaurantNotExist))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value(ExceptionResponse.OBJECT_NOT_FOUND.getMessage()));
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.RESTAURANT_NOT_EXIST.getMessage()));
 
         verify(this.userGateway).getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_VALID);
     }

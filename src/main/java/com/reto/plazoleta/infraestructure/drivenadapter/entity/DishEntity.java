@@ -4,34 +4,42 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "dish")
+@Table(name = "platos")
 @Data
 public class DishEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idDish;
-    @Column
+    @Column(name = "nombre")
     private String name;
-    @Column
-    private String descriptionDish;
-    @Column
+    @Column(name = "descripcion")
+    private String description;
+    @Column(name = "precio")
     private Double price;
-    @Column
-    private String imageDish;
-    @Column
-    private Boolean stateDish;
+    @Column(name = "url_imagen")
+    private String urlImageDish;
+    @Column(name = "activo")
+    private Boolean state;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Restaurant", referencedColumnName = "idRestaurant")
+    @JoinColumn(name = "id_restaurante", referencedColumnName = "idRestaurant")
     private RestaurantEntity restaurantEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Category", referencedColumnName = "idCategory")
+    @JoinColumn(name = "id_categoria", referencedColumnName = "idCategory")
     private CategoryEntity categoryEntity;
 }

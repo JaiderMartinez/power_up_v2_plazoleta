@@ -13,9 +13,8 @@ public class CreateDishRequestDto {
 
     private String name;
     private Double price;
-    private String descriptionDish;
-    private String imageDish;
+    private String description;
+    private String urlImageDish;
     private Long idCategory;
     private Long idRestaurant;
-
 }

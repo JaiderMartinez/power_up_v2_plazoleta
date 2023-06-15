@@ -3,7 +3,7 @@ package com.reto.plazoleta.domain.usecase;
 import com.reto.plazoleta.domain.api.IOwnerRestaurantServicePort;
 import com.reto.plazoleta.domain.exception.DishNotExistsException;
 import com.reto.plazoleta.domain.exception.InvalidDataException;
-import com.reto.plazoleta.domain.exception.ObjectNotFoundException;
+import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.model.CategoryModel;
 import com.reto.plazoleta.domain.model.DishModel;
@@ -21,6 +21,7 @@ public class OwnerRestaurantUseCase implements IOwnerRestaurantServicePort {
     private final ICategoryPersistencePort categoryPersistencePort;
     private final IUserGateway userGateway;
     private final JwtProvider jwtProvider;
+    private static final String MESSAGE_RESTAURANT_NOT_EXIST = "The restaurant does not exist";
 
     public OwnerRestaurantUseCase(IDishPersistencePort persistencePort, IRestaurantPersistencePort restaurantPersistencePort,
                                   ICategoryPersistencePort categoryPersistencePort, IUserGateway userGateway, JwtProvider jwtProvider) {
@@ -32,42 +33,35 @@ public class OwnerRestaurantUseCase implements IOwnerRestaurantServicePort {
     }
 
     @Override
-    public DishModel saveDish(DishModel dishModel) {
-        if(dishModel.getPrice() <= 0) {
+    public DishModel saveDish(DishModel dishModelRequest) {
+        if(dishModelRequest.getPrice() <= 0)
             throw new InvalidDataException("Price must be greater than zero");
-        }
-        RestaurantModel restaurantModel = restaurantPersistencePort.findByIdRestaurant(dishModel.getRestaurantModel().getIdRestaurant());
-        if(restaurantModel == null) {
-            throw new InvalidDataException("The restaurant does not exist");
-        }
-        CategoryModel categoryModel = categoryPersistencePort.findById(dishModel.getCategoryModel().getIdCategory());
-        if(categoryModel == null) {
+        RestaurantModel restaurantModel = this.restaurantPersistencePort.findByIdRestaurant(dishModelRequest.getRestaurantModel().getIdRestaurant());
+        if(restaurantModel == null)
+            throw new RestaurantNotExistException(MESSAGE_RESTAURANT_NOT_EXIST);
+        CategoryModel categoryModel = this.categoryPersistencePort.findById(dishModelRequest.getCategoryModel().getIdCategory());
+        if(categoryModel == null)
             throw new InvalidDataException("The category does not exist");
-        }
-        dishModel.setRestaurantModel(restaurantModel);
-        dishModel.setCategoryModel(categoryModel);
-        dishModel.setStateDish(true);
-        return dishPersistencePort.saveDish(dishModel);
+        dishModelRequest.setRestaurantModel(restaurantModel);
+        dishModelRequest.setCategoryModel(categoryModel);
+        dishModelRequest.setState(true);
+        return this.dishPersistencePort.saveDish(dishModelRequest);
     }
 
     @Override
-    public DishModel updateDish(DishModel dishModel) {
-        DishModel updateDishModel = dishPersistencePort.findById(dishModel.getIdDish());
-        if (updateDishModel == null) {
+    public DishModel updateDish(DishModel dishModelRequestToUpdate) {
+        DishModel updateDishModel = dishPersistencePort.findById(dishModelRequestToUpdate.getIdDish());
+        if (updateDishModel == null)
             throw new DishNotExistsException("The dish not exist");
-        }
-        RestaurantModel restaurantModel = restaurantPersistencePort.findByIdRestaurant(dishModel.getRestaurantModel().getIdRestaurant());
+        RestaurantModel restaurantModel = restaurantPersistencePort.findByIdRestaurant(dishModelRequestToUpdate.getRestaurantModel().getIdRestaurant());
         if (restaurantModel == null) {
-            throw new ObjectNotFoundException("The restaurant does not exist");
-        }
-        if (!updateDishModel.getRestaurantModel().getIdRestaurant().equals(restaurantModel.getIdRestaurant())) {
+            throw new RestaurantNotExistException(MESSAGE_RESTAURANT_NOT_EXIST);
+        }else if (!updateDishModel.getRestaurantModel().getIdRestaurant().equals(restaurantModel.getIdRestaurant())) {
             throw new InvalidDataException("Only the owner of the restaurant can update the dish");
         }
-
-        updateDishModel.setPrice(dishModel.getPrice());
-        updateDishModel.setDescriptionDish(dishModel.getDescriptionDish());
-
-        return dishPersistencePort.updateDish(updateDishModel);
+        updateDishModel.setPrice(dishModelRequestToUpdate.getPrice());
+        updateDishModel.setDescription(dishModelRequestToUpdate.getDescription());
+        return this.dishPersistencePort.saveDish(updateDishModel);
     }
 
     @Override
@@ -85,7 +79,7 @@ public class OwnerRestaurantUseCase implements IOwnerRestaurantServicePort {
     private void validateRestaurantExistenceAndIfBelongsToUser(Long idRestaurant, Long idUserOwnerAuthenticated) {
         RestaurantModel restaurantFound = this.restaurantPersistencePort.findByIdRestaurant(idRestaurant);
         if (restaurantFound == null) {
-            throw new ObjectNotFoundException("The restaurant does not exist");
+            throw new RestaurantNotExistException(MESSAGE_RESTAURANT_NOT_EXIST);
         } else if (!restaurantFound.getIdOwner().equals(idUserOwnerAuthenticated)) {
             throw new InvalidDataException("The user is not the owner of this restaurant");
         }
@@ -98,7 +92,7 @@ public class OwnerRestaurantUseCase implements IOwnerRestaurantServicePort {
         } else if (!dishFoundAndUpdateStatus.getRestaurantModel().getIdRestaurant().equals(dishModel.getRestaurantModel().getIdRestaurant())) {
             throw new InvalidDataException("The value of field idRestaurant does not match the dish's idRestaurant");
         }
-        dishFoundAndUpdateStatus.setStateDish(dishModel.getStateDish());
+        dishFoundAndUpdateStatus.setState(dishModel.getState());
         return dishFoundAndUpdateStatus;
     }
 }

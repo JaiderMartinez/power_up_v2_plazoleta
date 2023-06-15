@@ -4,7 +4,7 @@ import com.reto.plazoleta.domain.exception.CustomerHasAOrderInProcessException;
 import com.reto.plazoleta.domain.exception.DishNotExistsException;
 import com.reto.plazoleta.domain.exception.EmptyFieldsException;
 import com.reto.plazoleta.domain.exception.InvalidDataException;
-import com.reto.plazoleta.domain.exception.ObjectNotFoundException;
+import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
 import com.reto.plazoleta.domain.exception.OrderInProcessException;
 import com.reto.plazoleta.domain.exception.OrderNotExistsException;
 import com.reto.plazoleta.infraestructure.configuration.security.exception.AuthenticationFailedException;
@@ -44,11 +44,11 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_DATA.getMessage()));
     }
 
-    @ExceptionHandler(ObjectNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleObjectNotFoundException(
-            ObjectNotFoundException objectNotFoundException) {
+    @ExceptionHandler(RestaurantNotExistException.class)
+    public ResponseEntity<Map<String, String>> handleRestaurantNotExistException(
+            RestaurantNotExistException ignoredRestaurantNotExistException) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.OBJECT_NOT_FOUND.getMessage()));
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.RESTAURANT_NOT_EXIST.getMessage()));
     }
 
     @ExceptionHandler(DishNotExistsException.class)

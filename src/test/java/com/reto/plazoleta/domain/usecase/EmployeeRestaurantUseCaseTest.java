@@ -1,6 +1,6 @@
 package com.reto.plazoleta.domain.usecase;
 
-import com.reto.plazoleta.domain.exception.ObjectNotFoundException;
+import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
 import com.reto.plazoleta.domain.exception.OrderInProcessException;
 import com.reto.plazoleta.domain.exception.OrderNotExistsException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
@@ -103,7 +103,7 @@ class EmployeeRestaurantUseCaseTest {
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userOwner);
         when(this.restaurantPersistencePort.findByIdRestaurant(employeeRestaurantRequestModel.getIdRestaurant())).thenReturn(restaurantFoundExpected);
         //When
-        ObjectNotFoundException message = assertThrows( ObjectNotFoundException.class, () ->
+        RestaurantNotExistException message = assertThrows( RestaurantNotExistException.class, () ->
                 this.employeeRestaurantUseCase.saveEmployeeRestaurant(employeeRestaurantRequestModel, TOKEN_WITH_PREFIX_BEARER));
         //Then
         verify(this.jwtProvider, times(1)).getAuthentication(TOKEN_WITH_PREFIX_BEARER);
@@ -176,7 +176,7 @@ class EmployeeRestaurantUseCaseTest {
         when(this.employeeRestaurantPersistencePort.findByIdUserEmployee(userEmployeeAuthenticatedByToken.getIdUser())).thenReturn(restaurantFromEmployeeWhereRestaurantAlreadyNoExists);
         when(this.restaurantPersistencePort.findByIdRestaurant(restaurantFromEmployeeWhereRestaurantAlreadyNoExists.getIdRestaurant())).thenReturn(null);
         //When
-        ObjectNotFoundException messageException = assertThrows(ObjectNotFoundException.class,
+        RestaurantNotExistException messageException = assertThrows(RestaurantNotExistException.class,
                 () -> this.employeeRestaurantUseCase.getAllOrdersFilterByStatusAndSizeItemsByPage(1, 0, STATUS_FROM_ORDER, TOKEN_WITH_PREFIX_BEARER));
         //Then
         verify(this.jwtProvider, times(1)).getAuthentication(TOKEN_WITH_PREFIX_BEARER);
@@ -243,7 +243,7 @@ class EmployeeRestaurantUseCaseTest {
         when(this.employeeRestaurantPersistencePort.findByIdUserEmployee(1L)).thenReturn(restaurantFromEmployee);
         when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(null);
         //When
-        ObjectNotFoundException messageException = assertThrows(ObjectNotFoundException.class,
+        RestaurantNotExistException messageException = assertThrows(RestaurantNotExistException.class,
                 () ->this.employeeRestaurantUseCase.assignEmployeeToOrderAndChangeStatusToInPreparation(idOrdersRequest, TOKEN_WITH_PREFIX_BEARER));
         //Then
         assertEquals("Restaurant not Exist", messageException.getMessage());

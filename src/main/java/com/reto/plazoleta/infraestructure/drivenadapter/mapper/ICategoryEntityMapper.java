@@ -8,5 +8,4 @@ import org.mapstruct.Mapper;
 public interface ICategoryEntityMapper {
 
     CategoryModel toCategoryEntity(CategoryEntity categoryEntity);
-
 }

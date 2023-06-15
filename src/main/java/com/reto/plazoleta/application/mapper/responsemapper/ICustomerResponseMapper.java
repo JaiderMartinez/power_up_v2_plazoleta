@@ -18,7 +18,7 @@ public interface ICustomerResponseMapper {
 
     @Mapping(target = "dish.idDish", source = "dishModel.idDish")
     @Mapping(target = "dish.name", source = "dishModel.name")
-    @Mapping(target = "dish.dishImageUrl", source = "dishModel.imageDish")
-    @Mapping(target = "dish.description", source = "dishModel.descriptionDish")
+    @Mapping(target = "dish.dishImageUrl", source = "dishModel.urlImageDish")
+    @Mapping(target = "dish.description", source = "dishModel.description")
     OrdersDishesPaginatedResponseDto orderDishModelToOrdersDishesPaginatedResponseDto(OrderDishModel orderDishModel);
 }

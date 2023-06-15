@@ -14,6 +14,6 @@ public interface IDishResponseMapper {
 
     UpdateDishResponseDto toDishUpdateResponse(DishModel dishModel);
 
-    @Mapping(target = "active", source = "dishModel.stateDish")
+    @Mapping(target = "active", source = "dishModel.state")
     DishStatusResponseDto toDishStatusResponseDto(DishModel dishModel);
 }

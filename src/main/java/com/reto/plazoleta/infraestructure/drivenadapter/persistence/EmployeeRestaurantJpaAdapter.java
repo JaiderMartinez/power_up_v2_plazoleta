@@ -12,7 +12,6 @@ public class EmployeeRestaurantJpaAdapter implements IEmployeeRestaurantPersiste
     private final IEmployeeRepository employeeRepository;
     private final IEmployeeEntityMapper employeeEntityMapper;
 
-
     @Override
     public EmployeeRestaurantModel saveEmployeeRestaurant(EmployeeRestaurantModel employeeRestaurantModel) {
         return employeeEntityMapper.toEmployeeRestaurantModel(employeeRepository.save(
