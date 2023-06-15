@@ -22,45 +22,45 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/services-owner-restaurant")
+@RequestMapping("/micro-small-square/")
 public class OwnerRestaurantController {
 
     private final IOwnerRestaurantService ownerRestaurantService;
 
     @PreAuthorize(value = "hasRole('PROPIETARIO')")
-    @Operation(summary = "Add a new Dish")
+    @Operation(summary = "Add a new dish")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Dish created", content = @Content),
             @ApiResponse(responseCode = "400", description = "The format in the fields is invalid", content = @Content),
             @ApiResponse(responseCode = "409", description = "There are empty fields", content = @Content)
     })
-    @PostMapping(value = "/create-dish")
+    @PostMapping(value = "dish")
     public ResponseEntity<CreateDishResponseDto> saveDish(@RequestBody CreateDishRequestDto createDishRequestDto) {
         CreateDishResponseDto responseDto = ownerRestaurantService.saveDish(createDishRequestDto);
         return new ResponseEntity<>(responseDto,HttpStatus.CREATED);
     }
 
-    @Operation(summary = "update dish price and description")
+    @Operation(summary = "Update dish price and description")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Price and description update", content = @Content),
             @ApiResponse(responseCode = "401", description = "The format in the fields is invalid", content = @Content),
             @ApiResponse(responseCode = "403", description = "no access allowed", content = @Content)
     })
-    @PatchMapping(value = "/update-dish")
+    @PatchMapping(value = "dish/update")
     @PreAuthorize(value = "hasRole('PROPIETARIO')")
     public ResponseEntity<UpdateDishResponseDto> updateDishPriceAndDescription(@RequestBody UpdateDishRequestDto updateDishRequestDto) {
         UpdateDishResponseDto dishResponseDto = ownerRestaurantService.updateDish(updateDishRequestDto);
         return new ResponseEntity<>(dishResponseDto,HttpStatus.OK);
     }
   
-    @Operation(summary = "Add a new User employee in a restaurant")
+    @Operation(summary = "Add a new user employee in a restaurant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "restaurant employee created"),
             @ApiResponse(responseCode = "403", description = "The user does not have the owner role"),
             @ApiResponse(responseCode = "404", description = "The restaurant not found")
     })
     @PreAuthorize(value = "hasRole('PROPIETARIO')")
-    @PostMapping(value = "/add-employee-restaurant")
+    @PostMapping(value = "restaurant/employee")
     public ResponseEntity<RestaurantEmployeeResponseDto> saveUserEmployeeInARestaurant(@RequestBody RestaurantEmployeeRequestDto restaurantEmployeeRequestDto,
                                                                                        @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithBearerPrefix) {
         return new ResponseEntity<>(this.ownerRestaurantService.saveUserEmployeeInTheRestaurant(restaurantEmployeeRequestDto, tokenWithBearerPrefix), HttpStatus.CREATED);
@@ -74,9 +74,12 @@ public class OwnerRestaurantController {
             @ApiResponse(responseCode = "404", description = "The restaurant not exist", content = @Content),
             @ApiResponse(responseCode = "404", description = "The dish does not exist", content = @Content)
     })
-    @PatchMapping(value = "/dish-update-status")
+    @PatchMapping(value = "restaurant/{idRestaurant}/dish/{idDish}/update/status")
     @PreAuthorize(value = "hasRole('PROPIETARIO')")
-    public ResponseEntity<DishStatusResponseDto> enableOrDisableDishByFieldStatus(@RequestBody DishUpdateStatusRequestDto updateDishStatusRequest, @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithBearerPrefix) {
+    public ResponseEntity<DishStatusResponseDto> enableOrDisableDishByFieldStatus(@RequestParam(name = "active") boolean active,
+                                                                                  @PathVariable(name = "idRestaurant") Long idRestaurant,
+                                                                                  @PathVariable(name = "idDish") Long idDish,
+                                                                                  @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithBearerPrefix) {
         return new ResponseEntity<>(this.ownerRestaurantService.enableOrDisableDishByFieldStatus(updateDishStatusRequest, tokenWithBearerPrefix),HttpStatus.OK);
     }
 }
