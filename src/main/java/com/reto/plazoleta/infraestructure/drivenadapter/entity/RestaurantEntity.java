@@ -1,28 +1,38 @@
 package com.reto.plazoleta.infraestructure.drivenadapter.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "restaurant")
-@Data
+@Table(name = "restaurantes")
+@Getter
+@Setter
 public class RestaurantEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idRestaurant;
-    @Column
+    @Column(name = "nombre")
     private String name;
-    @Column
+    @Column(name = "direccion")
     private String address;
-    @Column
+    @Column(name = "telefono")
     private String phone;
-    @Column
+    @Column(name = "urlLogo")
     private String urlLogo;
-    @Column
+    @Column(name = "nit")
     private Long  nit;
-    @Column
+    @Column(name = "id_propietario")
     private Long idOwner;
 }

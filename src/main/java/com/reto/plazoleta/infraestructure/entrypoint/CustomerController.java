@@ -37,12 +37,11 @@ public class CustomerController {
     })
     @PreAuthorize(value = "hasRole('CLIENTE')")
     @GetMapping(value = "restaurants")
-    public ResponseEntity<Page<RestaurantResponsePageableDto>> getAllRestaurantsByOrderByNameAsc(
-            @Parameter(
-                    description = "Number of restaurant items by page",
-                    schema = @Schema(implementation = Integer.class))
-            @RequestParam(name = "sizeItemsByPages", required = true, defaultValue = "5") Integer sizeItemsByPages) {
-        int numberPage = 0;
+    public ResponseEntity<Page<RestaurantResponsePageableDto>> getAllRestaurantsOrderByNameAsc(
+            @Parameter( description = "Number of restaurant items by page", schema = @Schema(implementation = Integer.class))
+            @RequestParam(name = "sizePage", defaultValue = "5") Integer sizeItemsByPages,
+            @Parameter( description = "Page number in the pagination of the restaurants", schema = @Schema(implementation = Integer.class))
+            @RequestParam(name = "numberPage", defaultValue = "0") Integer numberPage) {
         return ResponseEntity.ok(customerService.getAllRestaurantsByOrderByNameAsc(numberPage, sizeItemsByPages));
     }
 
@@ -57,8 +56,7 @@ public class CustomerController {
     @PreAuthorize(value = "hasRole('CLIENTE')")
     @PostMapping(value = "order")
     public ResponseEntity<OrderCreatedResponseDto> registerOrderFromCustomer(@Parameter(
-            description = "Object to make an order",
-            required = true,
+            description = "Object to make an order",required = true,
             schema = @Schema(implementation = OrderRequestDto.class))
             @RequestBody OrderRequestDto orderRequestDto, @Parameter(
             description = "The authentication token with Bearer prefix for search the idUserCustomer",

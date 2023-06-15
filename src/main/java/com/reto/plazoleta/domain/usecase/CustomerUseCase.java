@@ -3,7 +3,7 @@ package com.reto.plazoleta.domain.usecase;
 import com.reto.plazoleta.domain.api.ICustomerServicePort;
 import com.reto.plazoleta.domain.exception.CustomerHasAOrderInProcessException;
 import com.reto.plazoleta.domain.exception.DishNotExistsException;
-import com.reto.plazoleta.domain.exception.ObjectNotFoundException;
+import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.model.DishModel;
 import com.reto.plazoleta.domain.model.OrderDishModel;
@@ -16,6 +16,9 @@ import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
 import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.domain.exception.NoDataFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -40,6 +43,14 @@ public class CustomerUseCase implements ICustomerServicePort {
         this.userGateway = userGateway;
         this.jwtProvider = jwtProvider;
         this.orderDishPersistencePort = orderDishPersistencePort;
+    }
+
+    @Override
+    public Page<RestaurantModel> findAllByOrderByNameAsc(Integer numberPage, Integer sizeItems) {
+        Page<RestaurantModel> resultRestaurantsPageable = this.restaurantPersistencePort
+                                            .findAllByOrderByNameAsc(PageRequest.of(numberPage, sizeItems));
+        if (resultRestaurantsPageable.isEmpty()) throw new NoDataFoundException();
+        return resultRestaurantsPageable;
     }
 
     @Override
@@ -76,7 +87,7 @@ public class CustomerUseCase implements ICustomerServicePort {
     private void validateRestaurant(Long idRestaurant) {
         final RestaurantModel restaurantFoundModel = this.restaurantPersistencePort.findByIdRestaurant(idRestaurant);
         if (restaurantFoundModel == null)
-            throw new ObjectNotFoundException("The restaurant in the order does not exist");
+            throw new RestaurantNotExistException("The restaurant in the order does not exist");
     }
 
     private void checkStatusFromUserOrdersInARestaurant(Long idRestaurant, Long idUserCustomer) {

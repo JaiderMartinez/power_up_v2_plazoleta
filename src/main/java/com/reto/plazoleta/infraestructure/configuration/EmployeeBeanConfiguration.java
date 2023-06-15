@@ -1,6 +1,6 @@
 package com.reto.plazoleta.infraestructure.configuration;
 
-import com.reto.plazoleta.domain.api.IEmployeeRestaurantServicePort;
+import com.reto.plazoleta.domain.api.IEmployeeServicePort;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.spi.IEmployeeRestaurantPersistencePort;
 import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
@@ -31,7 +31,7 @@ public class EmployeeBeanConfiguration {
     }
 
     @Bean
-    public IEmployeeRestaurantServicePort employeeRestaurantServicePort() {
+    public IEmployeeServicePort employeeRestaurantServicePort() {
         return new EmployeeRestaurantUseCase(employeeRestaurantPersistencePort(), this.restaurantPersistencePort, this.userGateway, this.jwtProvider, this.orderPersistencePort);
     }
 }

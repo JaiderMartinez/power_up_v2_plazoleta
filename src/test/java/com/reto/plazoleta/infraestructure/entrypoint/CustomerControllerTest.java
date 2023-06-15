@@ -96,7 +96,7 @@ class CustomerControllerTest {
     private static final String ROLE_ADMIN = "ADMINISTRADOR";
     private static final String ROLE_CUSTOMER = "CLIENTE";
     private static final String RESTAURANT_API_PATH = "/micro-small-square/restaurants";
-    private static final String PAGE_SIZE_PARAM = "sizeItemsByPages";
+    private static final String PAGE_SIZE_PARAM = "sizePage";
     private static final String REGISTER_ORDER_API_PATH = "/micro-small-square/order";
     private static final String TOKE_WITH_PREFIX_BEARER = "Bearer + token";
     private static final String NAME_OF_THE_ENTITY_ORDER = "pedidos";
@@ -132,7 +132,7 @@ class CustomerControllerTest {
 
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_getAllRestaurantsByOrderByNameAsc_withIntAsSizeItemsByPages_ShouldResponseAListOfNameAndUrlLogoOfRestaurantsPageableByPageSizeOrderByNameAsc() throws Exception {
+    void test_getAllRestaurantsOrderByNameAsc_withIntAsSizeItemsByPages_ShouldResponseAListOfNameAndUrlLogoOfRestaurantsPageableByPageSizeOrderByNameAsc() throws Exception {
         mockMvc.perform(get(RESTAURANT_API_PATH)
                         .param(PAGE_SIZE_PARAM, "10")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -157,7 +157,7 @@ class CustomerControllerTest {
 
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_getAllRestaurantsByOrderByNameAsc_withPageSizeOneAndTwoRestaurantsInDatabase_ShouldReturnSuccessAndTwoTotalPagesAndARestaurant() throws Exception {
+    void test_getAllRestaurantsOrderByNameAsc_withPageSizeOneAndTwoRestaurantsInDatabase_ShouldReturnSuccessAndTwoTotalPagesAndARestaurant() throws Exception {
         mockMvc.perform(get(RESTAURANT_API_PATH)
                         .param(PAGE_SIZE_PARAM, "1")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -172,7 +172,7 @@ class CustomerControllerTest {
     @Transactional
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_getAllRestaurantsByOrderByNameAsc_withPageSizeOneAndNotDataFound_ShouldThrowAStatusNoContent() throws Exception {
+    void test_getAllRestaurantsOrderByNameAsc_withPageSizeOneAndNotDataFound_ShouldThrowAStatusNoContent() throws Exception {
         this.orderRepository.deleteAll();
         this.orderDishRepository.deleteAll();
         this.dishRepository.deleteAll();
@@ -185,7 +185,7 @@ class CustomerControllerTest {
 
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_getAllRestaurantsByOrderByNameAsc_withNullPageSizeAndByDefaultTheValueIsFive_ShouldReturnMaximumFivePaginatedRestaurants() throws Exception {
+    void test_getAllRestaurantsOrderByNameAsc_withNullPageSizeAndByDefaultTheValueIsFive_ShouldReturnMaximumFivePaginatedRestaurants() throws Exception {
         mockMvc.perform(get(RESTAURANT_API_PATH)
                         .param(PAGE_SIZE_PARAM, "")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -252,7 +252,7 @@ class CustomerControllerTest {
                         .content(this.objectMapper.writeValueAsString(createOrderRequest))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(ExceptionResponse.OBJECT_NOT_FOUND.getMessage()));
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.RESTAURANT_NOT_EXIST.getMessage()));
     }
 
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})

@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-public interface IEmployeeRestaurantServicePort {
+public interface IEmployeeServicePort {
 
     EmployeeRestaurantModel saveEmployeeRestaurant(EmployeeRestaurantModel employeeRestaurantModel, String tokenWithBearerPrefix);
 

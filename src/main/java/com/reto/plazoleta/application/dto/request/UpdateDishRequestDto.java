@@ -14,5 +14,5 @@ public class UpdateDishRequestDto {
     private Long idDish;
     private Long idRestaurant;
     private Double price;
-    private String descriptionDish;
+    private String description;
 }

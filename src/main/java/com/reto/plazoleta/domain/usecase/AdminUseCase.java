@@ -1,23 +1,20 @@
 package com.reto.plazoleta.domain.usecase;
 
-import com.reto.plazoleta.domain.api.IRestaurantServicePort;
+import com.reto.plazoleta.domain.api.IAdminServicePort;
 import com.reto.plazoleta.domain.exception.EmptyFieldsException;
 import com.reto.plazoleta.domain.exception.InvalidDataException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.model.RestaurantModel;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
-import com.reto.plazoleta.infraestructure.exception.NoDataFoundException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 
-public class RestaurantUseCase implements IRestaurantServicePort {
+public class AdminUseCase implements IAdminServicePort {
 
     private final IRestaurantPersistencePort restaurantPersistencePort;
     private final IUserGateway userGateway;
 
-    public RestaurantUseCase(IRestaurantPersistencePort restaurantPersistencePort, IUserGateway userGateway) {
+    public AdminUseCase(IRestaurantPersistencePort restaurantPersistencePort, IUserGateway userGateway) {
         this.restaurantPersistencePort = restaurantPersistencePort;
         this.userGateway = userGateway;
     }
@@ -45,8 +42,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
             throw new EmptyFieldsException("The field must not be empty");
         }
     }
-
-
+    
     private void validateRestaurantPhone(String phoneRestaurant) {
         String phoneRestaurantNoSpaces = phoneRestaurant.replace(" ", "");
         if(phoneRestaurantNoSpaces.startsWith("+")){
@@ -64,13 +60,4 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     private boolean isContainsRestaurantNameOnlyNumbers(String nameRestaurant) {
         return nameRestaurant.matches("\\d+");
     }
-
-    @Override
-    public Page<RestaurantModel> findAllByOrderByNameAsc(int numberPage, int sizeItems) {
-        Page<RestaurantModel> resultRestaurantsPageable = restaurantPersistencePort.findAllByOrderByNameAsc(
-                                                                PageRequest.of(numberPage, sizeItems));
-        if (resultRestaurantsPageable.isEmpty()) throw new NoDataFoundException();
-        return resultRestaurantsPageable;
-    }
-
 }

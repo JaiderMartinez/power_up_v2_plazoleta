@@ -9,13 +9,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateDishRequestDto {
+public class DishCreateRequestDto {
 
     private String name;
     private Double price;
-    private String descriptionDish;
-    private String imageDish;
+    private String description;
+    private String urlImageDish;
     private Long idCategory;
     private Long idRestaurant;
-
 }

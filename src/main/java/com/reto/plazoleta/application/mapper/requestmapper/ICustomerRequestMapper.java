@@ -12,9 +12,9 @@ import org.mapstruct.ReportingPolicy;
 public interface ICustomerRequestMapper {
 
     @Mapping(target = "restaurantModel.idRestaurant", source = "idRestaurant")
-    OrderModel toOrderModel(OrderRequestDto createOrderRequestDto);
+    OrderModel orderRequestDtoToOrderModel(OrderRequestDto orderRequestDto);
 
     @Mapping(target = "dishModel.idDish", source = "idDish")
     @Mapping(target = "dishModel.name", source = "name")
-    OrderDishModel toOrderDishModel(DishFromOrderRequestDto dishFromOrderAndAmountRequestDto);
+    OrderDishModel dishFromOrderRequestDtoToOrderDishModel(DishFromOrderRequestDto dishFromOrderRequestDto);
 }

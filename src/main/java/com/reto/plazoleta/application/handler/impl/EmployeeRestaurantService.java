@@ -5,7 +5,7 @@ import com.reto.plazoleta.application.dto.response.OrdersPaginatedResponseDto;
 import com.reto.plazoleta.application.handler.IEmployeeRestaurantService;
 import com.reto.plazoleta.application.mapper.responsemapper.ICustomerResponseMapper;
 import com.reto.plazoleta.application.mapper.responsemapper.IEmployeeResponseMapper;
-import com.reto.plazoleta.domain.api.IEmployeeRestaurantServicePort;
+import com.reto.plazoleta.domain.api.IEmployeeServicePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EmployeeRestaurantService implements IEmployeeRestaurantService {
 
-    private final IEmployeeRestaurantServicePort employeeRestaurantServicePort;
+    private final IEmployeeServicePort employeeRestaurantServicePort;
     private final ICustomerResponseMapper customerResponseMapper;
     private final IEmployeeResponseMapper employeeResponseMapper;
 

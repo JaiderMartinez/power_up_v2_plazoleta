@@ -39,7 +39,7 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "The Restaurant not exist")
     })
     @PreAuthorize(value = "hasRole('EMPLEADO')")
-    @GetMapping(value = "orders")
+    @GetMapping(value = "filters-orders")
     public ResponseEntity<Page<OrdersPaginatedResponseDto>> getAllOrdersFilterByStatus(
             @Parameter( description = "Number of orders by page", schema = @Schema(implementation = Integer.class))
             @RequestParam(name = "sizeItems", defaultValue = "10") Integer sizeItems,

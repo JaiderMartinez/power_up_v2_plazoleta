@@ -1,7 +1,7 @@
 package com.reto.plazoleta.domain.usecase;
 
-import com.reto.plazoleta.domain.api.IEmployeeRestaurantServicePort;
-import com.reto.plazoleta.domain.exception.ObjectNotFoundException;
+import com.reto.plazoleta.domain.api.IEmployeeServicePort;
+import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
 import com.reto.plazoleta.domain.exception.OrderInProcessException;
 import com.reto.plazoleta.domain.exception.OrderNotExistsException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
@@ -14,14 +14,14 @@ import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
 import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
-import com.reto.plazoleta.infraestructure.exception.NoDataFoundException;
+import com.reto.plazoleta.domain.exception.NoDataFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EmployeeRestaurantUseCase implements IEmployeeRestaurantServicePort {
+public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
 
     private final IEmployeeRestaurantPersistencePort employeeRestaurantPersistencePort;
     private final IRestaurantPersistencePort restaurantPersistencePort;
@@ -44,7 +44,7 @@ public class EmployeeRestaurantUseCase implements IEmployeeRestaurantServicePort
         User userOwnerFound = userGateway.getUserByEmailInTheToken(emailFromUserOwnerOfARestaurant, tokenWithBearerPrefix);
         final RestaurantModel restaurantFoundModelByIdRestaurant = this.restaurantPersistencePort.findByIdRestaurant(employeeRestaurantModel.getIdRestaurant());
         if(restaurantFoundModelByIdRestaurant == null || !restaurantFoundModelByIdRestaurant.getIdOwner().equals(userOwnerFound.getIdUser())) {
-            throw new ObjectNotFoundException("Restaurant not Exist");
+            throw new RestaurantNotExistException("Restaurant not Exist");
         }
         employeeRestaurantModel.setIdRestaurant(restaurantFoundModelByIdRestaurant.getIdRestaurant());
         return this.employeeRestaurantPersistencePort.saveEmployeeRestaurant(employeeRestaurantModel);
@@ -71,7 +71,7 @@ public class EmployeeRestaurantUseCase implements IEmployeeRestaurantServicePort
         EmployeeRestaurantModel restaurantFromEmployeeFound = this.employeeRestaurantPersistencePort.findByIdUserEmployee(idUserEmployee);
         RestaurantModel restaurantModel = this.restaurantPersistencePort.findByIdRestaurant(restaurantFromEmployeeFound.getIdRestaurant());
         if (restaurantModel == null)
-            throw new ObjectNotFoundException("Restaurant not Exist");
+            throw new RestaurantNotExistException("Restaurant not Exist");
         return restaurantFromEmployeeFound;
     }
 

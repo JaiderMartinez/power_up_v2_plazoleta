@@ -1,4 +1,4 @@
-package com.reto.plazoleta.infraestructure.exception;
+package com.reto.plazoleta.domain.exception;
 
 public class NoDataFoundException extends RuntimeException {
     public NoDataFoundException() {

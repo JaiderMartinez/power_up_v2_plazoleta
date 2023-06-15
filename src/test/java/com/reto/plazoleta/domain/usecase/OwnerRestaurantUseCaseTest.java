@@ -2,6 +2,7 @@ package com.reto.plazoleta.domain.usecase;
 
 import com.reto.plazoleta.domain.exception.DishNotExistsException;
 import com.reto.plazoleta.domain.exception.InvalidDataException;
+import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
 import com.reto.plazoleta.domain.model.CategoryModel;
 import com.reto.plazoleta.domain.model.DishModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;
@@ -57,14 +58,14 @@ class OwnerRestaurantUseCaseTest {
         assertEquals(dishModel.getName(), savedDish.getName());
         assertEquals(dishModel.getIdDish(), savedDish.getIdDish());
         assertEquals(dishModel.getPrice(), savedDish.getPrice());
-        assertEquals(dishModel.getDescriptionDish(), savedDish.getDescriptionDish());
-        assertTrue(savedDish.getStateDish());
+        assertEquals(dishModel.getDescription(), savedDish.getDescription());
+        assertTrue(savedDish.getState());
         assertEquals(restaurantModel, savedDish.getRestaurantModel());
         assertEquals(categoryModel, savedDish.getCategoryModel());
     }
 
     @Test
-    void test_saveDish_withRequestIdRestaurantNotExists_ShouldThrowInvalidDataException() {
+    void test_saveDish_withRequestIdRestaurantNotExists_ShouldThrowRestaurantNotExistException() {
         //Given
         RestaurantModel restaurantModel = new RestaurantModel(2L, "sal", "bellavista",
                 "+123456779", "urlLogo", 1L, 12344L);
@@ -72,7 +73,7 @@ class OwnerRestaurantUseCaseTest {
         DishModel dishModel = new DishModel(2L, "cuscu", "salsa", 12.00,
                 "urlImagen", true, restaurantModel, categoryModel);
         // When
-        InvalidDataException exception = assertThrows(InvalidDataException.class, () -> ownerRestaurantUseCase.saveDish(dishModel));
+        RestaurantNotExistException exception = assertThrows(RestaurantNotExistException.class, () -> ownerRestaurantUseCase.saveDish(dishModel));
         //Then
         assertEquals("The restaurant does not exist", exception.getMessage());
     }
@@ -117,16 +118,16 @@ class OwnerRestaurantUseCaseTest {
 
         when(dishPersistencePort.findById(existingDish.getIdDish())).thenReturn(existingDish);
         when(restaurantPersistencePort.findByIdRestaurant(restaurantModel.getIdRestaurant())).thenReturn(restaurantModel);
-        when(dishPersistencePort.updateDish(existingDish)).thenReturn(updatedDishModel);
+        when(dishPersistencePort.saveDish(existingDish)).thenReturn(updatedDishModel);
 
         // When
         DishModel result = ownerRestaurantUseCase.updateDish(existingDish);
 
         // Then
         assertEquals(updatedDishModel, result);
-        assertEquals("New Description", result.getDescriptionDish());
+        assertEquals("New Description", result.getDescription());
         assertEquals(15.0, result.getPrice(), 0.0);
-        verify(dishPersistencePort, times(1)).updateDish(existingDish);
+        verify(dishPersistencePort, times(1)).saveDish(existingDish);
     }
 
     @Test
@@ -135,7 +136,7 @@ class OwnerRestaurantUseCaseTest {
         DishModel dish = new DishModel();
 
         dish.setIdDish(4L);
-        dish.setDescriptionDish("Non-existing Description");
+        dish.setDescription("Non-existing Description");
         dish.setPrice(0.0);
 
         when(dishPersistencePort.findById(4L)).thenReturn(null);
@@ -154,7 +155,7 @@ class OwnerRestaurantUseCaseTest {
         DishModel dishRequest = new DishModel();
         dishRequest.setIdDish(1L);
         dishRequest.setPrice(15000.0);
-        dishRequest.setDescriptionDish("new description");
+        dishRequest.setDescription("new description");
         dishRequest.setRestaurantModel(restaurantOwnerDish);
 
         RestaurantModel restaurantInvalid = new RestaurantModel(2L, "OtherRestaurant", "OtherAddress", "123456789", "logoUrl", 2L, 12345L);
