@@ -3,6 +3,8 @@ package com.reto.plazoleta.domain.usecase;
 import com.reto.plazoleta.domain.api.ICustomerServicePort;
 import com.reto.plazoleta.domain.exception.CustomerHasAOrderInProcessException;
 import com.reto.plazoleta.domain.exception.DishNotExistsException;
+import com.reto.plazoleta.domain.exception.OrderInProcessException;
+import com.reto.plazoleta.domain.exception.OrderNotExistsException;
 import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.model.DishModel;
@@ -114,5 +116,25 @@ public class CustomerUseCase implements ICustomerServicePort {
             }
         }
         return ordersDishesModelToSave;
+    }
+
+    @Override
+    public OrderModel cancelOrder(Long idOrder, String tokenWithPrefixBearer) {
+        String emailFromUserAuthenticated = getEmailFromUserAuthenticatedByTokenWithPrefixBearer(tokenWithPrefixBearer);
+        final User userCustomerAuthenticated = getUserByEmail(emailFromUserAuthenticated, tokenWithPrefixBearer);
+        OrderModel orderModelToChangeStatusToCanceled = this.orderPersistencePort.findByIdOrder(idOrder);
+        validateStatusFromOrderAndIfBelongTheUserAuthenticated(orderModelToChangeStatusToCanceled, userCustomerAuthenticated.getIdUser());
+        orderModelToChangeStatusToCanceled.setStatus(StatusOrder.CANCELADO);
+        return this.orderPersistencePort.saveOrder(orderModelToChangeStatusToCanceled);
+    }
+
+    private void validateStatusFromOrderAndIfBelongTheUserAuthenticated(OrderModel orderModelToValidate, Long idUserAuthenticated) {
+        if (orderModelToValidate == null) {
+            throw new OrderNotExistsException("The order not exist");
+        } else if (!orderModelToValidate.getIdUserCustomer().equals(idUserAuthenticated)) {
+            throw new OrderNotExistsException("The order does not belong to the user");
+        } else if (!orderModelToValidate.getStatus().equals(StatusOrder.PENDIENTE)) {
+            throw new OrderInProcessException("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse");
+        }
     }
 }

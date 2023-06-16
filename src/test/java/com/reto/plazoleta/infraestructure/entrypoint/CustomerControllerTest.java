@@ -277,6 +277,7 @@ class CustomerControllerTest {
     }
 
     @Transactional
+    @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
     void test_cancelOrder_withValidPinAndCorrectToken_shouldReturnOkStatusAndIdOrderFromOrder() throws Exception {
         User userAuthenticatedByToken = new User();
@@ -288,12 +289,13 @@ class CustomerControllerTest {
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
         when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
 
-        this.mockMvc.perform(patch(RESTAURANT_API_PATH + "/pin/" + pinValid)
+        this.mockMvc.perform(patch(REGISTER_ORDER_API_PATH + "/pin/" + pinValid)
                 .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.idOrder").value(pinValid));
     }
 
+    @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
     void test_cancelOrder_withIncorrectPinBecauseOrderDoesNotExistAndCorrectToken_shouldReturnNotFoundStatus() throws Exception {
         User userAuthenticatedByToken = new User();
@@ -302,37 +304,39 @@ class CustomerControllerTest {
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
         when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
 
-        this.mockMvc.perform(patch(RESTAURANT_API_PATH + "/pin/" + pinInvalid)
+        this.mockMvc.perform(patch(REGISTER_ORDER_API_PATH + "/pin/" + pinInvalid)
                         .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.ORDER_NOT_FOUND.getMessage()));
     }
 
+    @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_cancelOrder_withValidPinButOrderStatusOtherThanPendingAndCorrectToken_shouldReturnBadRequestStatus() throws Exception {
+    void test_cancelOrder_withValidPinButOrderStatusOtherThanPendingAndCorrectToken_shouldReturnConflictStatus() throws Exception {
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
-        long pinInvalidItsStatusIsInPreparation = 2000000L;
+        long pinInvalidItsStatusIsInPreparation = 1L;
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
         when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
 
-        this.mockMvc.perform(patch(RESTAURANT_API_PATH + "/pin/" + pinInvalidItsStatusIsInPreparation)
+        this.mockMvc.perform(patch(REGISTER_ORDER_API_PATH + "/pin/" + pinInvalidItsStatusIsInPreparation)
                         .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse"));
     }
 
+    @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_cancelOrder_withValidPinButTheOrderNotOwnedByUserAndCorrectToken_shouldReturnBadRequestStatus() throws Exception {
+    void test_cancelOrder_withValidPinButTheOrderNotOwnedByUserAndCorrectToken_shouldReturnNotFoundStatus() throws Exception {
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(2L);
         long pinInvalidOrderDoesNotBelongToUser = 1;
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
         when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
 
-        this.mockMvc.perform(patch(RESTAURANT_API_PATH + "/pin/" + pinInvalidOrderDoesNotBelongToUser)
+        this.mockMvc.perform(patch(REGISTER_ORDER_API_PATH + "/pin/" + pinInvalidOrderDoesNotBelongToUser)
                         .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.ORDER_NOT_FOUND.getMessage()));
     }
 }

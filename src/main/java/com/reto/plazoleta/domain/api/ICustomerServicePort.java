@@ -9,4 +9,6 @@ public interface ICustomerServicePort {
     Page<RestaurantModel> findAllByOrderByNameAsc(Integer numberPage, Integer sizeItems);
 
     OrderModel saveOrder(OrderModel orderModelRequest, String tokenWithPrefixBearer);
+
+    OrderModel cancelOrder(Long idOrder, String tokenWithPrefixBearer);
 }

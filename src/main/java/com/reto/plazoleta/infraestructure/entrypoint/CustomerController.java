@@ -1,6 +1,7 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
 import com.reto.plazoleta.application.dto.request.OrderRequestDto;
+import com.reto.plazoleta.application.dto.response.OrderCanceledResponseDto;
 import com.reto.plazoleta.application.dto.response.OrderCreatedResponseDto;
 import com.reto.plazoleta.application.dto.response.RestaurantResponsePageableDto;
 import com.reto.plazoleta.application.handler.ICustomerService;
@@ -16,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -64,5 +67,26 @@ public class CustomerController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithBearerPrefix) {
         final OrderCreatedResponseDto orderRegistered = this.customerService.saveOrder(orderRequestDto, tokenWithBearerPrefix);
         return new ResponseEntity<>(orderRegistered, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "cancel order in pending status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Order canceled"),
+            @ApiResponse(responseCode = "403", description = "Role other than customer"),
+            @ApiResponse(responseCode = "404", description = "The order not exist"),
+            @ApiResponse(responseCode = "404", description = "The order does not belong to the user"),
+            @ApiResponse(responseCode = "409", description = "The order is in a status other than pending")
+    })
+    @PreAuthorize(value = "hasRole('CLIENTE')")
+    @PatchMapping(value = "order/pin/{idOrder}")
+    public ResponseEntity<OrderCanceledResponseDto> cancelOrder(@Parameter(
+            description = "Pin as idOrder sent to client in a message", required = true,
+            schema = @Schema(implementation = Long.class))
+            @PathVariable(name = "idOrder") Long idOrder, @Parameter(
+            description = "The authentication token with Bearer prefix for search the user customer by id",
+            required = true, schema = @Schema(type = "String", format = "jwt"))
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithBearerPrefix) {
+        final OrderCanceledResponseDto orderCanceled = this.customerService.cancelOrder(idOrder, tokenWithBearerPrefix);
+        return new ResponseEntity<>(orderCanceled, HttpStatus.OK);
     }
 }
