@@ -39,8 +39,8 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    public OrderCanceledResponseDto cancelOrder(Long pinOrIdOrder, String tokenWithPrefixBearer) {
-        final OrderModel orderCanceledModel = this.customerServicePort.cancelOrder(pinOrIdOrder, tokenWithPrefixBearer);
+    public OrderCanceledResponseDto cancelOrder(Long idOrder, String tokenWithPrefixBearer) {
+        final OrderModel orderCanceledModel = this.customerServicePort.cancelOrder(idOrder, tokenWithPrefixBearer);
         return this.customerResponseMapper.orderModelToOrderCanceledResponseDto(orderCanceledModel);
     }
 }

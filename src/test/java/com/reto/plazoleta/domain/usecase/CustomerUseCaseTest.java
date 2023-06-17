@@ -2,6 +2,8 @@ package com.reto.plazoleta.domain.usecase;
 
 import com.reto.plazoleta.domain.exception.CustomerHasAOrderInProcessException;
 import com.reto.plazoleta.domain.exception.DishNotExistsException;
+import com.reto.plazoleta.domain.exception.OrderInProcessException;
+import com.reto.plazoleta.domain.exception.OrderNotExistsException;
 import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.model.CategoryModel;
@@ -246,5 +248,82 @@ class CustomerUseCaseTest {
         verify(this.orderPersistencePort, times(1)).saveOrder(orderModelRequest);
         verify(this.dishPersistencePort, times(1)).findById(dishModelRequest.getIdDish());
         assertEquals("The dish does not exist", messageException.getMessage());
+    }
+
+    @Test
+    void test_cancelOrder_withValidIdOrderAndTokenCorrect_shouldReturnTheOrderUpdatedStatusToCanceled() {
+        //Given
+        User userAuthenticatedByToken = new User();
+        userAuthenticatedByToken.setIdUser(1L);
+        RestaurantModel restaurantModelFromOrder = new RestaurantModel();
+        restaurantModelFromOrder.setIdRestaurant(1L);
+        OrderModel orderModelExpected = new OrderModel(1L, 1L, LocalDate.now(), StatusOrder.CANCELADO, null, restaurantModelFromOrder);
+        OrderModel orderModelToUpdate = new OrderModel(1L, 1L, LocalDate.now(), StatusOrder.PENDIENTE, null, restaurantModelFromOrder);
+        when(this.jwtProvider.getAuthentication("+ Token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
+        when(this.orderPersistencePort.findByIdOrder(1L)).thenReturn(orderModelToUpdate);
+        when(this.orderPersistencePort.saveOrder(orderModelToUpdate)).thenReturn(orderModelExpected);
+        //When
+        OrderModel orderCanceledResult = this.customerUseCase.cancelOrder(1L, TOKEN_WITH_PREFIX_BEARER);
+        //Then
+        assertEquals(orderModelExpected.getIdOrder(), orderCanceledResult.getIdOrder());
+        assertEquals(orderModelExpected.getStatus(), orderCanceledResult.getStatus());
+        assertEquals(orderModelExpected.getDate(), orderCanceledResult.getDate());
+        assertEquals(orderModelExpected.getRestaurantModel().getIdRestaurant(), orderCanceledResult.getRestaurantModel().getIdRestaurant());
+        assertEquals(orderModelExpected.getIdUserCustomer(), orderCanceledResult.getIdUserCustomer());
+    }
+
+    @Test
+    void test_cancelOrder_withRequestIdOrderInvalidBecauseNotExistTheOrderAndTokenCorrect_shouldThrowOrderNotExistsException() {
+        //Given
+        User userAuthenticatedByToken = new User();
+        userAuthenticatedByToken.setIdUser(1L);
+        when(this.jwtProvider.getAuthentication("+ Token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
+        when(this.orderPersistencePort.findByIdOrder(1L)).thenReturn(null);
+        //When
+        OrderNotExistsException messageException = assertThrows(
+                OrderNotExistsException.class,
+                () ->  this.customerUseCase.cancelOrder(1L, TOKEN_WITH_PREFIX_BEARER));
+        //Then
+        assertEquals("The order not exist", messageException.getMessage());
+    }
+
+    @Test
+    void test_cancelOrder_withRequestIdOrderInvalidButTheOrderDoesNotBelongToUserAndTokenCorrect_shouldThrowOrderNotExistsException() {
+        //Given
+        User userAuthenticatedByTokenButNeverPlacedAnOrder = new User();
+        userAuthenticatedByTokenButNeverPlacedAnOrder.setIdUser(2L);
+        RestaurantModel restaurantModelFromOrder = new RestaurantModel();
+        restaurantModelFromOrder.setIdRestaurant(1L);
+        OrderModel orderModelToUpdate = new OrderModel(1L, 1L, LocalDate.now(), StatusOrder.PENDIENTE, null, restaurantModelFromOrder);
+        when(this.jwtProvider.getAuthentication("+ Token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByTokenButNeverPlacedAnOrder);
+        when(this.orderPersistencePort.findByIdOrder(1L)).thenReturn(orderModelToUpdate);
+        //When
+        OrderNotExistsException messageException = assertThrows(
+                OrderNotExistsException.class,
+                () ->  this.customerUseCase.cancelOrder(1L, TOKEN_WITH_PREFIX_BEARER));
+        //Then
+        assertEquals("The order does not belong to the user", messageException.getMessage());
+    }
+
+    @Test
+    void test_cancelOrder_withRequestIdOrderValidButTheStatusFromOrderIsDifferentFromPending_shouldThrowOrderInProcessException() {
+        //Given
+        User userAuthenticatedByToken = new User();
+        userAuthenticatedByToken.setIdUser(1L);
+        RestaurantModel restaurantModelFromOrder = new RestaurantModel();
+        restaurantModelFromOrder.setIdRestaurant(1L);
+        OrderModel orderModelToUpdate = new OrderModel(1L, 1L, LocalDate.now(), StatusOrder.LISTO, null, restaurantModelFromOrder);
+        when(this.jwtProvider.getAuthentication("+ Token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
+        when(this.orderPersistencePort.findByIdOrder(1L)).thenReturn(orderModelToUpdate);
+        //When
+        OrderInProcessException messageException = assertThrows(
+                OrderInProcessException.class,
+                () ->  this.customerUseCase.cancelOrder(1L, TOKEN_WITH_PREFIX_BEARER));
+        //Then
+        assertEquals("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse", messageException.getMessage());
     }
 }

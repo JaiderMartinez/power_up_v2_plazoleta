@@ -102,7 +102,10 @@ class CustomerControllerTest {
     private static final String TOKE_WITH_PREFIX_BEARER = "Bearer + token";
     private static final String NAME_OF_THE_ENTITY_ORDER = "pedidos";
     private static final String NAME_OF_THE_COLUM_PRIMARY_KEY_OF_ORDER_ENTITY = "id_pedido";
+    private static final String CANCEL_ORDER_API_PATH = "/micro-small-square/order/cancel/";
 
+    CustomerControllerTest() {
+    }
 
     @BeforeAll
     void initializeTestEnvironment() {
@@ -279,32 +282,32 @@ class CustomerControllerTest {
     @Transactional
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_cancelOrder_withValidPinAndCorrectToken_shouldReturnOkStatusAndIdOrderFromOrder() throws Exception {
+    void test_cancelOrder_withValidIdOrderAndCorrectToken_shouldReturnOkStatusAndIdOrderFromOrder() throws Exception {
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
         RestaurantEntity restaurantEntityFromOrder = new RestaurantEntity();
         restaurantEntityFromOrder.setIdRestaurant(1L);
         this.orderRepository.save(new OrderEntity(2L, userAuthenticatedByToken.getIdUser(), LocalDate.now(), StatusOrder.PENDIENTE, null, restaurantEntityFromOrder, null));
-        long pinValid = 2L;
+        long idOrderValid = 2L;
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
         when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
 
-        this.mockMvc.perform(patch(REGISTER_ORDER_API_PATH + "/pin/" + pinValid)
+        this.mockMvc.perform(patch(CANCEL_ORDER_API_PATH + idOrderValid)
                 .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.idOrder").value(pinValid));
+                .andExpect(jsonPath("$.idOrder").value(idOrderValid));
     }
 
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_cancelOrder_withIncorrectPinBecauseOrderDoesNotExistAndCorrectToken_shouldReturnNotFoundStatus() throws Exception {
+    void test_cancelOrder_withIncorrectIdOrderBecauseOrderDoesNotExistAndCorrectToken_shouldReturnNotFoundStatus() throws Exception {
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
-        long pinInvalid = 2000000L;
+        long idOrderInvalid = 2000000L;
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
         when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
 
-        this.mockMvc.perform(patch(REGISTER_ORDER_API_PATH + "/pin/" + pinInvalid)
+        this.mockMvc.perform(patch(CANCEL_ORDER_API_PATH + idOrderInvalid)
                         .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.ORDER_NOT_FOUND.getMessage()));
@@ -312,14 +315,14 @@ class CustomerControllerTest {
 
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_cancelOrder_withValidPinButOrderStatusOtherThanPendingAndCorrectToken_shouldReturnConflictStatus() throws Exception {
+    void test_cancelOrder_withValidIdOrderButOrderStatusOtherThanPendingAndCorrectToken_shouldReturnConflictStatus() throws Exception {
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
-        long pinInvalidItsStatusIsInPreparation = 1L;
+        long idOrderInvalidItsStatusIsInPreparation = 1L;
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
         when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
 
-        this.mockMvc.perform(patch(REGISTER_ORDER_API_PATH + "/pin/" + pinInvalidItsStatusIsInPreparation)
+        this.mockMvc.perform(patch(CANCEL_ORDER_API_PATH + idOrderInvalidItsStatusIsInPreparation)
                         .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse"));
@@ -327,14 +330,14 @@ class CustomerControllerTest {
 
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_cancelOrder_withValidPinButTheOrderNotOwnedByUserAndCorrectToken_shouldReturnNotFoundStatus() throws Exception {
+    void test_cancelOrder_withValidIdOrderButTheOrderNotOwnedByUserAndCorrectToken_shouldReturnNotFoundStatus() throws Exception {
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(2L);
-        long pinInvalidOrderDoesNotBelongToUser = 1;
+        long idOrderInvalidOrderDoesNotBelongToUser = 1;
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
         when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
 
-        this.mockMvc.perform(patch(REGISTER_ORDER_API_PATH + "/pin/" + pinInvalidOrderDoesNotBelongToUser)
+        this.mockMvc.perform(patch(CANCEL_ORDER_API_PATH + idOrderInvalidOrderDoesNotBelongToUser)
                         .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.ORDER_NOT_FOUND.getMessage()));

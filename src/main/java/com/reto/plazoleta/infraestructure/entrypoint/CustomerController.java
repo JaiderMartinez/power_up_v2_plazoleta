@@ -78,9 +78,9 @@ public class CustomerController {
             @ApiResponse(responseCode = "409", description = "The order is in a status other than pending")
     })
     @PreAuthorize(value = "hasRole('CLIENTE')")
-    @PatchMapping(value = "order/pin/{idOrder}")
+    @PatchMapping(value = "order/cancel/{idOrder}")
     public ResponseEntity<OrderCanceledResponseDto> cancelOrder(@Parameter(
-            description = "Pin as idOrder sent to client in a message", required = true,
+            description = "IdOrder to cancel the order", required = true,
             schema = @Schema(implementation = Long.class))
             @PathVariable(name = "idOrder") Long idOrder, @Parameter(
             description = "The authentication token with Bearer prefix for search the user customer by id",

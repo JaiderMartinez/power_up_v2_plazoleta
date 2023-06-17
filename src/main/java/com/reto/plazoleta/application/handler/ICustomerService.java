@@ -12,5 +12,5 @@ public interface ICustomerService {
 
     OrderCreatedResponseDto saveOrder(OrderRequestDto createOrderRequestDto, String tokenWithPrefixBearer);
 
-    OrderCanceledResponseDto cancelOrder(Long pinOrIdOrder, String tokenWithPrefixBearer);
+    OrderCanceledResponseDto cancelOrder(Long idOrder, String tokenWithPrefixBearer);
 }
