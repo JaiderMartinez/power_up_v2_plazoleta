@@ -1,6 +1,7 @@
 package com.reto.plazoleta.application.handler.impl;
 
 import com.reto.plazoleta.application.dto.request.OrderRequestDto;
+import com.reto.plazoleta.application.dto.response.OrderCanceledResponseDto;
 import com.reto.plazoleta.application.dto.response.OrderCreatedResponseDto;
 import com.reto.plazoleta.application.dto.response.RestaurantResponsePageableDto;
 import com.reto.plazoleta.application.handler.ICustomerService;
@@ -35,5 +36,11 @@ public class CustomerService implements ICustomerService {
         final List<OrderDishModel> ordersDishesRequest = createOrderRequestDto.getDishes().stream().map(this.customerRequestMapper::dishFromOrderRequestDtoToOrderDishModel).collect(Collectors.toList());
         orderRequestModel.setOrdersDishesModel(ordersDishesRequest);
         return this.customerResponseMapper.toCreateOrderResponseDto(this.customerServicePort.saveOrder(orderRequestModel, tokenWithPrefixBearer));
+    }
+
+    @Override
+    public OrderCanceledResponseDto cancelOrder(Long idOrder, String tokenWithPrefixBearer) {
+        final OrderModel orderCanceledModel = this.customerServicePort.cancelOrder(idOrder, tokenWithPrefixBearer);
+        return this.customerResponseMapper.orderModelToOrderCanceledResponseDto(orderCanceledModel);
     }
 }
