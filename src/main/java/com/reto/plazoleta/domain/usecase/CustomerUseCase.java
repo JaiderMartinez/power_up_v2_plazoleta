@@ -56,6 +56,15 @@ public class CustomerUseCase implements ICustomerServicePort {
     }
 
     @Override
+    public Page<DishModel> getAllDishesActivePaginatedFromARestaurantOrderByCategoryAscending(Integer numberPage, Integer sizeItems, Long idRestaurant) {
+        if (this.restaurantPersistencePort.findByIdRestaurant(idRestaurant) == null) throw new RestaurantNotExistException("Restaurant not found");
+        Page<DishModel> dishesPaginatedAndGroupByCategory = this.dishPersistencePort
+                                            .getAllDishesActiveOfARestaurantOrderByCategoryAscending(PageRequest.of(numberPage, sizeItems), idRestaurant);
+        if (dishesPaginatedAndGroupByCategory.isEmpty()) throw new NoDataFoundException();
+        return dishesPaginatedAndGroupByCategory;
+    }
+
+    @Override
     public OrderModel saveOrder(OrderModel orderModelRequest, String tokenWithPrefixBearer) {
         String emailFromUserAuthenticated = getEmailFromUserAuthenticatedByTokenWithPrefixBearer(tokenWithPrefixBearer);
         final User userCustomerFound = getUserByEmail(emailFromUserAuthenticated, tokenWithPrefixBearer);

@@ -1,6 +1,6 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
-import com.reto.plazoleta.application.dto.response.DishesOfRestaurantPaginatedResponseDto;
+import com.reto.plazoleta.application.dto.response.CategoryFromDishesPaginatedResponseDto;
 import com.reto.plazoleta.application.dto.request.OrderRequestDto;
 import com.reto.plazoleta.application.dto.response.OrderCanceledResponseDto;
 import com.reto.plazoleta.application.dto.response.OrderCreatedResponseDto;
@@ -52,15 +52,14 @@ public class CustomerController {
     @Operation(summary = "get dishes paginated by a number of elements and grouped by category from a restaurant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "list from dishes from a restaurant grouped by category"),
-            @ApiResponse(responseCode = "400", description = "The value of the idRestaurant request param is empty"),
-            @ApiResponse(responseCode = "404", description = "Restaurant not found"),
-            @ApiResponse(responseCode = "404", description = "No data found")
+            @ApiResponse(responseCode = "204", description = "No data found"),
+            @ApiResponse(responseCode = "404", description = "Restaurant not found")
     })
-    @GetMapping(value = "/get-dishes-paginated")
+    @GetMapping(value = "/restaurant/{idRestaurant}/dishes")
     @PreAuthorize(value = "hasRole('CLIENTE')")
-    public ResponseEntity<DishesOfRestaurantPaginatedResponseDto> getDishesFromARestaurantAndGroupedByCategoryPaginated(@RequestParam(name = "size", defaultValue = "5") Integer sizeItems,
-                                                                                                                        @RequestParam(name = "idRestaurant", defaultValue = "0") Long idRestaurant) {
-        return new ResponseEntity<>(null, HttpStatus.OK);
+    public ResponseEntity<Page<CategoryFromDishesPaginatedResponseDto>> getDishesFromARestaurantAndGroupedByCategoryPaginated(@RequestParam(name = "sizePage", defaultValue = "5") Integer sizeItems,
+                                                                        @PathVariable(name = "idRestaurant") Long idRestaurant, @RequestParam(name = "numberPage", defaultValue = "0") Integer numberPage) {
+        return ResponseEntity.ok(this.customerService.getDishesFromARestaurantAndGroupedByCategoryPaginated(numberPage, sizeItems, idRestaurant));
     }
   
     @Operation(summary = "Make an order")

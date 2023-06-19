@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DishesResponseDto {
+public class DishResponseDto {
 
     private Long idDish;
     private String name;

@@ -11,9 +11,9 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DishesOfRestaurantPaginatedResponseDto {
+public class CategoryFromDishesPaginatedResponseDto {
 
     private Long idCategory;
     private String categoryName;
-    private List<DishesResponseDto> dishes;
+    private List<DishResponseDto> dishes;
 }

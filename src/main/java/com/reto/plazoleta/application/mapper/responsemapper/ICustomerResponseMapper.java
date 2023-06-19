@@ -1,15 +1,22 @@
 package com.reto.plazoleta.application.mapper.responsemapper;
 
+import com.reto.plazoleta.application.dto.response.CategoryFromDishesPaginatedResponseDto;
+import com.reto.plazoleta.application.dto.response.DishResponseDto;
 import com.reto.plazoleta.application.dto.response.OrderCanceledResponseDto;
 import com.reto.plazoleta.application.dto.response.OrderCreatedResponseDto;
 import com.reto.plazoleta.application.dto.response.OrdersDishesPaginatedResponseDto;
 import com.reto.plazoleta.application.dto.response.OrdersPaginatedResponseDto;
 import com.reto.plazoleta.application.dto.response.RestaurantResponsePageableDto;
+import com.reto.plazoleta.domain.model.DishModel;
 import com.reto.plazoleta.domain.model.OrderDishModel;
 import com.reto.plazoleta.domain.model.OrderModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface ICustomerResponseMapper {
@@ -29,4 +36,16 @@ public interface ICustomerResponseMapper {
 
     @Mapping(target = "idCustomer", source = "idUserCustomer")
     OrderCanceledResponseDto orderModelToOrderCanceledResponseDto(OrderModel orderModel);
+
+    @Mapping(target = "idCategory", source = "entry.key")
+    @Mapping(target = "categoryName", expression = "java(entry.getValue().get(0).getCategoryModel().getName())")
+    @Mapping(target = "dishes", source = "entry.value", qualifiedByName = "mapDishModelListToDishResponseDtoList")
+    CategoryFromDishesPaginatedResponseDto mapEntryToCategoryDto(Map.Entry<Long, List<DishModel>> entry);
+
+    @Named( value = "mapDishModelListToDishResponseDtoList")
+    List<DishResponseDto> mapDishModelListToDishResponseDtoList(List<DishModel> dishesModels);
+
+
+    @Mapping(target = "urlImage", source = "urlImageDish")
+    DishResponseDto dishModelToDishResponseDto(DishModel dishModel);
 }

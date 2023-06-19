@@ -104,9 +104,6 @@ class CustomerControllerTest {
     private static final String NAME_OF_THE_COLUM_PRIMARY_KEY_OF_ORDER_ENTITY = "id_pedido";
     private static final String CANCEL_ORDER_API_PATH = "/micro-small-square/order/cancel/";
 
-    CustomerControllerTest() {
-    }
-
     @BeforeAll
     void initializeTestEnvironment() {
         List<RestaurantEntity> restaurantList = new ArrayList<>();
