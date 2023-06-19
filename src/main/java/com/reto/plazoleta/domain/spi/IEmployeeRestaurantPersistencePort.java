@@ -5,4 +5,6 @@ import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
 public interface IEmployeeRestaurantPersistencePort {
 
     EmployeeRestaurantModel saveEmployeeRestaurant(EmployeeRestaurantModel employeeRestaurantModel);
+
+    EmployeeRestaurantModel findByIdUserEmployee(Long idUserEmployee);
 }

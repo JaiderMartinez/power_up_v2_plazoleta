@@ -3,7 +3,7 @@ package com.reto.plazoleta.infraestructure.entrypoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reto.plazoleta.application.dto.request.RequestToCreateRestaurantDto;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
-import com.reto.plazoleta.infraestructure.configuration.security.exception.UserDoesNotExistException;
+import com.reto.plazoleta.infraestructure.drivenadapter.gateways.exceptions.UserDoesNotExistException;
 import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
 import com.reto.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class AdminControllerTest {
     @MockBean
     private IUserGateway userGateway;
 
-    private static final String CREATE_RESTAURANT_API_PATH = "/micro-small-square/create-restaurant";
+    private static final String CREATE_RESTAURANT_API_PATH = "/micro-small-square/restaurant";
     private static final String USERNAME_ADMIN = "admin@dmin.com";
     private static final String PASSWORD = "123";
     private static final String ROLE_ADMIN = "ADMINISTRADOR";

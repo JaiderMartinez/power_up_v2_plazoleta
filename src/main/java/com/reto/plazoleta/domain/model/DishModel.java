@@ -4,10 +4,10 @@ public class DishModel {
 
     private Long idDish;
     private String name;
-    private String descriptionDish;
+    private String description;
     private Double price;
-    private String imageDish;
-    private Boolean stateDish;
+    private String urlImageDish;
+    private Boolean state;
     private RestaurantModel restaurantModel;
     private CategoryModel categoryModel;
 
@@ -17,10 +17,10 @@ public class DishModel {
     public DishModel(Long idDish, String name, String descriptionDish, Double price, String imageDish, Boolean stateDish, RestaurantModel restaurantModel, CategoryModel categoryModel) {
         this.idDish = idDish;
         this.name = name;
-        this.descriptionDish = descriptionDish;
+        this.description = descriptionDish;
         this.price = price;
-        this.imageDish = imageDish;
-        this.stateDish = stateDish;
+        this.urlImageDish = imageDish;
+        this.state = stateDish;
         this.restaurantModel = restaurantModel;
         this.categoryModel = categoryModel;
     }
@@ -41,12 +41,12 @@ public class DishModel {
         this.name = name;
     }
 
-    public String getDescriptionDish() {
-        return descriptionDish;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDescriptionDish(String descriptionDish) {
-        this.descriptionDish = descriptionDish;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Double getPrice() {
@@ -57,20 +57,20 @@ public class DishModel {
         this.price = price;
     }
 
-    public String getImageDish() {
-        return imageDish;
+    public String getUrlImageDish() {
+        return urlImageDish;
     }
 
-    public void setImageDish(String imageDish) {
-        this.imageDish = imageDish;
+    public void setUrlImageDish(String urlImageDish) {
+        this.urlImageDish = urlImageDish;
     }
 
-    public Boolean getStateDish() {
-        return stateDish;
+    public Boolean getState() {
+        return state;
     }
 
-    public void setStateDish(Boolean stateDish) {
-        this.stateDish = stateDish;
+    public void setState(Boolean state) {
+        this.state = state;
     }
 
     public RestaurantModel getRestaurantModel() {
