@@ -226,4 +226,28 @@ class EmployeeControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("This order is in process"));
     }
+
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamIdOrderIsValidAndTokenCorrect_shouldReturnStatusOkWithFieldIdOrderAndStatusReadyFromOrder() {
+
+    }
+
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamIdOrderInvalidBecauseOrderNotExistAndTokenCorrect_shouldReturnNotFoundStatus() {
+
+    }
+
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamIdOrderInvalidBecauseOrderIsInProcessAndTokenCorrect_shouldReturnConflictStatus() {
+
+    }
+
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamIdOrderValidButOrderDoesNotBelongToRestaurantAndTokenCorrect_shouldReturnConflictStatus() {
+
+    }
 }
