@@ -66,8 +66,8 @@ public class CustomerController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Registered order"),
             @ApiResponse(responseCode = "403", description = "Role other than customer"),
-            @ApiResponse(responseCode = "404", description = "The Dish not exists"),
-            @ApiResponse(responseCode = "404", description = "The Restaurant not exists"),
+            @ApiResponse(responseCode = "404", description = "The Dish not exist"),
+            @ApiResponse(responseCode = "404", description = "The Restaurant not exist"),
             @ApiResponse(responseCode = "409", description = "The customer has a order in process")
     })
     @PreAuthorize(value = "hasRole('CLIENTE')")

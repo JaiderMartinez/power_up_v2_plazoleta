@@ -50,7 +50,7 @@ public class CustomerUseCase implements ICustomerServicePort {
     public Page<RestaurantModel> findAllByOrderByNameAsc(Integer numberPage, Integer sizeItems) {
         Page<RestaurantModel> resultRestaurantsPageable = this.restaurantPersistencePort
                                             .findAllByOrderByNameAsc(PageRequest.of(numberPage, sizeItems));
-        checkIfListIsEmpty(resultRestaurantsPageable.getSize());
+        checkIfListIsEmpty(resultRestaurantsPageable.isEmpty());
         return resultRestaurantsPageable;
     }
 
@@ -59,12 +59,12 @@ public class CustomerUseCase implements ICustomerServicePort {
         validateRestaurant(idRestaurant);
         Page<DishModel> dishesPaginatedAndOrderByCategory = this.dishPersistencePort
                         .getAllDishesActiveOfARestaurantOrderByCategoryAscending(PageRequest.of(numberPage, sizeItems), idRestaurant);
-        checkIfListIsEmpty(dishesPaginatedAndOrderByCategory.getSize());
+        checkIfListIsEmpty(dishesPaginatedAndOrderByCategory.isEmpty());
         return dishesPaginatedAndOrderByCategory;
     }
 
-    private void checkIfListIsEmpty(Integer listSize) {
-        if (listSize <= 0)
+    private void checkIfListIsEmpty(boolean isTheListEmpty) {
+        if (isTheListEmpty)
             throw new NoDataFoundException();
     }
 

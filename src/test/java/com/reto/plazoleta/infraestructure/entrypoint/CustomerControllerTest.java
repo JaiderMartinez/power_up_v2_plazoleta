@@ -99,10 +99,11 @@ class CustomerControllerTest {
     private static final String RESTAURANT_API_PATH = "/micro-small-square/restaurants";
     private static final String PAGE_SIZE_PARAM = "sizePage";
     private static final String REGISTER_ORDER_API_PATH = "/micro-small-square/order";
-    private static final String TOKE_WITH_PREFIX_BEARER = "Bearer + token";
+    private static final String TOKEN_WITH_PREFIX_BEARER = "Bearer + token";
     private static final String NAME_OF_THE_ENTITY_ORDER = "pedidos";
     private static final String NAME_OF_THE_COLUM_PRIMARY_KEY_OF_ORDER_ENTITY = "id_pedido";
     private static final String CANCEL_ORDER_API_PATH = "/micro-small-square/order/cancel/";
+    private static final String LIST_THE_DISHES_OF_A_RESTAURANT = "/micro-small-square//restaurant/";
 
     @BeforeAll
     void initializeTestEnvironment() {
@@ -171,16 +172,12 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.content[0].urlLogo").value("http://restaurante1.com"));
     }
 
-    @Transactional
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
     void test_getAllRestaurantsOrderByNameAsc_withPageSizeOneAndNotDataFound_ShouldThrowAStatusNoContent() throws Exception {
-        this.orderRepository.deleteAll();
-        this.orderDishRepository.deleteAll();
-        this.dishRepository.deleteAll();
-        restaurantRepository.deleteAll();
         mockMvc.perform(get(RESTAURANT_API_PATH)
                         .param(PAGE_SIZE_PARAM, "1")
+                        .param("numberPage", "100")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
@@ -209,9 +206,9 @@ class CustomerControllerTest {
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
-        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
+        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         this.mockMvc.perform(post(REGISTER_ORDER_API_PATH)
-                        .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
                         .content(this.objectMapper.writeValueAsString(createOrderRequest))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -229,9 +226,9 @@ class CustomerControllerTest {
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
-        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
+        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         this.mockMvc.perform(post(REGISTER_ORDER_API_PATH)
-                        .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
                         .content(this.objectMapper.writeValueAsString(createOrderRequest))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict())
@@ -248,9 +245,9 @@ class CustomerControllerTest {
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
-        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
+        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         this.mockMvc.perform(post(REGISTER_ORDER_API_PATH)
-                        .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
                         .content(this.objectMapper.writeValueAsString(createOrderRequest))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -267,9 +264,9 @@ class CustomerControllerTest {
         User userAuthenticatedByToken = new User();
         userAuthenticatedByToken.setIdUser(1L);
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
-        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
+        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         this.mockMvc.perform(post(REGISTER_ORDER_API_PATH)
-                        .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
                         .content(this.objectMapper.writeValueAsString(createOrderRequest))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -287,10 +284,10 @@ class CustomerControllerTest {
         this.orderRepository.save(new OrderEntity(2L, userAuthenticatedByToken.getIdUser(), LocalDate.now(), StatusOrder.PENDIENTE, null, restaurantEntityFromOrder, null));
         long idOrderValid = 2L;
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
-        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
+        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
 
         this.mockMvc.perform(patch(CANCEL_ORDER_API_PATH + idOrderValid)
-                .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER))
+                .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.idOrder").value(idOrderValid));
     }
@@ -302,10 +299,10 @@ class CustomerControllerTest {
         userAuthenticatedByToken.setIdUser(1L);
         long idOrderInvalid = 2000000L;
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
-        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
+        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
 
         this.mockMvc.perform(patch(CANCEL_ORDER_API_PATH + idOrderInvalid)
-                        .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER))
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.ORDER_NOT_FOUND.getMessage()));
     }
@@ -317,10 +314,10 @@ class CustomerControllerTest {
         userAuthenticatedByToken.setIdUser(1L);
         long idOrderInvalidItsStatusIsInPreparation = 1L;
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
-        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
+        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
 
         this.mockMvc.perform(patch(CANCEL_ORDER_API_PATH + idOrderInvalidItsStatusIsInPreparation)
-                        .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER))
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse"));
     }
@@ -332,35 +329,41 @@ class CustomerControllerTest {
         userAuthenticatedByToken.setIdUser(2L);
         long idOrderInvalidOrderDoesNotBelongToUser = 1;
         when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(USERNAME_CUSTOMER, null, null));
-        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKE_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
+        when(this.userGateway.getUserByEmailInTheToken(USERNAME_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
 
         this.mockMvc.perform(patch(CANCEL_ORDER_API_PATH + idOrderInvalidOrderDoesNotBelongToUser)
-                        .header(HttpHeaders.AUTHORIZATION, TOKE_WITH_PREFIX_BEARER))
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.ORDER_NOT_FOUND.getMessage()));
     }
     
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_getDishesFromARestaurantAndGroupedByCategoryPaginated_withRequestParamSizeItemsAndIdRestaurantValueValid_shouldResponseAnListFromDishesPaginatedAndGroupedByCategoryAndAStatusOK() {
-
+    void test_getDishesFromARestaurantAndGroupedByCategoryPaginated_withRequestParamSizeItemsAndIdRestaurantValueValid_shouldResponseAnListFromDishesPaginatedAndGroupedByCategoryAndAStatusOK() throws Exception {
+        this.mockMvc.perform(get(LIST_THE_DISHES_OF_A_RESTAURANT + 1 + "/dishes")
+                        .param(PAGE_SIZE_PARAM, "1")
+                        .param("numberPage", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pageable.pageSize").value(1))
+                .andExpect(jsonPath("$.pageable.pageNumber").value(1))
+                .andExpect(jsonPath("$.content[0].idCategory").value(1))
+                .andExpect(jsonPath("$.content[0].categoryName").value("Plato tipico"));
     }
 
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_getDishesFromARestaurantAndGroupedByCategoryPaginated_withRequestParamIdRestaurantEmpty_shouldResponseAStatusBadRequest() {
-
+    void test_getDishesFromARestaurantAndGroupedByCategoryPaginated_withRequestParamIdRestaurantInvalidBecauseNotExistTheRestaurant_shouldResponseNotFoundStatus() throws Exception {
+        this.mockMvc.perform(get(LIST_THE_DISHES_OF_A_RESTAURANT + 100000 + "/dishes"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.RESTAURANT_NOT_EXIST.getMessage()));
     }
 
     @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
     @Test
-    void test_getDishesFromARestaurantAndGroupedByCategoryPaginated_withRestaurantNotFoundFromIdRestaurantRequestParamValue_shouldResponseAStatusNotFound() {
-
-    }
-
-    @WithMockUser(username = USERNAME_CUSTOMER, password = PASSWORD, roles = {ROLE_CUSTOMER})
-    @Test
-    void test_getDishesFromARestaurantAndGroupedByCategoryPaginated_withRequestParamSizeItemsAndIdRestaurantValidButNotFoundData_shouldResponseAStatusNotFound() {
-
+    void test_getDishesFromARestaurantAndGroupedByCategoryPaginated_withRequestParamValidButDishesNotFound_shouldResponseNotContentStatus() throws Exception {
+        this.mockMvc.perform(get(LIST_THE_DISHES_OF_A_RESTAURANT + 1 + "/dishes")
+                        .param(PAGE_SIZE_PARAM, "1")
+                        .param("numberPage", "1000000"))
+                .andExpect(status().isNoContent());
     }
 }
