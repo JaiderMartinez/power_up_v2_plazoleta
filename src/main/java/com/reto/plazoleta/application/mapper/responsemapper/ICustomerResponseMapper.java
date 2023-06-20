@@ -40,7 +40,7 @@ public interface ICustomerResponseMapper {
     @Mapping(target = "idCategory", source = "entry.key")
     @Mapping(target = "categoryName", expression = "java(entry.getValue().get(0).getCategoryModel().getName())")
     @Mapping(target = "dishes", source = "entry.value", qualifiedByName = "mapDishModelListToDishResponseDtoList")
-    CategoryFromDishesPaginatedResponseDto mapEntryToCategoryDto(Map.Entry<Long, List<DishModel>> entry);
+    CategoryFromDishesPaginatedResponseDto mapEntryToCategoryFromDishesPaginatedResponseDto(Map.Entry<Long, List<DishModel>> entry);
 
     @Named( value = "mapDishModelListToDishResponseDtoList")
     List<DishResponseDto> mapDishModelListToDishResponseDtoList(List<DishModel> dishesModels);

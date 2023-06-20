@@ -14,6 +14,7 @@ import com.reto.plazoleta.domain.model.OrderModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,8 +42,8 @@ public class CustomerService implements ICustomerService {
                 ))
                 .entrySet()
                 .stream()
-                .map(this.customerResponseMapper::mapEntryToCategoryDto)
-                .collect(Collectors.collectingAndThen(Collectors.toList(), PageImpl::new));
+                .map(this.customerResponseMapper::mapEntryToCategoryFromDishesPaginatedResponseDto)
+                .collect(Collectors.collectingAndThen(Collectors.toList(), content -> new PageImpl<>(content, PageRequest.of(numberPage, sizeItems), content.size())));
     }
 
     @Override
