@@ -13,4 +13,6 @@ public interface IEmployeeServicePort {
     Page<OrderModel> getAllOrdersFilterByStatusAndSizeItemsByPage(Integer sizeItems, Integer pageNumber, String status, String tokenWithPrefixBearer);
 
     List<OrderModel> assignEmployeeToOrderAndChangeStatusToInPreparation(List<Long> idOrders, String tokenWithPrefixBearer);
+
+    OrderModel changeOrderStatusToReadyAndNotifyCustomer(Long idOrder, String tokenWithPrefixBearer);
 }

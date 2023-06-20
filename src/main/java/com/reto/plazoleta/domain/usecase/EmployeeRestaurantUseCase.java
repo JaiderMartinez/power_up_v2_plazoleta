@@ -6,9 +6,11 @@ import com.reto.plazoleta.domain.exception.OrderInProcessException;
 import com.reto.plazoleta.domain.exception.OrderNotExistsException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
+import com.reto.plazoleta.domain.model.MessageSms;
 import com.reto.plazoleta.domain.model.OrderModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;
 import com.reto.plazoleta.domain.spi.IEmployeeRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.IMessengerServiceProviderPort;
 import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
@@ -28,14 +30,17 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
     private final IUserGateway userGateway;
     private final JwtProvider jwtProvider;
     private final IOrderPersistencePort orderPersistencePort;
+    private final IMessengerServiceProviderPort messengerServiceProviderPort;
 
     public EmployeeRestaurantUseCase(IEmployeeRestaurantPersistencePort employeeRestaurantPersistencePort, IRestaurantPersistencePort restaurantPersistencePort,
-                                     IUserGateway userGateway, JwtProvider jwtProvider, IOrderPersistencePort orderPersistencePort) {
+                                     IUserGateway userGateway, JwtProvider jwtProvider, IOrderPersistencePort orderPersistencePort,
+                                     IMessengerServiceProviderPort messengerServiceProviderPort) {
         this.employeeRestaurantPersistencePort = employeeRestaurantPersistencePort;
         this.restaurantPersistencePort = restaurantPersistencePort;
         this.userGateway = userGateway;
         this.jwtProvider = jwtProvider;
         this.orderPersistencePort = orderPersistencePort;
+        this.messengerServiceProviderPort = messengerServiceProviderPort;
     }
 
     @Override
@@ -101,7 +106,35 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
         } else if (orderModelToValidate.getEmployeeRestaurantModel() != null) {
             throw new OrderInProcessException("This order is in process");
         } else if (!employeeRestaurantToSave.getIdRestaurant().equals(orderModelToValidate.getRestaurantModel().getIdRestaurant())) {
-            throw new OrderNotExistsException("The restaurant no belongs to this restaurant");
+            throw new OrderNotExistsException("The employee no belongs to this restaurant");
+        }
+    }
+
+    @Override
+    public OrderModel changeOrderStatusToReadyAndNotifyCustomer(Long idOrder, String tokenWithPrefixBearer) {
+        OrderModel orderModelToUpdate = this.orderPersistencePort.findByIdOrder(idOrder);
+        User userEmployeeAuthenticated = this.userGateway.getUserByEmailInTheToken(getEmailFromToken(tokenWithPrefixBearer), tokenWithPrefixBearer);
+
+        EmployeeRestaurantModel employeeRestaurant = getRestaurantFromEmployeeByIdUserEmployeeAndValidateIfExistsTheRestaurant(userEmployeeAuthenticated.getIdUser());
+        validateOrderAndIfIsInPreparationStatus(orderModelToUpdate, employeeRestaurant.getIdRestaurant());
+
+        User userCustomerToNotifyOfYourOrder = this.userGateway.getUserById( orderModelToUpdate.getIdUserCustomer(), tokenWithPrefixBearer);
+
+        MessageSms messageSmsToSend = new MessageSms(null, orderModelToUpdate.getRestaurantModel().getName(),
+                userCustomerToNotifyOfYourOrder.getName(), userCustomerToNotifyOfYourOrder.getCellPhone());
+
+        this.messengerServiceProviderPort.notifyCustomerBySmsMessage(messageSmsToSend, tokenWithPrefixBearer);
+        orderModelToUpdate.setStatus(StatusOrder.LISTO);
+        return orderModelToUpdate;
+    }
+
+    private void validateOrderAndIfIsInPreparationStatus(OrderModel orderModelToValidate, Long idRestaurantToWhichEmployeeBelongs) {
+        if ( orderModelToValidate == null ) {
+            throw new OrderNotExistsException("Order not exists");
+        } else if ( !orderModelToValidate.getStatus().equals(StatusOrder.EN_PREPARACION) ) {
+            throw new OrderInProcessException("The order found in process");
+        } else if ( !orderModelToValidate.getRestaurantModel().getIdRestaurant().equals(idRestaurantToWhichEmployeeBelongs) ) {
+            throw new OrderNotExistsException("Order not exists");
         }
     }
 }
