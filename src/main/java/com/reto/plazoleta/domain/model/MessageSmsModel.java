@@ -1,16 +1,16 @@
 package com.reto.plazoleta.domain.model;
 
-public class MessageSms {
+public class MessageSmsModel {
 
     private Long pin;
     private String restaurantName;
     private String customerName;
     private String customerCellPhone;
 
-    public MessageSms() {
+    public MessageSmsModel() {
     }
 
-    public MessageSms(Long pin, String restaurantName, String customerName, String customerCellPhone) {
+    public MessageSmsModel(Long pin, String restaurantName, String customerName, String customerCellPhone) {
         this.pin = pin;
         this.restaurantName = restaurantName;
         this.customerName = customerName;

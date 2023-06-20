@@ -6,11 +6,11 @@ import com.reto.plazoleta.domain.exception.OrderInProcessException;
 import com.reto.plazoleta.domain.exception.OrderNotExistsException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
-import com.reto.plazoleta.domain.model.MessageSms;
+import com.reto.plazoleta.domain.model.MessageSmsModel;
 import com.reto.plazoleta.domain.model.OrderModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;
 import com.reto.plazoleta.domain.spi.IEmployeeRestaurantPersistencePort;
-import com.reto.plazoleta.domain.spi.IMessengerServiceProviderPort;
+import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
 import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
@@ -119,8 +119,8 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
         validateOrderAndIfIsInPreparationStatus(orderModelToUpdate, employeeRestaurant.getIdRestaurant());
 
         User userCustomerToNotifyOfYourOrder = this.userGateway.getUserById( orderModelToUpdate.getIdUserCustomer(), tokenWithPrefixBearer);
-
-        MessageSms messageSmsToSend = new MessageSms(null, orderModelToUpdate.getRestaurantModel().getName(),
+        Long pinGenerated = encryptOrderId(orderModelToUpdate.getIdOrder());
+        MessageSmsModel messageSmsToSend = new MessageSmsModel(pinGenerated, orderModelToUpdate.getRestaurantModel().getName(),
                 userCustomerToNotifyOfYourOrder.getName(), userCustomerToNotifyOfYourOrder.getCellPhone());
 
         this.messengerServiceProviderPort.notifyCustomerBySmsMessage(messageSmsToSend, tokenWithPrefixBearer);
@@ -136,5 +136,16 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
         } else if ( !orderModelToValidate.getRestaurantModel().getIdRestaurant().equals(idRestaurantToWhichEmployeeBelongs) ) {
             throw new OrderNotExistsException("Order not exists");
         }
+    }
+
+    private long encryptOrderId(Long idOrder) {
+        String addFiveCharacters = String.format("%05d", idOrder);
+        StringBuilder orderIdEncryption = new StringBuilder();
+        for (int index = 0; index < addFiveCharacters.length(); index++) {
+            char digitToEncrypt  = addFiveCharacters.charAt(index);
+            int originalCharacterToEncrypt = Character.getNumericValue(digitToEncrypt);
+            orderIdEncryption.append((originalCharacterToEncrypt + 3) % 10);
+        }
+        return Long.parseLong(orderIdEncryption.toString());
     }
 }

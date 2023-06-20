@@ -1,7 +1,7 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
 import com.reto.plazoleta.domain.gateways.IUserGateway;
-import com.reto.plazoleta.domain.spi.IMessengerServiceProviderPort;
+import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.EmployeeRestaurantEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.OrderEntity;

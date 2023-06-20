@@ -3,7 +3,7 @@ package com.reto.plazoleta.infraestructure.configuration;
 import com.reto.plazoleta.domain.api.IEmployeeServicePort;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.spi.IEmployeeRestaurantPersistencePort;
-import com.reto.plazoleta.domain.spi.IMessengerServiceProviderPort;
+import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
 import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.domain.usecase.EmployeeRestaurantUseCase;

@@ -1,7 +1,7 @@
 package com.reto.plazoleta.infraestructure.drivenadapter.gateways.adapter;
 
-import com.reto.plazoleta.domain.model.MessageSms;
-import com.reto.plazoleta.domain.spi.IMessengerServiceProviderPort;
+import com.reto.plazoleta.domain.model.MessageSmsModel;
+import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
 import com.reto.plazoleta.infraestructure.drivenadapter.gateways.dto.request.MessageSmsRequestDto;
 import com.reto.plazoleta.infraestructure.drivenadapter.gateways.dto.response.MessageSmsResponseDto;
 import com.reto.plazoleta.infraestructure.drivenadapter.gateways.exceptions.MessagingApiFailedException;
@@ -23,7 +23,7 @@ public class MessengerServiceAdapter implements IMessengerServiceProviderPort {
     private final IMessengerServiceRequestMapper messengerServiceRequestMapper;
 
     @Override
-    public void notifyCustomerBySmsMessage(MessageSms messageSmsToSend, String tokenWithPrefixBearer) {
+    public void notifyCustomerBySmsMessage(MessageSmsModel messageSmsToSend, String tokenWithPrefixBearer) {
         MessageSmsRequestDto messageSmsRequestDto = this.messengerServiceRequestMapper.messageSmsToMessageSmsRequestDto(messageSmsToSend);
         this.webClient.post().uri(uriBuilder -> uriBuilder.path("notify").build())
                 .header(HttpHeaders.AUTHORIZATION, tokenWithPrefixBearer)
