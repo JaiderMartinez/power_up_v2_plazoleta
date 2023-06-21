@@ -14,7 +14,7 @@ public class WebClientConfiguration {
     @Value("${base.url.micro.messenger.service}")
     private String baseUrlMessengerService;
 
-    @Bean
+    @Bean("webClientUsers")
     public WebClient webClient() {
         return WebClient.builder().baseUrl(baseUrl).build();
     }

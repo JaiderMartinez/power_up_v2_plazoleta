@@ -1,4 +1,4 @@
-package com.reto.plazoleta.infraestructure.drivenadapter.gateways.dto.request;
+package com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class MessageSmsRequestDto {
 
-    private Long pin;
+    private Long orderPin;
     private String restaurantName;
     private String customerName;
     private String customerCellPhone;

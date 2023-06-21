@@ -17,7 +17,7 @@ import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
-import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
 import com.reto.plazoleta.domain.exception.NoDataFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.reto.plazoleta.infraestructure.drivenadapter.gateways.exceptions;
+package com.reto.plazoleta.infraestructure.drivenadapter.webclients.exceptions;
 
 public class MessagingApiFailedException extends RuntimeException{
 

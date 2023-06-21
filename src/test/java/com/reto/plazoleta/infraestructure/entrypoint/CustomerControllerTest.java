@@ -12,7 +12,7 @@ import com.reto.plazoleta.infraestructure.drivenadapter.entity.OrderDishEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.OrderEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.RestaurantEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
-import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.ICategoryRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.IDishRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.IEmployeeRepository;

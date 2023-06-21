@@ -9,7 +9,7 @@ import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.CategoryEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.DishEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.RestaurantEntity;
-import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.ICategoryRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.IDishRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.IRestaurantRepository;
@@ -69,7 +69,7 @@ class OwnerControllerTest {
     private static final String ROL_OWNER = "PROPIETARIO";
     private static final String CREATE_DISH = "/micro-small-square/restaurant/dish";
     private static final String ADD_A_EMPLOYEE_TO_THE_RESTAURANT = "/micro-small-square/restaurant/employee";
-    private static final String UPDATE_DISH = "/micro-small-square/dish/update";
+    private static final String UPDATE_DISH = "/micro-small-square/restaurant/dish/update";
     private static final String TOKEN_VALID = "Bearer + token";
     private static final String EMAIL_TAKEN_FROM_TOKEN = "owner@owner.com";
     private  static final String PATH_RESTAURANT = "/micro-small-square/restaurant/";

@@ -13,7 +13,7 @@ import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
-import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
 import com.reto.plazoleta.domain.exception.NoDataFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -320,7 +320,7 @@ class EmployeeRestaurantUseCaseTest {
         OrderNotExistsException messageException = assertThrows(OrderNotExistsException.class,
                 () ->this.employeeRestaurantUseCase.assignEmployeeToOrderAndChangeStatusToInPreparation(idOrdersRequest, TOKEN_WITH_PREFIX_BEARER));
         //Then
-        assertEquals("The restaurant no belongs to this restaurant", messageException.getMessage());
+        assertEquals("The employee no belongs to this restaurant", messageException.getMessage());
     }
 
     @Test
@@ -340,6 +340,7 @@ class EmployeeRestaurantUseCaseTest {
         when(this.employeeRestaurantPersistencePort.findByIdUserEmployee(1L)).thenReturn(employeeRestaurantAuthenticated);
         when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantWhereEmployeeWorks);
         when(this.orderPersistencePort.findByIdOrder(1L)).thenReturn(orderModelExpected);
+        when(this.orderPersistencePort.saveOrder(orderModelExpected)).thenReturn(orderModelExpected);
         //When
         OrderModel orderModelSaved = this.employeeRestaurantUseCase.changeOrderStatusToReadyAndNotifyCustomer(1L, TOKEN_WITH_PREFIX_BEARER);
         //Then

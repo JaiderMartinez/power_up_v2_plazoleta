@@ -15,7 +15,7 @@ import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
-import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
 import com.reto.plazoleta.domain.exception.NoDataFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -125,7 +125,7 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
 
         this.messengerServiceProviderPort.notifyCustomerBySmsMessage(messageSmsToSend, tokenWithPrefixBearer);
         orderModelToUpdate.setStatus(StatusOrder.LISTO);
-        return orderModelToUpdate;
+        return this.orderPersistencePort.saveOrder(orderModelToUpdate);
     }
 
     private void validateOrderAndIfIsInPreparationStatus(OrderModel orderModelToValidate, Long idRestaurantToWhichEmployeeBelongs) {

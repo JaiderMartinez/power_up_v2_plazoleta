@@ -1,6 +1,6 @@
 package com.reto.plazoleta.domain.gateways;
 
-import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
 
 public interface IUserGateway {
 
