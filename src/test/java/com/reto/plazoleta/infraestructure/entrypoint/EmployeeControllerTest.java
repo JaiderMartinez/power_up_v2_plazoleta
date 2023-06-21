@@ -65,6 +65,7 @@ class EmployeeControllerTest {
     private static final String TOKEN_WITH_PREFIX_BEARER = "Bearer + token";
     private static final String ASSIGN_AN_EMPLOYEE_TO_AN_ORDER_PATH = "/micro-small-square/restaurant/order";
     private static final String REQUEST_PARAM_ID_ORDER = "idOrder";
+    private static final String CHANGE_ORDER_STATUS_TO_DELIVERED = "restaurant/order/status/delivered/";
 
     @BeforeAll
     void initializeTestEnvironment() {
@@ -225,5 +226,44 @@ class EmployeeControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("This order is in process"));
+    }
+
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_changeOrderStatusToDelivered_withRequestParamPinCorrectAndCorrectToken_shouldReturnOKStatus() throws Exception {
+        User restaurantEmployeeUser = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_EMPLOYEE, PASSWORD_EMPLOYEE, ROL_EMPLOYEE);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_EMPLOYEE, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_EMPLOYEE, TOKEN_WITH_PREFIX_BEARER)).thenReturn(restaurantEmployeeUser);
+        Long pinOrderValid = 3L;
+        this.mockMvc.perform(MockMvcRequestBuilders.patch(CHANGE_ORDER_STATUS_TO_DELIVERED + pinOrderValid)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.idOrder").value(3));
+    }
+
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_changeOrderStatusToDelivered_withOrderInStatusOtherThanReady_shouldReturnConflictStatus() throws Exception {
+        User restaurantEmployeeUser = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_EMPLOYEE, PASSWORD_EMPLOYEE, ROL_EMPLOYEE);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_EMPLOYEE, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_EMPLOYEE, TOKEN_WITH_PREFIX_BEARER)).thenReturn(restaurantEmployeeUser);
+        Long pinOrderValid = 3L;
+        this.mockMvc.perform(MockMvcRequestBuilders.patch(CHANGE_ORDER_STATUS_TO_DELIVERED + pinOrderValid)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("The order to an is in process"));
+    }
+
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_changeOrderStatusToDelivered_withRequestParamPinInvalidBecauseThereIsNoSuchOrder_shouldReturnNotFoundStatus() throws Exception {
+        User restaurantEmployeeUser = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_EMPLOYEE, PASSWORD_EMPLOYEE, ROL_EMPLOYEE);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_EMPLOYEE, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_EMPLOYEE, TOKEN_WITH_PREFIX_BEARER)).thenReturn(restaurantEmployeeUser);
+        Long pinInvalid = 3L;
+        this.mockMvc.perform(MockMvcRequestBuilders.patch(CHANGE_ORDER_STATUS_TO_DELIVERED + pinInvalid)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.ORDER_NOT_FOUND.getMessage()));
     }
 }
