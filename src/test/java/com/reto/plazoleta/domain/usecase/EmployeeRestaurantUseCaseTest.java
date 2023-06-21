@@ -291,7 +291,7 @@ class EmployeeRestaurantUseCaseTest {
         OrderInProcessException messageException = assertThrows(OrderInProcessException.class,
                 () ->this.employeeRestaurantUseCase.assignEmployeeToOrderAndChangeStatusToInPreparation(idOrdersRequest, TOKEN_WITH_PREFIX_BEARER));
         //Then
-        assertEquals("This order is in process", messageException.getMessage());
+        assertEquals("This order is in process with another employee", messageException.getMessage());
     }
 
     @Test

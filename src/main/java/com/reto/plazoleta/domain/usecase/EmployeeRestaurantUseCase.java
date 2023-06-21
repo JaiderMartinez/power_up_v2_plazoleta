@@ -103,7 +103,7 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
         if (orderModelToValidate == null) {
             throw new OrderNotExistsException("The order no exist");
         } else if (orderModelToValidate.getEmployeeRestaurantModel() != null) {
-            throw new OrderInProcessException("This order is in process");
+            throw new OrderInProcessException("This order is in process with another employee");
         } else if (!employeeRestaurantToSave.getIdRestaurant().equals(orderModelToValidate.getRestaurantModel().getIdRestaurant())) {
             throw new OrderNotExistsException("The restaurant no belongs to this restaurant");
         }
