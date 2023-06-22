@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class RestaurantResponsePageableDto {
 
+    private Long idRestaurant;
     private String name;
     private String urlLogo;
 }

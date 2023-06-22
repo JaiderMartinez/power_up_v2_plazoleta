@@ -1,12 +1,12 @@
 package com.reto.plazoleta.domain.usecase;
 
 import com.reto.plazoleta.domain.api.IAdminServicePort;
-import com.reto.plazoleta.domain.exception.EmptyFieldsException;
-import com.reto.plazoleta.domain.exception.InvalidDataException;
-import com.reto.plazoleta.domain.gateways.IUserGateway;
+import com.reto.plazoleta.domain.exceptions.EmptyFieldsException;
+import com.reto.plazoleta.domain.exceptions.InvalidDataException;
+import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.RestaurantModel;
-import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
-import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
+import com.reto.plazoleta.domain.spi.persistence.IRestaurantPersistencePort;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.UserDto;
 import org.springframework.security.access.AccessDeniedException;
 
 public class AdminUseCase implements IAdminServicePort {
@@ -26,7 +26,7 @@ public class AdminUseCase implements IAdminServicePort {
         }
         validateRestaurantFieldsEmpty(restaurantModel);
         validateRestaurantPhone(restaurantModel.getPhone());
-        User user = userGateway.getUserById(restaurantModel.getIdOwner(), tokenWithBearerPrefix);
+        UserDto user = userGateway.getUserById(restaurantModel.getIdOwner(), tokenWithBearerPrefix);
         if(!user.getRol().equals("PROPIETARIO")) {
             throw new AccessDeniedException("The user id does not have the required role to use this action");
         }

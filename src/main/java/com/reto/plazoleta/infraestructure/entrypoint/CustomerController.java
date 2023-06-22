@@ -8,6 +8,7 @@ import com.reto.plazoleta.application.dto.response.RestaurantResponsePageableDto
 import com.reto.plazoleta.application.handler.ICustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -37,7 +38,7 @@ public class CustomerController {
     @Operation(summary = "List restaurants paginated by a field")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of names and url logo of paginated restaurants"),
-            @ApiResponse(responseCode = "403", description = "Role other than customer")
+            @ApiResponse(responseCode = "403", description = "Role other than customer", content = @Content)
     })
     @PreAuthorize(value = "hasRole('CLIENTE')")
     @GetMapping(value = "restaurants")
@@ -52,8 +53,8 @@ public class CustomerController {
     @Operation(summary = "get dishes paginated by a number of elements and grouped by category from a restaurant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "list from dishes from a restaurant grouped by category"),
-            @ApiResponse(responseCode = "204", description = "No data found"),
-            @ApiResponse(responseCode = "404", description = "Restaurant not found")
+            @ApiResponse(responseCode = "204", description = "No data found", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Restaurant not found", content = @Content)
     })
     @GetMapping(value = "/restaurant/{idRestaurant}/dishes")
     @PreAuthorize(value = "hasRole('CLIENTE')")
@@ -65,10 +66,10 @@ public class CustomerController {
     @Operation(summary = "Make an order")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Registered order"),
-            @ApiResponse(responseCode = "403", description = "Role other than customer"),
-            @ApiResponse(responseCode = "404", description = "The Dish not exist"),
-            @ApiResponse(responseCode = "404", description = "The Restaurant not exist"),
-            @ApiResponse(responseCode = "409", description = "The customer has a order in process")
+            @ApiResponse(responseCode = "403", description = "Role other than customer", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The Dish not exist", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The Restaurant not exist", content = @Content),
+            @ApiResponse(responseCode = "409", description = "The customer has a order in process", content = @Content)
     })
     @PreAuthorize(value = "hasRole('CLIENTE')")
     @PostMapping(value = "order")
@@ -86,10 +87,10 @@ public class CustomerController {
     @Operation(summary = "cancel order in pending status")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Order canceled"),
-            @ApiResponse(responseCode = "403", description = "Role other than customer"),
-            @ApiResponse(responseCode = "404", description = "The order not exist"),
-            @ApiResponse(responseCode = "404", description = "The order does not belong to the user"),
-            @ApiResponse(responseCode = "409", description = "The order is in a status other than pending")
+            @ApiResponse(responseCode = "403", description = "Role other than customer", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The order not exist", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The order does not belong to the user", content = @Content),
+            @ApiResponse(responseCode = "409", description = "The order is in a status other than pending", content = @Content)
     })
     @PreAuthorize(value = "hasRole('CLIENTE')")
     @PatchMapping(value = "order/cancel/{idOrder}")

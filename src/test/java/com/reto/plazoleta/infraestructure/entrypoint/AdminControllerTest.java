@@ -2,9 +2,9 @@ package com.reto.plazoleta.infraestructure.entrypoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reto.plazoleta.application.dto.request.RequestToCreateRestaurantDto;
-import com.reto.plazoleta.domain.gateways.IUserGateway;
+import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.infraestructure.drivenadapter.webclients.exceptions.UserDoesNotExistException;
-import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.UserDto;
 import com.reto.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,7 @@ class AdminControllerTest {
         restaurantRequestDto.setNit(187273543L);
         restaurantRequestDto.setIdOwner(1L);
 
-        User userExpected = new User();
+        UserDto userExpected = new UserDto();
         userExpected.setRol("PROPIETARIO");
         when(userGateway.getUserById(1L, BEARER_TOKEN)).thenReturn(userExpected);
 
@@ -135,7 +135,7 @@ class AdminControllerTest {
         restaurantRequestDto.setNit(187273543L);
         restaurantRequestDto.setIdOwner(1L);
 
-        User userExpected = new User();
+        UserDto userExpected = new UserDto();
         userExpected.setRol("ADMINISTRADOR");
         when(userGateway.getUserById(1L, BEARER_TOKEN)).thenReturn(userExpected);
 

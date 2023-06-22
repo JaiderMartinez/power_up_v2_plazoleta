@@ -1,23 +1,24 @@
 package com.reto.plazoleta.domain.usecase;
 
 import com.reto.plazoleta.domain.api.IEmployeeServicePort;
-import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
-import com.reto.plazoleta.domain.exception.OrderInProcessException;
-import com.reto.plazoleta.domain.exception.OrderNotExistsException;
-import com.reto.plazoleta.domain.gateways.IUserGateway;
+import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
+import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
+import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
+import com.reto.plazoleta.domain.model.User;
+import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
 import com.reto.plazoleta.domain.model.MessageSmsModel;
 import com.reto.plazoleta.domain.model.OrderModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;
-import com.reto.plazoleta.domain.spi.IEmployeeRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IEmployeeRestaurantPersistencePort;
 import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
-import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
-import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IOrderPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IRestaurantPersistencePort;
 import com.reto.plazoleta.domain.spi.token.ITokenServiceProviderPort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
-import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
-import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
-import com.reto.plazoleta.domain.exception.NoDataFoundException;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.StatusOrder;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.UserDto;
+import com.reto.plazoleta.domain.exceptions.NoDataFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -121,7 +122,7 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
         EmployeeRestaurantModel employeeRestaurant = getRestaurantFromEmployeeByIdUserEmployeeAndValidateIfExistsTheRestaurant(userEmployeeAuthenticated.getIdUser());
         validateOrderAndIfIsInPreparationStatus(orderModelToUpdate, employeeRestaurant.getIdRestaurant());
 
-        User userCustomerToNotifyOfYourOrder = this.userGateway.getUserById( orderModelToUpdate.getIdUserCustomer(), tokenWithPrefixBearer);
+        UserDto userCustomerToNotifyOfYourOrder = this.userGateway.getUserById( orderModelToUpdate.getIdUserCustomer(), tokenWithPrefixBearer);
         Long pinGenerated = encryptOrderId(orderModelToUpdate.getIdOrder());
         MessageSmsModel messageSmsToSend = new MessageSmsModel(pinGenerated, orderModelToUpdate.getRestaurantModel().getName(),
                 userCustomerToNotifyOfYourOrder.getName(), userCustomerToNotifyOfYourOrder.getCellPhone());
@@ -196,5 +197,6 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
     private void validateIfEmployeeBelongsToRestaurantOfOrder(Long idRestaurantWhereEmployeeWorks, Long idRestaurantFromOrder) {
         if (!idRestaurantFromOrder.equals(idRestaurantWhereEmployeeWorks)) {
             throw new OrderNotExistsException("The employee no belongs to this restaurant");
+        }
     }
 }

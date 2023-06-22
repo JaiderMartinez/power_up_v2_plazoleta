@@ -1,24 +1,24 @@
 package com.reto.plazoleta.domain.usecase;
 
 import com.reto.plazoleta.domain.api.ICustomerServicePort;
-import com.reto.plazoleta.domain.exception.CustomerHasAOrderInProcessException;
-import com.reto.plazoleta.domain.exception.DishNotExistsException;
-import com.reto.plazoleta.domain.exception.OrderInProcessException;
-import com.reto.plazoleta.domain.exception.OrderNotExistsException;
-import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
-import com.reto.plazoleta.domain.gateways.IUserGateway;
+import com.reto.plazoleta.domain.exceptions.CustomerHasAOrderInProcessException;
+import com.reto.plazoleta.domain.exceptions.DishNotExistsException;
+import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
+import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
+import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
+import com.reto.plazoleta.domain.model.User;
+import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.DishModel;
 import com.reto.plazoleta.domain.model.OrderDishModel;
 import com.reto.plazoleta.domain.model.OrderModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;
-import com.reto.plazoleta.domain.spi.IDishPersistencePort;
-import com.reto.plazoleta.domain.spi.IOrderDishPersistencePort;
-import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
-import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IDishPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IOrderDishPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IOrderPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
-import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
-import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
-import com.reto.plazoleta.domain.exception.NoDataFoundException;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.StatusOrder;
+import com.reto.plazoleta.domain.exceptions.NoDataFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -106,7 +106,7 @@ public class CustomerUseCase implements ICustomerServicePort {
     }
 
     private void checkStatusFromUserOrdersInARestaurant(Long idRestaurant, Long idUserCustomer) {
-        Long numberOfOrdersFoundInProcess = this.orderPersistencePort.findByIdUserCustomerAndIdRestaurant(
+        long numberOfOrdersFoundInProcess = this.orderPersistencePort.findByIdUserCustomerAndIdRestaurant(
                          idUserCustomer, idRestaurant).stream()
                 .filter(order -> !order.getStatus().equals(StatusOrder.CANCELADO) && !order.getStatus().equals(StatusOrder.ENTREGADO))
                 .count();
