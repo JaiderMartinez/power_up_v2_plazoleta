@@ -1,6 +1,7 @@
 package com.reto.plazoleta.application.handler.impl;
 
 import com.reto.plazoleta.application.dto.request.OrderRequestDto;
+import com.reto.plazoleta.application.dto.response.CategoryFromDishesPaginatedResponseDto;
 import com.reto.plazoleta.application.dto.response.OrderCanceledResponseDto;
 import com.reto.plazoleta.application.dto.response.OrderCreatedResponseDto;
 import com.reto.plazoleta.application.dto.response.RestaurantResponsePageableDto;
@@ -12,6 +13,8 @@ import com.reto.plazoleta.domain.model.OrderDishModel;
 import com.reto.plazoleta.domain.model.OrderModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +31,19 @@ public class CustomerService implements ICustomerService {
     @Override
     public Page<RestaurantResponsePageableDto> getAllRestaurantsByOrderByNameAsc(Integer numberPage, Integer sizeItems) {
         return this.customerServicePort.findAllByOrderByNameAsc(numberPage, sizeItems).map(this.customerResponseMapper::toRestaurantResponse);
+    }
+
+    @Override
+    public Page<CategoryFromDishesPaginatedResponseDto> getDishesFromARestaurantAndGroupedByCategoryPaginated(Integer numberPage, Integer sizeItems, Long idRestaurant) {
+        return this.customerServicePort.getAllDishesActivePaginatedFromARestaurantOrderByCategoryAscending(numberPage, sizeItems, idRestaurant)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        dishModelResponse -> dishModelResponse.getCategoryModel().getIdCategory()
+                ))
+                .entrySet()
+                .stream()
+                .map(this.customerResponseMapper::mapEntryToCategoryFromDishesPaginatedResponseDto)
+                .collect(Collectors.collectingAndThen(Collectors.toList(), content -> new PageImpl<>(content, PageRequest.of(numberPage, sizeItems), content.size())));
     }
 
     @Override

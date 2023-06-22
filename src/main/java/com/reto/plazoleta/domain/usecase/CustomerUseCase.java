@@ -25,7 +25,6 @@ import org.springframework.data.domain.PageRequest;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CustomerUseCase implements ICustomerServicePort {
 
@@ -51,8 +50,22 @@ public class CustomerUseCase implements ICustomerServicePort {
     public Page<RestaurantModel> findAllByOrderByNameAsc(Integer numberPage, Integer sizeItems) {
         Page<RestaurantModel> resultRestaurantsPageable = this.restaurantPersistencePort
                                             .findAllByOrderByNameAsc(PageRequest.of(numberPage, sizeItems));
-        if (resultRestaurantsPageable.isEmpty()) throw new NoDataFoundException();
+        checkIfListIsEmpty(resultRestaurantsPageable.isEmpty());
         return resultRestaurantsPageable;
+    }
+
+    @Override
+    public Page<DishModel> getAllDishesActivePaginatedFromARestaurantOrderByCategoryAscending(Integer numberPage, Integer sizeItems, Long idRestaurant) {
+        validateRestaurant(idRestaurant);
+        Page<DishModel> dishesPaginatedAndOrderByCategory = this.dishPersistencePort
+                        .getAllDishesActiveOfARestaurantOrderByCategoryAscending(PageRequest.of(numberPage, sizeItems), idRestaurant);
+        checkIfListIsEmpty(dishesPaginatedAndOrderByCategory.isEmpty());
+        return dishesPaginatedAndOrderByCategory;
+    }
+
+    private void checkIfListIsEmpty(boolean isTheListEmpty) {
+        if (isTheListEmpty)
+            throw new NoDataFoundException();
     }
 
     @Override
@@ -89,15 +102,15 @@ public class CustomerUseCase implements ICustomerServicePort {
     private void validateRestaurant(Long idRestaurant) {
         final RestaurantModel restaurantFoundModel = this.restaurantPersistencePort.findByIdRestaurant(idRestaurant);
         if (restaurantFoundModel == null)
-            throw new RestaurantNotExistException("The restaurant in the order does not exist");
+            throw new RestaurantNotExistException("The restaurant not exist");
     }
 
     private void checkStatusFromUserOrdersInARestaurant(Long idRestaurant, Long idUserCustomer) {
-        final List<OrderModel> listOfOrdersFromUserFromSameRestaurant = this.orderPersistencePort.findByIdUserCustomerAndIdRestaurant(
+        Long numberOfOrdersFoundInProcess = this.orderPersistencePort.findByIdUserCustomerAndIdRestaurant(
                          idUserCustomer, idRestaurant).stream()
                 .filter(order -> !order.getStatus().equals(StatusOrder.CANCELADO) && !order.getStatus().equals(StatusOrder.ENTREGADO))
-                .collect(Collectors.toList());
-        if (!listOfOrdersFromUserFromSameRestaurant.isEmpty())
+                .count();
+        if (numberOfOrdersFoundInProcess != 0)
             throw new CustomerHasAOrderInProcessException("The customer user has an order in process");
     }
 
