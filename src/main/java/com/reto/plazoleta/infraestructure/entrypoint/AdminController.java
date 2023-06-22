@@ -5,6 +5,7 @@ import com.reto.plazoleta.application.dto.response.RestaurantCreatedResponseDto;
 import com.reto.plazoleta.application.handler.IAdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -29,10 +30,10 @@ public class AdminController {
     @Operation(summary = "Add a new Restaurant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Restaurant created"),
-            @ApiResponse(responseCode = "400", description = "The format in the fields is invalid"),
-            @ApiResponse(responseCode = "403", description = "Role other than admin"),
-            @ApiResponse(responseCode = "404", description = "No user found with that id"),
-            @ApiResponse(responseCode = "409", description = "There are empty fields")
+            @ApiResponse(responseCode = "400", description = "The format in the fields is invalid", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Role other than admin", content = @Content),
+            @ApiResponse(responseCode = "404", description = "No user found with that id", content = @Content),
+            @ApiResponse(responseCode = "409", description = "There are empty fields", content = @Content)
     })
     @PreAuthorize(value = "hasRole('ADMINISTRADOR')")
     @PostMapping(value = "restaurant")

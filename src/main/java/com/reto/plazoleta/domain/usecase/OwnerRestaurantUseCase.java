@@ -1,18 +1,18 @@
 package com.reto.plazoleta.domain.usecase;
 
 import com.reto.plazoleta.domain.api.IOwnerRestaurantServicePort;
-import com.reto.plazoleta.domain.exception.DishNotExistsException;
-import com.reto.plazoleta.domain.exception.InvalidDataException;
-import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
-import com.reto.plazoleta.domain.gateways.IUserGateway;
+import com.reto.plazoleta.domain.exceptions.DishNotExistsException;
+import com.reto.plazoleta.domain.exceptions.InvalidDataException;
+import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
+import com.reto.plazoleta.domain.model.User;
+import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.CategoryModel;
 import com.reto.plazoleta.domain.model.DishModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;
-import com.reto.plazoleta.domain.spi.ICategoryPersistencePort;
-import com.reto.plazoleta.domain.spi.IDishPersistencePort;
-import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.ICategoryPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IDishPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
-import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
 
 public class OwnerRestaurantUseCase implements IOwnerRestaurantServicePort {
 

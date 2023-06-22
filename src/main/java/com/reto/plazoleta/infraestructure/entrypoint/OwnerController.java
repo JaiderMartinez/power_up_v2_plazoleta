@@ -35,7 +35,7 @@ public class OwnerController {
     @PreAuthorize(value = "hasRole('PROPIETARIO')")
     @Operation(summary = "Add a new dish")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Dish created", content = @Content),
+            @ApiResponse(responseCode = "201", description = "Dish created"),
             @ApiResponse(responseCode = "400", description = "The format in the fields is invalid", content = @Content),
             @ApiResponse(responseCode = "409", description = "There are empty fields", content = @Content)
     })
@@ -47,7 +47,7 @@ public class OwnerController {
 
     @Operation(summary = "Update dish price and description")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Price and description update", content = @Content),
+            @ApiResponse(responseCode = "201", description = "Price and description update"),
             @ApiResponse(responseCode = "401", description = "The format in the fields is invalid", content = @Content),
             @ApiResponse(responseCode = "403", description = "no access allowed", content = @Content)
     })
@@ -61,8 +61,8 @@ public class OwnerController {
     @Operation(summary = "Add a new user employee in a restaurant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "restaurant employee created"),
-            @ApiResponse(responseCode = "403", description = "The user does not have the owner role"),
-            @ApiResponse(responseCode = "404", description = "The restaurant not found")
+            @ApiResponse(responseCode = "403", description = "The user does not have the owner role", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The restaurant not found", content = @Content)
     })
     @PreAuthorize(value = "hasRole('PROPIETARIO')")
     @PostMapping(value = "restaurant/employee")
@@ -73,7 +73,7 @@ public class OwnerController {
 
     @Operation(summary = "Update the active variable of the dish")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "The field from dish isActive updated", content = @Content),
+            @ApiResponse(responseCode = "200", description = "The field from dish isActive updated"),
             @ApiResponse(responseCode = "400", description = "The user is not the owner of this restaurant", content = @Content),
             @ApiResponse(responseCode = "400", description = "The value of field idRestaurant does not match the dish's idRestaurant", content = @Content),
             @ApiResponse(responseCode = "404", description = "The restaurant not exist", content = @Content),

@@ -1,10 +1,10 @@
 package com.reto.plazoleta.infraestructure.configuration;
 
 
-import com.reto.plazoleta.domain.spi.ICategoryPersistencePort;
-import com.reto.plazoleta.infraestructure.drivenadapter.mapper.ICategoryEntityMapper;
-import com.reto.plazoleta.infraestructure.drivenadapter.persistence.CategoryJpaAdapter;
-import com.reto.plazoleta.infraestructure.drivenadapter.repository.ICategoryRepository;
+import com.reto.plazoleta.domain.spi.persistence.ICategoryPersistencePort;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.mapper.ICategoryEntityMapper;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.persistence.CategoryJpaAdapter;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.ICategoryRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Bean;

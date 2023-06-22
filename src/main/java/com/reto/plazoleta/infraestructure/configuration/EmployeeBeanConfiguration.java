@@ -1,17 +1,17 @@
 package com.reto.plazoleta.infraestructure.configuration;
 
 import com.reto.plazoleta.domain.api.IEmployeeServicePort;
-import com.reto.plazoleta.domain.gateways.IUserGateway;
-import com.reto.plazoleta.domain.spi.IEmployeeRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.clients.IUserGateway;
+import com.reto.plazoleta.domain.spi.persistence.IEmployeeRestaurantPersistencePort;
 import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
-import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
-import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IOrderPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IRestaurantPersistencePort;
 import com.reto.plazoleta.domain.spi.token.ITokenServiceProviderPort;
 import com.reto.plazoleta.domain.usecase.EmployeeRestaurantUseCase;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
-import com.reto.plazoleta.infraestructure.drivenadapter.mapper.IEmployeeEntityMapper;
-import com.reto.plazoleta.infraestructure.drivenadapter.persistence.EmployeeRestaurantJpaAdapter;
-import com.reto.plazoleta.infraestructure.drivenadapter.repository.IEmployeeRepository;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.mapper.IEmployeeEntityMapper;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.persistence.EmployeeRestaurantJpaAdapter;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.IEmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

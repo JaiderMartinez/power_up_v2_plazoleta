@@ -1,21 +1,22 @@
 package com.reto.plazoleta.domain.usecase;
 
-import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
-import com.reto.plazoleta.domain.exception.OrderInProcessException;
-import com.reto.plazoleta.domain.exception.OrderNotExistsException;
-import com.reto.plazoleta.domain.gateways.IUserGateway;
+import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
+import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
+import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
+import com.reto.plazoleta.domain.model.User;
+import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
 import com.reto.plazoleta.domain.model.OrderModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;
-import com.reto.plazoleta.domain.spi.IEmployeeRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IEmployeeRestaurantPersistencePort;
 import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
-import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
-import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IOrderPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IRestaurantPersistencePort;
 import com.reto.plazoleta.domain.spi.token.ITokenServiceProviderPort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
-import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
-import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
-import com.reto.plazoleta.domain.exception.NoDataFoundException;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.StatusOrder;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.UserDto;
+import com.reto.plazoleta.domain.exceptions.NoDataFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -116,7 +117,7 @@ class EmployeeRestaurantUseCaseTest {
     @Test
     void test_getAllOrdersFilterByStatusAndSizeItemsByPage_withAllTheRequestParamCorrectAndTokenValid_shouldReturnAListPaginatedBySizePageAndFilteredByStatusTheOrders() {
         //Given
-        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         EmployeeRestaurantModel restaurantFromEmployeeFound = new EmployeeRestaurantModel(1L, 1L, 1L);
         StatusOrder status = StatusOrder.valueOf(STATUS_FROM_ORDER.toUpperCase());
         List<OrderModel> listFromOrders = new ArrayList<>();
@@ -146,7 +147,7 @@ class EmployeeRestaurantUseCaseTest {
     @Test
     void test_getAllOrdersFilterByStatusAndSizeItemsByPage_withAllTheRequestParamCorrectButNoOrderFoundAndTokenValid_shouldThrowNoDataFoundException() {
         //Given
-        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         EmployeeRestaurantModel restaurantFromEmployeeFound = new EmployeeRestaurantModel(1L, 1L, 1L);
         StatusOrder status = StatusOrder.valueOf(STATUS_FROM_ORDER.toUpperCase());
 
@@ -169,7 +170,7 @@ class EmployeeRestaurantUseCaseTest {
     @Test
     void test_getAllOrdersFilterByStatusAndSizeItemsByPage_withAllTheRequestParamCorrectAndTokenValidButTheRestaurantAlreadyNoExists_shouldThrowObjectNotFoundException() {
         //Given
-        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         EmployeeRestaurantModel restaurantFromEmployeeWhereRestaurantAlreadyNoExists = new EmployeeRestaurantModel(1L, 1L, 1L);
 
         when(this.jwtProvider.getAuthentication(TOKEN_WITH_PREFIX_BEARER)).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, null));
@@ -190,7 +191,7 @@ class EmployeeRestaurantUseCaseTest {
     @Test
     void test_assignEmployeeToOrderAndChangeStatusToInPreparation_withListFromIdOrdersCorrectAndTokenValid_shouldReturnTheListFromOrdersSaved() {
         //Given
-        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         EmployeeRestaurantModel restaurantFromEmployee = new EmployeeRestaurantModel(1L, 1L, 1L);
         RestaurantModel restaurantModelExpected = new RestaurantModel(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L);
@@ -233,7 +234,7 @@ class EmployeeRestaurantUseCaseTest {
     @Test
     void test_assignEmployeeToOrderAndChangeStatusToInPreparation_withListFromIdOrdersCorrectAndTokenValidButNotExistTheRestaurantFromEmployee_shouldThrowObjectNotFoundException() {
         //Given
-        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         EmployeeRestaurantModel restaurantFromEmployee = new EmployeeRestaurantModel(1L, 1L, 1L);
 
         List<Long> idOrdersRequest = new ArrayList<>();
@@ -253,7 +254,7 @@ class EmployeeRestaurantUseCaseTest {
     @Test
     void test_assignEmployeeToOrderAndChangeStatusToInPreparation_withListFromIdOrdersInvalidBecauseThereIsNoExistOrder_shouldThrowOrderNotExistsException() {
         //Given
-        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         EmployeeRestaurantModel restaurantFromEmployee = new EmployeeRestaurantModel(1L, 1L, 1L);
         RestaurantModel restaurantModelExpected = new RestaurantModel(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L);
@@ -275,7 +276,7 @@ class EmployeeRestaurantUseCaseTest {
     @Test
     void test_assignEmployeeToOrderAndChangeStatusToInPreparation_withAnOrderIsAlreadyAssignedToAnotherEmployee_shouldThrowOrderInProcessException() {
         //Given
-        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         EmployeeRestaurantModel restaurantFromEmployee = new EmployeeRestaurantModel(1L, 1L, 1L);
         RestaurantModel restaurantModelExpected = new RestaurantModel(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L);
@@ -298,7 +299,7 @@ class EmployeeRestaurantUseCaseTest {
     @Test
     void test_assignEmployeeToOrderAndChangeStatusToInPreparation_withTheRestaurantFromTheOrderIsDifferentFromTheOneEmployeeBelongsTo_shouldThrowOrderNotExistsException() {
         //Given
-        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         EmployeeRestaurantModel restaurantFromEmployee = new EmployeeRestaurantModel(1L, 1L, 1L);
         RestaurantModel restaurantFoundByIdFromRestaurantThatBelongsTheEmployeeExpected = new RestaurantModel(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L);
@@ -325,13 +326,13 @@ class EmployeeRestaurantUseCaseTest {
     void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamCorrect_shouldReturnOrderModelUpdated() {
         //Given
         User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283",
-                EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+                EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         EmployeeRestaurantModel employeeRestaurantAuthenticated = new EmployeeRestaurantModel(1L, 1L, 1L);
         RestaurantModel restaurantWhereEmployeeWorks = new RestaurantModel(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L);
         OrderModel orderModelExpected = new OrderModel(1L, 2L, LocalDate.now(), StatusOrder.EN_PREPARACION, employeeRestaurantAuthenticated, restaurantWhereEmployeeWorks);
-        User customerOwnerFromOrder = new User(2L, "name", "lastName", 10937745L, "3094369283",
-                "customer@customer.com", "123", "CLIENTE");
+        UserDto customerOwnerFromOrder = new UserDto(2L, "name", "lastName", 10937745L, "3094369283",
+                "customer@customer.com", "CLIENTE");
         when(this.jwtProvider.getAuthentication(TOKEN_WITH_PREFIX_BEARER)).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, null));
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userEmployeeAuthenticatedByToken);
         when(this.userGateway.getUserById(orderModelExpected.getIdUserCustomer(), TOKEN_WITH_PREFIX_BEARER)).thenReturn(customerOwnerFromOrder);
@@ -352,7 +353,7 @@ class EmployeeRestaurantUseCaseTest {
     void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamIdOrderInvalidAndTokenValid_shouldThrowOrderNotExistsException() {
         //Given
         User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283",
-                EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+                EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         EmployeeRestaurantModel employeeRestaurantAuthenticated = new EmployeeRestaurantModel(1L, 1L, 1L);
         RestaurantModel restaurantWhereEmployeeWorks = new RestaurantModel(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L);
@@ -372,7 +373,7 @@ class EmployeeRestaurantUseCaseTest {
     void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamCorrectButOrderIsInProcess_shouldThrowOrderInProcessException() {
         //Given
         User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283",
-                EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+                EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         EmployeeRestaurantModel employeeRestaurantAuthenticated = new EmployeeRestaurantModel(1L, 1L, 1L);
         RestaurantModel restaurantWhereEmployeeWorks = new RestaurantModel(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L);
@@ -393,7 +394,7 @@ class EmployeeRestaurantUseCaseTest {
     void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamInvalidBecauseOrderDoesNotBelongToEmployeeRestaurant_shouldThrowOrderNotExistsException() {
         //Given
         User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283",
-                EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+                EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         EmployeeRestaurantModel employeeRestaurantAuthenticated = new EmployeeRestaurantModel(1L, 1L, 1L);
         RestaurantModel restaurantWhereEmployeeWorks = new RestaurantModel(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L);
@@ -416,7 +417,7 @@ class EmployeeRestaurantUseCaseTest {
     @Test
     void test_changeOrderStatusToDelivered_withRequestParamOrderPinAndTokenCorrect_shouldReturnOrderUpdated() {
         //Given
-        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         RestaurantModel restaurantFromOrder = new RestaurantModel(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L);
         EmployeeRestaurantModel restaurantEmployeeAuthenticated = new EmployeeRestaurantModel(1L, 1L, 1L);
@@ -439,7 +440,7 @@ class EmployeeRestaurantUseCaseTest {
     @Test
     void test_changeOrderStatusToDelivered_withRequestParamOrderPinTheOrderDoesNotExist_shouldThrowOrderNotExistsException() {
         //Given
-         when(this.orderPersistencePort.findByIdOrder(1L)).thenReturn(null);
+        when(this.orderPersistencePort.findByIdOrder(1L)).thenReturn(null);
         //When
         OrderNotExistsException messageException = assertThrows(OrderNotExistsException.class,
                 () ->this.employeeRestaurantUseCase.changeOrderStatusToDelivered(33334L, TOKEN_WITH_PREFIX_BEARER));
@@ -465,7 +466,7 @@ class EmployeeRestaurantUseCaseTest {
     @Test
     void test_changeOrderStatusToDelivered_withRequestParamOrderPinValidButEmployeeNoBelongsToThisRestaurant_shouldThrowOrderInProcessException() {
         //Given
-        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
         RestaurantModel restaurantFromOrder = new RestaurantModel(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L);
         EmployeeRestaurantModel restaurantEmployeeAuthenticatedBuIsNotEqualTheFromOrder = new EmployeeRestaurantModel(1L, 1L, 200000L);

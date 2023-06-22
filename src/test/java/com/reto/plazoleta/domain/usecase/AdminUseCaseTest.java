@@ -1,11 +1,11 @@
 package com.reto.plazoleta.domain.usecase;
 
-import com.reto.plazoleta.domain.exception.EmptyFieldsException;
-import com.reto.plazoleta.domain.exception.InvalidDataException;
-import com.reto.plazoleta.domain.gateways.IUserGateway;
+import com.reto.plazoleta.domain.exceptions.EmptyFieldsException;
+import com.reto.plazoleta.domain.exceptions.InvalidDataException;
+import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.RestaurantModel;
-import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
-import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
+import com.reto.plazoleta.domain.spi.persistence.IRestaurantPersistencePort;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.UserDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +33,7 @@ class AdminUseCaseTest {
     @Test
     void test_saveRestaurant_withNonEmptyRestaurantModelTheFieldsNameAndPhoneFormatCorrectAndIdOwnerExistAndEqualsOwnerRoleAndAndValidToken_ShouldReturnRestaurantModelSaved() {
         //Given
-        User userWithRoleOwner = new User();
+        UserDto userWithRoleOwner = new UserDto();
         userWithRoleOwner.setRol("PROPIETARIO");
         RestaurantModel restaurantExpected = new RestaurantModel(1L, "Sabroson17", "Cra 10", "3018452367", "http://sabroson.img", 843775L, 1L);
         when(userGateway.getUserById(1L, TOKEN)).thenReturn(userWithRoleOwner);
@@ -114,7 +114,7 @@ class AdminUseCaseTest {
         restaurantRequestModel.setNit(84373275L);
         restaurantRequestModel.setIdOwner(1L);
 
-        User userWithRoleOtherThanOwner = new User();
+        UserDto userWithRoleOtherThanOwner = new UserDto();
         userWithRoleOtherThanOwner.setRol("ADMINISTRADOR");
         when(userGateway.getUserById(1L, TOKEN)).thenReturn(userWithRoleOtherThanOwner);
         // When

@@ -1,6 +1,6 @@
 package com.reto.plazoleta.domain.model;
 
-import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.StatusOrder;
 
 import java.time.LocalDate;
 import java.util.List;

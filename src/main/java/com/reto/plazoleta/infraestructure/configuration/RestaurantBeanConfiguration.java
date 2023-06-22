@@ -1,12 +1,12 @@
 package com.reto.plazoleta.infraestructure.configuration;
 
 import com.reto.plazoleta.domain.api.IAdminServicePort;
-import com.reto.plazoleta.domain.gateways.IUserGateway;
-import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.clients.IUserGateway;
+import com.reto.plazoleta.domain.spi.persistence.IRestaurantPersistencePort;
 import com.reto.plazoleta.domain.usecase.AdminUseCase;
-import com.reto.plazoleta.infraestructure.drivenadapter.mapper.IRestaurantEntityMapper;
-import com.reto.plazoleta.infraestructure.drivenadapter.persistence.RestaurantJpaAdapter;
-import com.reto.plazoleta.infraestructure.drivenadapter.repository.IRestaurantRepository;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.mapper.IRestaurantEntityMapper;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.persistence.RestaurantJpaAdapter;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.IRestaurantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

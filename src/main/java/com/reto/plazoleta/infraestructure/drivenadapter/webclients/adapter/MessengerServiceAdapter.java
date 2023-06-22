@@ -5,7 +5,7 @@ import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
 import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.MessageSmsRequestDto;
 import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.response.MessageSmsResponseDto;
 import com.reto.plazoleta.infraestructure.drivenadapter.webclients.exceptions.MessagingApiFailedException;
-import com.reto.plazoleta.infraestructure.drivenadapter.webclients.mapper.IMessengerServiceRequestMapper;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.mapper.IMessengerServiceMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,9 +18,9 @@ public class MessengerServiceAdapter implements IMessengerServiceProviderPort {
 
     private final WebClient webClient;
 
-    private final IMessengerServiceRequestMapper messengerServiceRequestMapper;
+    private final IMessengerServiceMapper messengerServiceRequestMapper;
 
-    public MessengerServiceAdapter(@Qualifier("webClientMessengerService") WebClient webClient, IMessengerServiceRequestMapper messengerServiceRequestMapper) {
+    public MessengerServiceAdapter(@Qualifier("webClientMessengerService") WebClient webClient, IMessengerServiceMapper messengerServiceRequestMapper) {
         this.webClient = webClient;
         this.messengerServiceRequestMapper = messengerServiceRequestMapper;
     }

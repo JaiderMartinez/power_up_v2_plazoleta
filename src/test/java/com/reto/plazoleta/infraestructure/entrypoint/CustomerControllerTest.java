@@ -3,22 +3,23 @@ package com.reto.plazoleta.infraestructure.entrypoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reto.plazoleta.application.dto.request.DishFromOrderRequestDto;
 import com.reto.plazoleta.application.dto.request.OrderRequestDto;
-import com.reto.plazoleta.domain.gateways.IUserGateway;
+import com.reto.plazoleta.domain.model.User;
+import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
-import com.reto.plazoleta.infraestructure.drivenadapter.entity.CategoryEntity;
-import com.reto.plazoleta.infraestructure.drivenadapter.entity.DishEntity;
-import com.reto.plazoleta.infraestructure.drivenadapter.entity.EmployeeRestaurantEntity;
-import com.reto.plazoleta.infraestructure.drivenadapter.entity.OrderDishEntity;
-import com.reto.plazoleta.infraestructure.drivenadapter.entity.OrderEntity;
-import com.reto.plazoleta.infraestructure.drivenadapter.entity.RestaurantEntity;
-import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
-import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
-import com.reto.plazoleta.infraestructure.drivenadapter.repository.ICategoryRepository;
-import com.reto.plazoleta.infraestructure.drivenadapter.repository.IDishRepository;
-import com.reto.plazoleta.infraestructure.drivenadapter.repository.IEmployeeRepository;
-import com.reto.plazoleta.infraestructure.drivenadapter.repository.IOrderDishRepository;
-import com.reto.plazoleta.infraestructure.drivenadapter.repository.IOrderRepository;
-import com.reto.plazoleta.infraestructure.drivenadapter.repository.IRestaurantRepository;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.CategoryEntity;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.DishEntity;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.EmployeeRestaurantEntity;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.OrderDishEntity;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.OrderEntity;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.RestaurantEntity;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.StatusOrder;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.UserDto;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.ICategoryRepository;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.IDishRepository;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.IEmployeeRepository;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.IOrderDishRepository;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.IOrderRepository;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.IRestaurantRepository;
 import com.reto.plazoleta.infraestructure.exceptionhandler.ExceptionResponse;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -58,37 +59,26 @@ class CustomerControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private IRestaurantRepository restaurantRepository;
-
     @Autowired
     private IDishRepository dishRepository;
-
     @Autowired
     private IOrderRepository orderRepository;
-
     @Autowired
     private ICategoryRepository categoryRepository;
-
     @Autowired
     private IEmployeeRepository employeeRepository;
-
     @Autowired
     private ObjectMapper objectMapper;
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
     @Autowired
     private IOrderDishRepository orderDishRepository;
-
     @MockBean
     private IUserGateway userGateway;
-
     @MockBean
     private JwtProvider jwtProvider;
-
     private List<DishEntity> listDishEntities;
 
     private static final String USERNAME_CUSTOMER = "customer@customer.com";

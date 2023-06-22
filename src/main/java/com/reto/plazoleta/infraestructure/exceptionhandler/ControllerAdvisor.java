@@ -1,16 +1,16 @@
 package com.reto.plazoleta.infraestructure.exceptionhandler;
 
-import com.reto.plazoleta.domain.exception.CustomerHasAOrderInProcessException;
-import com.reto.plazoleta.domain.exception.DishNotExistsException;
-import com.reto.plazoleta.domain.exception.EmptyFieldsException;
-import com.reto.plazoleta.domain.exception.InvalidDataException;
-import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
-import com.reto.plazoleta.domain.exception.OrderInProcessException;
-import com.reto.plazoleta.domain.exception.OrderNotExistsException;
+import com.reto.plazoleta.domain.exceptions.CustomerHasAOrderInProcessException;
+import com.reto.plazoleta.domain.exceptions.DishNotExistsException;
+import com.reto.plazoleta.domain.exceptions.EmptyFieldsException;
+import com.reto.plazoleta.domain.exceptions.InvalidDataException;
+import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
+import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
+import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.exceptions.AuthenticationFailedException;
 import com.reto.plazoleta.infraestructure.drivenadapter.webclients.exceptions.MessagingApiFailedException;
 import com.reto.plazoleta.infraestructure.drivenadapter.webclients.exceptions.UserDoesNotExistException;
-import com.reto.plazoleta.domain.exception.NoDataFoundException;
+import com.reto.plazoleta.domain.exceptions.NoDataFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;

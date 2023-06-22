@@ -1,15 +1,15 @@
 package com.reto.plazoleta.infraestructure.configuration;
 
 import com.reto.plazoleta.domain.api.IOwnerRestaurantServicePort;
-import com.reto.plazoleta.domain.gateways.IUserGateway;
-import com.reto.plazoleta.domain.spi.ICategoryPersistencePort;
-import com.reto.plazoleta.domain.spi.IDishPersistencePort;
-import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.clients.IUserGateway;
+import com.reto.plazoleta.domain.spi.persistence.ICategoryPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IDishPersistencePort;
+import com.reto.plazoleta.domain.spi.persistence.IRestaurantPersistencePort;
 import com.reto.plazoleta.domain.usecase.OwnerRestaurantUseCase;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
-import com.reto.plazoleta.infraestructure.drivenadapter.mapper.IDishEntityMapper;
-import com.reto.plazoleta.infraestructure.drivenadapter.persistence.DishJpaAdapter;
-import com.reto.plazoleta.infraestructure.drivenadapter.repository.IDishRepository;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.mapper.IDishEntityMapper;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.persistence.DishJpaAdapter;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.IDishRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
