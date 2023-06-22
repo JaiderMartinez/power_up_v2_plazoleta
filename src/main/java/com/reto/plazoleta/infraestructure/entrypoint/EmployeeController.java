@@ -1,11 +1,13 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
 import com.reto.plazoleta.application.dto.response.AssignedOrdersResponseDto;
+import com.reto.plazoleta.application.dto.response.OrderDeliveredResponseDto;
 import com.reto.plazoleta.application.dto.response.OrderNotificationResponseDto;
 import com.reto.plazoleta.application.dto.response.OrdersPaginatedResponseDto;
 import com.reto.plazoleta.application.handler.IEmployeeRestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -36,9 +38,9 @@ public class EmployeeController {
     @Operation(summary = "List orders paginated by the field status")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of orders filtered by status"),
-            @ApiResponse(responseCode = "204", description = "No order found"),
-            @ApiResponse(responseCode = "403", description = "Role other than employee"),
-            @ApiResponse(responseCode = "404", description = "The Restaurant not exist")
+            @ApiResponse(responseCode = "204", description = "No order found", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Role other than employee", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The Restaurant not exist", content = @Content)
     })
     @PreAuthorize(value = "hasRole('EMPLEADO')")
     @GetMapping(value = "filters-orders")
@@ -57,10 +59,10 @@ public class EmployeeController {
     @Operation(summary = "The employee will be assigned to one or more orders at the same time and the order was changed to pending status")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The employee was assigned to one or more orders successfully"),
-            @ApiResponse(responseCode = "403", description = "Role other than employee"),
-            @ApiResponse(responseCode = "404", description = "Order not found"),
-            @ApiResponse(responseCode = "404", description = "The restaurant that the employee belongs to does not exist"),
-            @ApiResponse(responseCode = "409", description = "The order is already in process with another employee")
+            @ApiResponse(responseCode = "403", description = "Role other than employee", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Order not found", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The restaurant that the employee belongs to does not exist", content = @Content),
+            @ApiResponse(responseCode = "409", description = "The order is already in process with another employee", content = @Content)
     })
     @PatchMapping(value = "restaurant/order")
     @PreAuthorize(value = "hasRole('EMPLEADO')")
@@ -75,10 +77,10 @@ public class EmployeeController {
     @Operation(summary = "Change order status to ready and notify customer")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The order updated status a ready and notified the customer"),
-            @ApiResponse(responseCode = "403", description = "Role other than employee"),
-            @ApiResponse(responseCode = "404", description = "Order not found"),
-            @ApiResponse(responseCode = "404", description = "Order does not belong to the restaurant"),
-            @ApiResponse(responseCode = "409", description = "The order found in process")
+            @ApiResponse(responseCode = "403", description = "Role other than employee", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Order not found", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Order does not belong to the restaurant", content = @Content),
+            @ApiResponse(responseCode = "409", description = "The order found in process", content = @Content)
     })
     @PatchMapping(value = "restaurant/order/{idOrder}")
     @PreAuthorize(value = "hasRole('EMPLEADO')")
@@ -87,5 +89,23 @@ public class EmployeeController {
             @PathVariable(name = "idOrder") Long idOrder,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithPrefixBearer) {
         return ResponseEntity.ok(this.employeeRestaurantService.changeOrderStatusToReadyAndNotifyCustomer(idOrder, tokenWithPrefixBearer));
+    }
+  
+    @Operation(summary = "Change order status to delivered")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Updated order with delivered status"),
+            @ApiResponse(responseCode = "403", description = "Role other than employee", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Order not found", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The employee no belongs to restaurant from order", content = @Content),
+            @ApiResponse(responseCode = "409", description = "The order has a status other than ready", content = @Content)
+    })
+    @PatchMapping(value = "restaurant/order/status/delivered/{pin}")
+    @PreAuthorize(value = "hasRole('EMPLEADO')")
+    public ResponseEntity<OrderDeliveredResponseDto> changeOrderStatusToDelivered(@Parameter( description = "numeric value where the order identifier was encrypted",
+            schema = @Schema(implementation = Long.class)) @PathVariable(name = "pin") Long orderPin, @Parameter(
+            description = "Token to validate if the employee belongs to the restaurant of the order in which he works",
+            required = true, schema = @Schema(type = "String", format = "jwt"))
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithPrefixBearer ) {
+        return ResponseEntity.ok(this.employeeRestaurantService.changeOrderStatusToDelivered(orderPin, tokenWithPrefixBearer));
     }
 }

@@ -6,6 +6,7 @@ import com.reto.plazoleta.domain.spi.IEmployeeRestaurantPersistencePort;
 import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
 import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.token.ITokenServiceProviderPort;
 import com.reto.plazoleta.domain.usecase.EmployeeRestaurantUseCase;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.mapper.IEmployeeEntityMapper;
@@ -25,6 +26,7 @@ public class EmployeeBeanConfiguration {
     private final IUserGateway userGateway;
     private final JwtProvider jwtProvider;
     private final IOrderPersistencePort orderPersistencePort;
+    private final ITokenServiceProviderPort tokenServiceProviderPort;
     private final IMessengerServiceProviderPort messengerServiceProviderPort;
 
     @Bean
@@ -33,8 +35,8 @@ public class EmployeeBeanConfiguration {
     }
 
     @Bean
-    public IEmployeeServicePort employeeServicePort() {
+    public IEmployeeServicePort employeeRestaurantServicePort() {
         return new EmployeeRestaurantUseCase(employeeRestaurantPersistencePort(), this.restaurantPersistencePort, this.userGateway,
-                this.jwtProvider, this.orderPersistencePort, this.messengerServiceProviderPort);
+                this.jwtProvider, this.tokenServiceProviderPort, this.orderPersistencePort, this.messengerServiceProviderPort);
     }
 }

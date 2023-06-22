@@ -1,6 +1,7 @@
 package com.reto.plazoleta.application.handler.impl;
 
 import com.reto.plazoleta.application.dto.response.AssignedOrdersResponseDto;
+import com.reto.plazoleta.application.dto.response.OrderDeliveredResponseDto;
 import com.reto.plazoleta.application.dto.response.OrderNotificationResponseDto;
 import com.reto.plazoleta.application.dto.response.OrdersPaginatedResponseDto;
 import com.reto.plazoleta.application.handler.IEmployeeRestaurantService;
@@ -36,10 +37,17 @@ public class EmployeeRestaurantService implements IEmployeeRestaurantService {
         return this.employeeServicePort.assignEmployeeToOrderAndChangeStatusToInPreparation(idOrders, tokenWithPrefixBearer).stream()
                 .map(employeeResponseMapper::orderModelToAssignedOrdersResponseDto).collect(Collectors.toList());
     }
-
+  
     @Override
     public OrderNotificationResponseDto changeOrderStatusToReadyAndNotifyCustomer(Long idOrder, String tokenWithPrefixBearer) {
         return this.employeeResponseMapper.orderModelToOrderNotificationResponseDto(this.employeeServicePort
                                 .changeOrderStatusToReadyAndNotifyCustomer(idOrder, tokenWithPrefixBearer));
+    }
+
+    @Override
+    public OrderDeliveredResponseDto changeOrderStatusToDelivered(Long orderPin, String tokenWithPrefixBearer) {
+        return this.employeeResponseMapper.orderModelToOrderDeliveredResponseDto(
+                this.employeeServicePort.changeOrderStatusToDelivered(orderPin, tokenWithPrefixBearer)
+        );
     }
 }

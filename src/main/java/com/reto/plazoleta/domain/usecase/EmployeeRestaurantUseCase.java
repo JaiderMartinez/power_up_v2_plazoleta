@@ -13,6 +13,7 @@ import com.reto.plazoleta.domain.spi.IEmployeeRestaurantPersistencePort;
 import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
 import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.token.ITokenServiceProviderPort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
 import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
@@ -29,16 +30,18 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
     private final IRestaurantPersistencePort restaurantPersistencePort;
     private final IUserGateway userGateway;
     private final JwtProvider jwtProvider;
+    private final ITokenServiceProviderPort tokenServiceProviderPort;
     private final IOrderPersistencePort orderPersistencePort;
     private final IMessengerServiceProviderPort messengerServiceProviderPort;
 
     public EmployeeRestaurantUseCase(IEmployeeRestaurantPersistencePort employeeRestaurantPersistencePort, IRestaurantPersistencePort restaurantPersistencePort,
-                                     IUserGateway userGateway, JwtProvider jwtProvider, IOrderPersistencePort orderPersistencePort,
-                                     IMessengerServiceProviderPort messengerServiceProviderPort) {
+                                     IUserGateway userGateway, JwtProvider jwtProvider, ITokenServiceProviderPort tokenServiceProviderPort,
+                                     IOrderPersistencePort orderPersistencePort, IMessengerServiceProviderPort messengerServiceProviderPort) {
         this.employeeRestaurantPersistencePort = employeeRestaurantPersistencePort;
         this.restaurantPersistencePort = restaurantPersistencePort;
         this.userGateway = userGateway;
         this.jwtProvider = jwtProvider;
+        this.tokenServiceProviderPort = tokenServiceProviderPort;
         this.orderPersistencePort = orderPersistencePort;
         this.messengerServiceProviderPort = messengerServiceProviderPort;
     }
@@ -104,7 +107,7 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
         if (orderModelToValidate == null) {
             throw new OrderNotExistsException("The order no exist");
         } else if (orderModelToValidate.getEmployeeRestaurantModel() != null) {
-            throw new OrderInProcessException("This order is in process");
+            throw new OrderInProcessException("This order is in process with another employee");
         } else if (!employeeRestaurantToSave.getIdRestaurant().equals(orderModelToValidate.getRestaurantModel().getIdRestaurant())) {
             throw new OrderNotExistsException("The employee no belongs to this restaurant");
         }
@@ -147,5 +150,51 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
             orderIdEncryption.append((originalCharacterToEncrypt + 3) % 10);
         }
         return Long.parseLong(orderIdEncryption.toString());
+    }
+    
+    @Override
+    public OrderModel changeOrderStatusToDelivered(Long orderPin, String tokenWithPrefixBearer) {
+        OrderModel orderModelToUpdateStatus = this.orderPersistencePort.findByIdOrder(decryptOrderPin(orderPin.toString()));
+        validateIfExistsOrderAndStatusBeEqualToReady(orderModelToUpdateStatus);
+        User userEmployeeAuthenticated = getUserByEmail(getEmailFromUserAuthenticatedByToken(tokenWithPrefixBearer), tokenWithPrefixBearer);
+        EmployeeRestaurantModel employeeRestaurantFound = getRestaurantEmployeeWhereWorksByIdUserEmployee(userEmployeeAuthenticated.getIdUser());
+        validateIfEmployeeBelongsToRestaurantOfOrder(employeeRestaurantFound.getIdRestaurant(), orderModelToUpdateStatus.getRestaurantModel().getIdRestaurant());
+        orderModelToUpdateStatus.setStatus(StatusOrder.ENTREGADO);
+        return this.orderPersistencePort.saveOrder(orderModelToUpdateStatus);
+    }
+
+    private Long decryptOrderPin(String pinEncryption) {
+        StringBuilder decryptPinFromOrder = new StringBuilder();
+        for (int index = 0; index < pinEncryption.length(); index++) {
+            char encryptedPinDigit = pinEncryption.charAt(index);
+            int decryptedPinDigit = (Character.getNumericValue(encryptedPinDigit) + 7) % 10;
+            decryptPinFromOrder.append(decryptedPinDigit);
+        }
+        return Long.parseLong(decryptPinFromOrder.toString());
+    }
+
+    private void validateIfExistsOrderAndStatusBeEqualToReady(OrderModel orderModelToValidate) {
+        if (orderModelToValidate == null) {
+            throw new OrderNotExistsException("The order no exist");
+        } else if (!orderModelToValidate.getStatus().equals(StatusOrder.LISTO)) {
+            throw new OrderInProcessException("This order is in process");
+        }
+    }
+
+    private String getEmailFromUserAuthenticatedByToken(String tokenWithPrefixBearer) {
+        return this.tokenServiceProviderPort.getEmailFromToken(tokenWithPrefixBearer);
+    }
+
+    private User getUserByEmail(String emailFromUser, String tokenWithPrefixBearer) {
+        return this.userGateway.getUserByEmailInTheToken(emailFromUser, tokenWithPrefixBearer);
+    }
+
+    private EmployeeRestaurantModel getRestaurantEmployeeWhereWorksByIdUserEmployee(Long idEmployee) {
+        return this.employeeRestaurantPersistencePort.findByIdUserEmployee(idEmployee);
+    }
+
+    private void validateIfEmployeeBelongsToRestaurantOfOrder(Long idRestaurantWhereEmployeeWorks, Long idRestaurantFromOrder) {
+        if (!idRestaurantFromOrder.equals(idRestaurantWhereEmployeeWorks)) {
+            throw new OrderNotExistsException("The employee no belongs to this restaurant");
     }
 }
