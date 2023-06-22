@@ -1,4 +1,4 @@
-package com.reto.plazoleta.infraestructure.drivenadapter.gateways;
+package com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

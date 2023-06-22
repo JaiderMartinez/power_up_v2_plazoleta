@@ -2,6 +2,7 @@ package com.reto.plazoleta.application.handler.impl;
 
 import com.reto.plazoleta.application.dto.response.AssignedOrdersResponseDto;
 import com.reto.plazoleta.application.dto.response.OrderDeliveredResponseDto;
+import com.reto.plazoleta.application.dto.response.OrderNotificationResponseDto;
 import com.reto.plazoleta.application.dto.response.OrdersPaginatedResponseDto;
 import com.reto.plazoleta.application.handler.IEmployeeRestaurantService;
 import com.reto.plazoleta.application.mapper.responsemapper.ICustomerResponseMapper;
@@ -20,21 +21,27 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EmployeeRestaurantService implements IEmployeeRestaurantService {
 
-    private final IEmployeeServicePort employeeRestaurantServicePort;
+    private final IEmployeeServicePort employeeServicePort;
     private final ICustomerResponseMapper customerResponseMapper;
     private final IEmployeeResponseMapper employeeResponseMapper;
 
     @Override
     public Page<OrdersPaginatedResponseDto> getAllOrdersFilterByStatus(Integer sizeItems, Integer pageNumber, String status, String tokenWithPrefixBearer) {
-        return this.employeeRestaurantServicePort
+        return this.employeeServicePort
                 .getAllOrdersFilterByStatusAndSizeItemsByPage(sizeItems, pageNumber, status, tokenWithPrefixBearer)
                 .map(customerResponseMapper::orderModelToOrdersPaginatedResponseDto);
     }
 
     @Override
     public List<AssignedOrdersResponseDto> assignOrderAndChangeStatusToInPreparation(List<Long> idOrders, String tokenWithPrefixBearer) {
-        return this.employeeRestaurantServicePort.assignEmployeeToOrderAndChangeStatusToInPreparation(idOrders, tokenWithPrefixBearer).stream()
+        return this.employeeServicePort.assignEmployeeToOrderAndChangeStatusToInPreparation(idOrders, tokenWithPrefixBearer).stream()
                 .map(employeeResponseMapper::orderModelToAssignedOrdersResponseDto).collect(Collectors.toList());
+    }
+  
+    @Override
+    public OrderNotificationResponseDto changeOrderStatusToReadyAndNotifyCustomer(Long idOrder, String tokenWithPrefixBearer) {
+        return this.employeeResponseMapper.orderModelToOrderNotificationResponseDto(this.employeeServicePort
+                                .changeOrderStatusToReadyAndNotifyCustomer(idOrder, tokenWithPrefixBearer));
     }
 
     @Override

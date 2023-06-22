@@ -2,6 +2,7 @@ package com.reto.plazoleta.application.mapper.responsemapper;
 
 import com.reto.plazoleta.application.dto.response.AssignedOrdersResponseDto;
 import com.reto.plazoleta.application.dto.response.OrderDeliveredResponseDto;
+import com.reto.plazoleta.application.dto.response.OrderNotificationResponseDto;
 import com.reto.plazoleta.application.dto.response.RestaurantEmployeeResponseDto;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
 import com.reto.plazoleta.domain.model.OrderModel;
@@ -14,5 +15,7 @@ public interface IEmployeeResponseMapper {
 
     AssignedOrdersResponseDto orderModelToAssignedOrdersResponseDto(OrderModel orderModel);
 
+    OrderNotificationResponseDto orderModelToOrderNotificationResponseDto(OrderModel orderModel);
+  
     OrderDeliveredResponseDto orderModelToOrderDeliveredResponseDto(OrderModel orderModel);
 }

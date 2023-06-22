@@ -17,7 +17,7 @@ import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
-import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
 import com.reto.plazoleta.domain.exception.NoDataFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -206,7 +206,7 @@ class CustomerUseCaseTest {
         verify(this.jwtProvider, times(1)).getAuthentication("+ Token");
         verify(this.userGateway, times(1)).getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER);
         verify(this.restaurantPersistencePort, times(1)).findByIdRestaurant(1L);
-        assertEquals("The restaurant in the order does not exist", messageException.getMessage());
+        assertEquals("The restaurant not exist", messageException.getMessage());
     }
 
     @Test
@@ -325,5 +325,67 @@ class CustomerUseCaseTest {
                 () ->  this.customerUseCase.cancelOrder(1L, TOKEN_WITH_PREFIX_BEARER));
         //Then
         assertEquals("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse", messageException.getMessage());
+    }
+
+    @Test
+    void test_getAllDishesActivePaginatedFromARestaurantOrderByCategoryAscending_withRequestParamValid_shouldReturnAnListPaginatedFromDishes() {
+        //Given
+        RestaurantModel restaurantModelExpected = new RestaurantModel();
+        restaurantModelExpected.setIdRestaurant(1L);
+        CategoryModel categoryModelExpected = new CategoryModel();
+        categoryModelExpected.setIdCategory(1L);
+        List<DishModel> dishesWithVariableActiveAndOrderByCategory = new ArrayList<>();
+        dishesWithVariableActiveAndOrderByCategory.add(new DishModel(1L, "name", "description", 3000000.0, "http://imagen.png", true, restaurantModelExpected, categoryModelExpected));
+        Integer numberPageRequest = 0;
+        Integer sizeItemsByPage = 2;
+        Page<DishModel> dishesExpected = new PageImpl<>(dishesWithVariableActiveAndOrderByCategory, PageRequest.of(numberPageRequest, sizeItemsByPage), dishesWithVariableActiveAndOrderByCategory.size());
+        when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantModelExpected);
+        when(this.dishPersistencePort.getAllDishesActiveOfARestaurantOrderByCategoryAscending(PageRequest.of(numberPageRequest, sizeItemsByPage), restaurantModelExpected.getIdRestaurant()))
+                                                                                              .thenReturn(dishesExpected);
+        //When
+        Page<DishModel> dishesResult = this.customerUseCase.getAllDishesActivePaginatedFromARestaurantOrderByCategoryAscending(numberPageRequest, sizeItemsByPage, 1L);
+        //Then
+        assertEquals(dishesExpected.getTotalPages(), dishesResult.getTotalPages());
+        assertEquals(dishesExpected.getNumberOfElements(), dishesResult.getNumberOfElements());
+        assertEquals(dishesExpected.getSize(), dishesResult.getSize());
+        assertEquals(dishesExpected.getPageable(), dishesResult.getPageable());
+        assertEquals(dishesExpected.getNumber(), dishesResult.getNumber());
+        assertEquals(dishesExpected.getContent().get(0).getIdDish(), dishesResult.getContent().get(0).getIdDish());
+        assertEquals(dishesExpected.getContent().get(0).getName(), dishesResult.getContent().get(0).getName());
+        assertEquals(dishesExpected.getContent().get(0).getRestaurantModel().getIdRestaurant(), dishesResult.getContent().get(0).getRestaurantModel().getIdRestaurant());
+        assertEquals(dishesExpected.getContent().get(0).getState(), dishesResult.getContent().get(0).getState());
+    }
+
+    @Test
+    void test_getAllDishesActivePaginatedFromARestaurantOrderByCategoryAscending_withRequestParamIdRestaurantInvalidBecauseRestaurantNotExist_shouldThrowRestaurantNotExistException() {
+        //Given
+        Long idRestaurantRequest = 1L;
+        Integer numberPageRequest = 0;
+        Integer sizeItemsByPage = 2;
+        when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(null);
+        //When
+        RestaurantNotExistException messageException = assertThrows(
+                RestaurantNotExistException.class,
+                () ->  this.customerUseCase.getAllDishesActivePaginatedFromARestaurantOrderByCategoryAscending(numberPageRequest, sizeItemsByPage, idRestaurantRequest));
+        //Then
+        assertEquals("The restaurant not exist", messageException.getMessage());
+    }
+
+    @Test
+    void test_getAllDishesActivePaginatedFromARestaurantOrderByCategoryAscending_withRequestParamValidButNoDishesFound_shouldThrowNoDataFoundException() {
+        //Given
+        RestaurantModel restaurantModelExpected = new RestaurantModel();
+        restaurantModelExpected.setIdRestaurant(1L);
+        Integer numberPageRequest = 0;
+        Integer sizeItemsByPage = 2;
+        when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantModelExpected);
+        when(this.dishPersistencePort.getAllDishesActiveOfARestaurantOrderByCategoryAscending(PageRequest.of(numberPageRequest, sizeItemsByPage), restaurantModelExpected.getIdRestaurant()))
+                                                                .thenReturn(Page.empty());
+        //When
+        NoDataFoundException messageException = assertThrows(
+                NoDataFoundException.class,
+                () ->  this.customerUseCase.getAllDishesActivePaginatedFromARestaurantOrderByCategoryAscending(numberPageRequest, sizeItemsByPage, restaurantModelExpected.getIdRestaurant()));
+        //Then
+        assertEquals("No content", messageException.getMessage());
     }
 }

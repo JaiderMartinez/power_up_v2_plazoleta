@@ -14,5 +14,7 @@ public interface IEmployeeServicePort {
 
     List<OrderModel> assignEmployeeToOrderAndChangeStatusToInPreparation(List<Long> idOrders, String tokenWithPrefixBearer);
 
+    OrderModel changeOrderStatusToReadyAndNotifyCustomer(Long idOrder, String tokenWithPrefixBearer);
+  
     OrderModel changeOrderStatusToDelivered(Long orderPin, String tokenWithPrefixBearer);
 }

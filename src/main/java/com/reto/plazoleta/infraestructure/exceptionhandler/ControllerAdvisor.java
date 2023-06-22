@@ -8,7 +8,8 @@ import com.reto.plazoleta.domain.exception.RestaurantNotExistException;
 import com.reto.plazoleta.domain.exception.OrderInProcessException;
 import com.reto.plazoleta.domain.exception.OrderNotExistsException;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.exceptions.AuthenticationFailedException;
-import com.reto.plazoleta.infraestructure.drivenadapter.gateways.exceptions.UserDoesNotExistException;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.exceptions.MessagingApiFailedException;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.exceptions.UserDoesNotExistException;
 import com.reto.plazoleta.domain.exception.NoDataFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -104,5 +105,12 @@ public class ControllerAdvisor {
             OrderInProcessException orderInProcessException) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Collections.singletonMap(MESSAGE, orderInProcessException.getMessage()));
+    }
+
+    @ExceptionHandler(MessagingApiFailedException.class)
+    public ResponseEntity<Map<String, String>> handleMessagingApiFailedException(
+            MessagingApiFailedException ignoredMessagingApiFailedException) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.FAILED_IN_MESSAGING_MICROSERVICE.getMessage()));
     }
 }

@@ -6,7 +6,7 @@ import com.reto.plazoleta.domain.exception.InvalidDataException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
 import com.reto.plazoleta.domain.model.RestaurantModel;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
-import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
 import org.springframework.security.access.AccessDeniedException;
 
 public class AdminUseCase implements IAdminServicePort {

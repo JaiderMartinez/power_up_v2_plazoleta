@@ -1,7 +1,7 @@
 package com.reto.plazoleta.infraestructure.configuration.security.jwt.implementation;
 
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.IUserVerifierToken;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -9,10 +9,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @Service
-@RequiredArgsConstructor
 public class UserVerifierToken implements IUserVerifierToken {
 
     private final WebClient webClient;
+
+    public UserVerifierToken(@Qualifier("webClientUsers") WebClient webClient) {
+        this.webClient = webClient;
+    }
 
     @Override
     public boolean isValidTokenUser(String tokenWithPrefixBearer) {
