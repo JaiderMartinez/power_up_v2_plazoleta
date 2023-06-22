@@ -1,19 +1,23 @@
-package com.reto.plazoleta.infraestructure.drivenadapter.gateways;
+package com.reto.plazoleta.infraestructure.drivenadapter.webclients.adapter;
 
-import com.reto.plazoleta.infraestructure.drivenadapter.gateways.exceptions.UserDoesNotExistException;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.exceptions.UserDoesNotExistException;
 import com.reto.plazoleta.domain.gateways.IUserGateway;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-@RequiredArgsConstructor
 @Service
 public class UserGatewayImpl implements IUserGateway {
 
     private final WebClient webClient;
+
+    public UserGatewayImpl(@Qualifier("webClientUsers") WebClient webClient) {
+        this.webClient = webClient;
+    }
 
     @Override
     public User getUserById(Long idUser, String token) {

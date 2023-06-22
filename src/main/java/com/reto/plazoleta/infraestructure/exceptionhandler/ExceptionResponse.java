@@ -11,7 +11,8 @@ public enum ExceptionResponse {
     DISH_NOT_EXISTS("The dish not exist"),
     RESTAURANT_NOT_EXIST("The restaurant not exist"),
     ORDER_IN_PROCESS("The user has an order in process"),
-    ORDER_NOT_FOUND("Order not exist");
+    ORDER_NOT_FOUND("Order not exist"),
+    FAILED_IN_MESSAGING_MICROSERVICE("Unexpected failure in the messaging microservice");
 
     private final String message;
 

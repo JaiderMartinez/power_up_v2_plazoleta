@@ -1,12 +1,13 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
 import com.reto.plazoleta.domain.gateways.IUserGateway;
+import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.EmployeeRestaurantEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.OrderEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.RestaurantEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
-import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.IEmployeeRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.IOrderRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.repository.IRestaurantRepository;
@@ -49,6 +50,9 @@ class EmployeeControllerTest {
     @MockBean
     private JwtProvider jwtProvider;
 
+    @MockBean
+    private IMessengerServiceProviderPort messengerServiceProviderPort;
+
     @Autowired
     private IEmployeeRepository employeeRepository;
 
@@ -65,35 +69,25 @@ class EmployeeControllerTest {
     private static final String TOKEN_WITH_PREFIX_BEARER = "Bearer + token";
     private static final String ASSIGN_AN_EMPLOYEE_TO_AN_ORDER_PATH = "/micro-small-square/restaurant/order";
     private static final String REQUEST_PARAM_ID_ORDER = "idOrder";
+    private static final String CHANGE_ORDER_STATUS_AND_NOTIFY_CUSTOMER = "/micro-small-square/restaurant/order/";
 
     @BeforeAll
     void initializeTestEnvironment() {
         final RestaurantEntity restaurantEntitySaved = this.restaurantRepository.save(new RestaurantEntity(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L));
-        OrderEntity orderEntityWithoutListFromDishes = new OrderEntity();
-        orderEntityWithoutListFromDishes.setIdOrder(1L);
-        orderEntityWithoutListFromDishes.setDate(LocalDate.now());
-        orderEntityWithoutListFromDishes.setRestaurantEntity(restaurantEntitySaved);
-        orderEntityWithoutListFromDishes.setStatus(StatusOrder.PENDIENTE);
+        OrderEntity orderEntityWithoutListFromDishes = new OrderEntity(1L, null, LocalDate.now(), StatusOrder.PENDIENTE,
+                                                                        null, restaurantEntitySaved, null);
         this.orderRepository.save(orderEntityWithoutListFromDishes);
 
-        OrderEntity orderEntityWithoutListFromDishesToSave = new OrderEntity();
-        orderEntityWithoutListFromDishesToSave.setIdOrder(2L);
-        orderEntityWithoutListFromDishesToSave.setDate(LocalDate.now());
-        orderEntityWithoutListFromDishesToSave.setRestaurantEntity(restaurantEntitySaved);
-        orderEntityWithoutListFromDishesToSave.setStatus(StatusOrder.EN_PREPARACION);
+        OrderEntity orderEntityWithoutListFromDishesToSave = new OrderEntity(2L, null, LocalDate.now(), StatusOrder.EN_PREPARACION,
+                                                        null, restaurantEntitySaved, null);
         this.orderRepository.save(orderEntityWithoutListFromDishesToSave);
 
-        EmployeeRestaurantEntity employeeRestaurantSaved = this.employeeRepository.save(new EmployeeRestaurantEntity(1L, 1L, 1L));
-
+        EmployeeRestaurantEntity employeeRestaurantSavedWithIdOne = this.employeeRepository.save(new EmployeeRestaurantEntity(1L, 1L, 1L));
         this.employeeRepository.save(new EmployeeRestaurantEntity(2L, 2L, 2L));
 
-        OrderEntity orderEntityWithoutListFromDishesAndWithAEmployeeAssignedToTheOrder = new OrderEntity();
-        orderEntityWithoutListFromDishesAndWithAEmployeeAssignedToTheOrder.setIdOrder(3L);
-        orderEntityWithoutListFromDishesAndWithAEmployeeAssignedToTheOrder.setDate(LocalDate.now());
-        orderEntityWithoutListFromDishesAndWithAEmployeeAssignedToTheOrder.setRestaurantEntity(restaurantEntitySaved);
-        orderEntityWithoutListFromDishesAndWithAEmployeeAssignedToTheOrder.setStatus(StatusOrder.EN_PREPARACION);
-        orderEntityWithoutListFromDishesAndWithAEmployeeAssignedToTheOrder.setEmployeeRestaurantEntity(employeeRestaurantSaved);
+        OrderEntity orderEntityWithoutListFromDishesAndWithAEmployeeAssignedToTheOrder = new OrderEntity(3L, 2L, LocalDate.now(), StatusOrder.EN_PREPARACION,
+                                                                                                employeeRestaurantSavedWithIdOne, restaurantEntitySaved, null);
         this.orderRepository.save(orderEntityWithoutListFromDishesAndWithAEmployeeAssignedToTheOrder);
     }
 
@@ -225,5 +219,65 @@ class EmployeeControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("This order is in process"));
+    }
+
+    @Transactional
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamIdOrderIsValidAndTokenCorrect_shouldReturnStatusOkWithFieldIdOrderAndStatusReadyFromOrder() throws Exception {
+        User userEmployeeAuthenticated = new User(1L, "name", "lastName", 10937745L, "3094369283",
+                                                    EMAIL_EMPLOYEE, PASSWORD_EMPLOYEE, ROL_EMPLOYEE);
+        User userCustomerToNotify = new  User(2L, "name", "lastName", 10937745L, "3094369283",
+                                        "customer@customer.com", PASSWORD_EMPLOYEE, ROL_EMPLOYEE);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_EMPLOYEE, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_EMPLOYEE, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userEmployeeAuthenticated);
+        when(this.userGateway.getUserById(2L, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userCustomerToNotify);
+        this.mockMvc.perform(MockMvcRequestBuilders.patch(CHANGE_ORDER_STATUS_AND_NOTIFY_CUSTOMER + 3)
+                .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.idOrder").value(3))
+                .andExpect(jsonPath("$.status").value("LISTO"));
+    }
+
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamIdOrderInvalidBecauseOrderNotExistAndTokenCorrect_shouldReturnNotFoundStatus() throws Exception {
+        User userEmployeeAuthenticated = new User(1L, "name", "lastName", 10937745L, "3094369283",
+                                                    EMAIL_EMPLOYEE, PASSWORD_EMPLOYEE, ROL_EMPLOYEE);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_EMPLOYEE, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_EMPLOYEE, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userEmployeeAuthenticated);
+        this.mockMvc.perform(MockMvcRequestBuilders.patch(CHANGE_ORDER_STATUS_AND_NOTIFY_CUSTOMER + 100000)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.ORDER_NOT_FOUND.getMessage()));
+    }
+
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamIdOrderInvalidBecauseOrderIsInProcessAndTokenCorrect_shouldReturnConflictStatus() throws Exception {
+        User userEmployeeAuthenticated = new User(1L, "name", "lastName", 10937745L, "3094369283",
+                                                    EMAIL_EMPLOYEE, PASSWORD_EMPLOYEE, ROL_EMPLOYEE);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_EMPLOYEE, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_EMPLOYEE, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userEmployeeAuthenticated);
+        this.mockMvc.perform(MockMvcRequestBuilders.patch(CHANGE_ORDER_STATUS_AND_NOTIFY_CUSTOMER + 1)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("The order is in process"));
+    }
+
+    @Transactional
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamIdOrderValidButOrderDoesNotBelongToRestaurantAndTokenCorrect_shouldReturnNotFoundStatus() throws Exception {
+        this.restaurantRepository.save(new RestaurantEntity(2L, "name", "address", "3019273456",
+                                                                "http://image-logo.com", 10297345345L, 1L));
+        User userEmployeeAuthenticatedButOrderNotBelongToRestaurant = new User(2L, "name", "lastName", 10937745L, "3094369283", EMAIL_EMPLOYEE,
+                                                    PASSWORD_EMPLOYEE, ROL_EMPLOYEE);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_EMPLOYEE, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_EMPLOYEE, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userEmployeeAuthenticatedButOrderNotBelongToRestaurant);
+        this.mockMvc.perform(MockMvcRequestBuilders.patch(CHANGE_ORDER_STATUS_AND_NOTIFY_CUSTOMER + 2)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.ORDER_NOT_FOUND.getMessage()));
     }
 }

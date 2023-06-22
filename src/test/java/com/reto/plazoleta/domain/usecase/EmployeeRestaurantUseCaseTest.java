@@ -8,11 +8,12 @@ import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
 import com.reto.plazoleta.domain.model.OrderModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;
 import com.reto.plazoleta.domain.spi.IEmployeeRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
 import com.reto.plazoleta.domain.spi.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.IRestaurantPersistencePort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.entity.StatusOrder;
-import com.reto.plazoleta.infraestructure.drivenadapter.gateways.User;
+import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.User;
 import com.reto.plazoleta.domain.exception.NoDataFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,6 +55,9 @@ class EmployeeRestaurantUseCaseTest {
 
     @Mock
     private IOrderPersistencePort orderPersistencePort;
+
+    @Mock
+    private IMessengerServiceProviderPort messengerServiceProviderPort;
 
     private static final String TOKEN_WITH_PREFIX_BEARER = "token";
     private static final String EMAIL_TAKEN_FROM_TOKEN = "owner@owner.com";
@@ -316,6 +320,98 @@ class EmployeeRestaurantUseCaseTest {
         OrderNotExistsException messageException = assertThrows(OrderNotExistsException.class,
                 () ->this.employeeRestaurantUseCase.assignEmployeeToOrderAndChangeStatusToInPreparation(idOrdersRequest, TOKEN_WITH_PREFIX_BEARER));
         //Then
-        assertEquals("The restaurant no belongs to this restaurant", messageException.getMessage());
+        assertEquals("The employee no belongs to this restaurant", messageException.getMessage());
+    }
+
+    @Test
+    void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamCorrect_shouldReturnOrderModelUpdated() {
+        //Given
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283",
+                EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        EmployeeRestaurantModel employeeRestaurantAuthenticated = new EmployeeRestaurantModel(1L, 1L, 1L);
+        RestaurantModel restaurantWhereEmployeeWorks = new RestaurantModel(1L, "name", "address", "3019273456",
+                "http://image-logo.com", 10297345345L, 1L);
+        OrderModel orderModelExpected = new OrderModel(1L, 2L, LocalDate.now(), StatusOrder.EN_PREPARACION, employeeRestaurantAuthenticated, restaurantWhereEmployeeWorks);
+        User customerOwnerFromOrder = new User(2L, "name", "lastName", 10937745L, "3094369283",
+                "customer@customer.com", "123", "CLIENTE");
+        when(this.jwtProvider.getAuthentication(TOKEN_WITH_PREFIX_BEARER)).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userEmployeeAuthenticatedByToken);
+        when(this.userGateway.getUserById(orderModelExpected.getIdUserCustomer(), TOKEN_WITH_PREFIX_BEARER)).thenReturn(customerOwnerFromOrder);
+        when(this.employeeRestaurantPersistencePort.findByIdUserEmployee(1L)).thenReturn(employeeRestaurantAuthenticated);
+        when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantWhereEmployeeWorks);
+        when(this.orderPersistencePort.findByIdOrder(1L)).thenReturn(orderModelExpected);
+        when(this.orderPersistencePort.saveOrder(orderModelExpected)).thenReturn(orderModelExpected);
+        //When
+        OrderModel orderModelSaved = this.employeeRestaurantUseCase.changeOrderStatusToReadyAndNotifyCustomer(1L, TOKEN_WITH_PREFIX_BEARER);
+        //Then
+        assertEquals(orderModelExpected.getIdOrder(), orderModelSaved.getIdOrder());
+        assertEquals(orderModelExpected.getDate(), orderModelSaved.getDate());
+        assertEquals(orderModelExpected.getRestaurantModel().getIdRestaurant(), orderModelSaved.getRestaurantModel().getIdRestaurant());
+        assertEquals(StatusOrder.LISTO, orderModelSaved.getStatus());
+    }
+
+    @Test
+    void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamIdOrderInvalidAndTokenValid_shouldThrowOrderNotExistsException() {
+        //Given
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283",
+                EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        EmployeeRestaurantModel employeeRestaurantAuthenticated = new EmployeeRestaurantModel(1L, 1L, 1L);
+        RestaurantModel restaurantWhereEmployeeWorks = new RestaurantModel(1L, "name", "address", "3019273456",
+                "http://image-logo.com", 10297345345L, 1L);
+        when(this.orderPersistencePort.findByIdOrder(1L)).thenReturn(null);
+        when(this.jwtProvider.getAuthentication(TOKEN_WITH_PREFIX_BEARER)).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userEmployeeAuthenticatedByToken);
+        when(this.employeeRestaurantPersistencePort.findByIdUserEmployee(1L)).thenReturn(employeeRestaurantAuthenticated);
+        when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantWhereEmployeeWorks);
+        //When
+        OrderNotExistsException messageException = assertThrows(OrderNotExistsException.class,
+                () -> this.employeeRestaurantUseCase.changeOrderStatusToReadyAndNotifyCustomer(1L, TOKEN_WITH_PREFIX_BEARER));
+        //Then
+        assertEquals("Order not exists", messageException.getMessage());
+    }
+
+    @Test
+    void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamCorrectButOrderIsInProcess_shouldThrowOrderInProcessException() {
+        //Given
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283",
+                EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        EmployeeRestaurantModel employeeRestaurantAuthenticated = new EmployeeRestaurantModel(1L, 1L, 1L);
+        RestaurantModel restaurantWhereEmployeeWorks = new RestaurantModel(1L, "name", "address", "3019273456",
+                "http://image-logo.com", 10297345345L, 1L);
+        OrderModel orderModelExpected = new OrderModel(1L, 2L, LocalDate.now(), StatusOrder.PENDIENTE, employeeRestaurantAuthenticated, restaurantWhereEmployeeWorks);
+        when(this.jwtProvider.getAuthentication(TOKEN_WITH_PREFIX_BEARER)).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userEmployeeAuthenticatedByToken);
+        when(this.employeeRestaurantPersistencePort.findByIdUserEmployee(1L)).thenReturn(employeeRestaurantAuthenticated);
+        when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantWhereEmployeeWorks);
+        when(this.orderPersistencePort.findByIdOrder(1L)).thenReturn(orderModelExpected);
+        //When
+        OrderInProcessException messageException = assertThrows(OrderInProcessException.class,
+                () -> this.employeeRestaurantUseCase.changeOrderStatusToReadyAndNotifyCustomer(1L, TOKEN_WITH_PREFIX_BEARER));
+        //Then
+        assertEquals("The order is in process", messageException.getMessage());
+    }
+
+    @Test
+    void test_changeOrderStatusToReadyAndNotifyCustomer_withRequestParamInvalidBecauseOrderDoesNotBelongToEmployeeRestaurant_shouldThrowOrderNotExistsException() {
+        //Given
+        User userEmployeeAuthenticatedByToken = new User(1L, "name", "lastName", 10937745L, "3094369283",
+                EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "123", "EMPLEADO");
+        EmployeeRestaurantModel employeeRestaurantAuthenticated = new EmployeeRestaurantModel(1L, 1L, 1L);
+        RestaurantModel restaurantWhereEmployeeWorks = new RestaurantModel(1L, "name", "address", "3019273456",
+                "http://image-logo.com", 10297345345L, 1L);
+        RestaurantModel restaurantOfTheOrder = new RestaurantModel(2L, "name", "address", "3019273456",
+                "http://image-logo.com", 10297345345L, 1L);
+
+        OrderModel orderModelExpected = new OrderModel(1L, 2L, LocalDate.now(), StatusOrder.EN_PREPARACION, employeeRestaurantAuthenticated, restaurantOfTheOrder);
+        when(this.jwtProvider.getAuthentication(TOKEN_WITH_PREFIX_BEARER)).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userEmployeeAuthenticatedByToken);
+        when(this.employeeRestaurantPersistencePort.findByIdUserEmployee(1L)).thenReturn(employeeRestaurantAuthenticated);
+        when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantWhereEmployeeWorks);
+        when(this.orderPersistencePort.findByIdOrder(1L)).thenReturn(orderModelExpected);
+        //When
+        OrderNotExistsException messageException = assertThrows(OrderNotExistsException.class,
+                () -> this.employeeRestaurantUseCase.changeOrderStatusToReadyAndNotifyCustomer(1L, TOKEN_WITH_PREFIX_BEARER));
+        //Then
+        assertEquals("Order not exists", messageException.getMessage());
     }
 }

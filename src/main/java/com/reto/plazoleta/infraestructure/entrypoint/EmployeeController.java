@@ -1,6 +1,7 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
 import com.reto.plazoleta.application.dto.response.AssignedOrdersResponseDto;
+import com.reto.plazoleta.application.dto.response.OrderNotificationResponseDto;
 import com.reto.plazoleta.application.dto.response.OrdersPaginatedResponseDto;
 import com.reto.plazoleta.application.handler.IEmployeeRestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -68,5 +70,22 @@ public class EmployeeController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithPrefixBearer) {
         return new ResponseEntity<>(this.employeeRestaurantService
                 .assignOrderAndChangeStatusToInPreparation(idOrders, tokenWithPrefixBearer), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Change order status to ready and notify customer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The order updated status a ready and notified the customer"),
+            @ApiResponse(responseCode = "403", description = "Role other than employee"),
+            @ApiResponse(responseCode = "404", description = "Order not found"),
+            @ApiResponse(responseCode = "404", description = "Order does not belong to the restaurant"),
+            @ApiResponse(responseCode = "409", description = "The order found in process")
+    })
+    @PatchMapping(value = "restaurant/order/{idOrder}")
+    @PreAuthorize(value = "hasRole('EMPLEADO')")
+    public ResponseEntity<OrderNotificationResponseDto> changeOrderStatusToReadyAndNotifyCustomer(
+            @Parameter( description = "Order record identification", schema = @Schema(implementation = Long.class))
+            @PathVariable(name = "idOrder") Long idOrder,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenWithPrefixBearer) {
+        return ResponseEntity.ok(this.employeeRestaurantService.changeOrderStatusToReadyAndNotifyCustomer(idOrder, tokenWithPrefixBearer));
     }
 }
