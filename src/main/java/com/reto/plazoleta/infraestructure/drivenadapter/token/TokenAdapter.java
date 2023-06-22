@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 public class TokenAdapter implements ITokenServiceProviderPort {
 
     private final JwtProvider jwtProvider;
+
     @Override
     public String getEmailFromToken(String tokenWithPrefixBearer) {
         String tokenWithoutPrefix = tokenWithPrefixBearer.replace("Bearer ", "").trim();

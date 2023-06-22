@@ -47,7 +47,7 @@ public class EmployeeRestaurantService implements IEmployeeRestaurantService {
     @Override
     public OrderDeliveredResponseDto changeOrderStatusToDelivered(Long orderPin, String tokenWithPrefixBearer) {
         return this.employeeResponseMapper.orderModelToOrderDeliveredResponseDto(
-                this.employeeRestaurantServicePort.changeOrderStatusToDelivered(orderPin, tokenWithPrefixBearer)
+                this.employeeServicePort.changeOrderStatusToDelivered(orderPin, tokenWithPrefixBearer)
         );
     }
 }

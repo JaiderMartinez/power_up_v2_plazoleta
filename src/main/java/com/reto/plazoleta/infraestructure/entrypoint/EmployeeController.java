@@ -96,7 +96,7 @@ public class EmployeeController {
             @ApiResponse(responseCode = "200", description = "Updated order with delivered status"),
             @ApiResponse(responseCode = "403", description = "Role other than employee", content = @Content),
             @ApiResponse(responseCode = "404", description = "Order not found", content = @Content),
-            @ApiResponse(responseCode = "404", description = "The restaurant that the employee belongs to does not exist", content = @Content),
+            @ApiResponse(responseCode = "404", description = "The employee no belongs to restaurant from order", content = @Content),
             @ApiResponse(responseCode = "409", description = "The order has a status other than ready", content = @Content)
     })
     @PatchMapping(value = "restaurant/order/status/delivered/{pin}")
