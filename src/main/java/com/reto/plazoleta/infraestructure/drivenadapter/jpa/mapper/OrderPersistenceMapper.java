@@ -79,7 +79,7 @@ public class OrderPersistenceMapper {
     }
 
     private DishModel convertDishEntityToDishModel(DishEntity dishEntity, OrderDishEntity orderDishEntity) {
-        String dishType = dishEntity.getTypeDish().toString();
+        String dishType = dishEntity.getCategoryEntity().getName().toString();
         if (dishType.equalsIgnoreCase(TypeDish.CARNE.toString())) {
             return convertToMeatDishModel(dishEntity, orderDishEntity.getGramsDish());
         } else if (dishType.equalsIgnoreCase(TypeDish.SOPA.toString())) {
@@ -96,7 +96,7 @@ public class OrderPersistenceMapper {
     private CategoryModel convertEntityToCategoryModel(CategoryEntity categoryEntity) {
         return new CategoryModel(
                 categoryEntity.getIdCategory(),
-                categoryEntity.getName(),
+                categoryEntity.getName().toString(),
                 categoryEntity.getDescription()
         );
     }

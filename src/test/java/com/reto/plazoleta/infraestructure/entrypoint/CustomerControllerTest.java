@@ -13,6 +13,7 @@ import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.OrderDishEnti
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.OrderEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.RestaurantEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.StatusOrder;
+import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.TypeDish;
 import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.UserDto;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.ICategoryRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.IDishRepository;
@@ -103,7 +104,7 @@ class CustomerControllerTest {
         restaurantRepository.saveAll(restaurantList);
 
         listDishEntities = new ArrayList<>();
-        final CategoryEntity categoryEntityToSave = new CategoryEntity(1L, "Plato tipico", "Comida real");
+        final CategoryEntity categoryEntityToSave = new CategoryEntity(1L, TypeDish.CARNE, "Comida real");
         this.categoryRepository.save(categoryEntityToSave);
 
         listDishEntities.add(new DishEntity(1L, "BOWL MONTAÑERO", "Carne desmechada, Lentejas en guiso con salchichas", 35000.0, "http://image.png",

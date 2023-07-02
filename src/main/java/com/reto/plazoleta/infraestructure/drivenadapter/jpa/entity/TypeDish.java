@@ -4,5 +4,5 @@ public enum TypeDish {
     CARNE,
     SOPA,
     POSTRE_FLAN,
-    POSTRE_HELADO;
+    POSTRE_HELADO
 }
