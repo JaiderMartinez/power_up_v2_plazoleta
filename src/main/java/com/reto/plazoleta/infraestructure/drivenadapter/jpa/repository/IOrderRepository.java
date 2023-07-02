@@ -13,4 +13,6 @@ public interface IOrderRepository extends JpaRepository<OrderEntity, Long> {
     List<OrderEntity> findByIdUserCustomerAndRestaurantEntityIdRestaurant(Long userCustomerId, Long restaurantId);
 
     Page<OrderEntity> findAllByRestaurantEntityIdRestaurantAndStatus(Pageable pageable, Long idRestaurant, StatusOrder status);
+
+    List<OrderEntity> findAllByRestaurantEntityIdRestaurantAndStatus(Long idRestaurant, StatusOrder status);
 }

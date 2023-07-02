@@ -17,4 +17,6 @@ public interface IEmployeeServicePort {
     OrderModel changeOrderStatusToReadyAndNotifyCustomer(Long idOrder, String tokenWithPrefixBearer);
   
     OrderModel changeOrderStatusToDelivered(Long orderPin, String tokenWithPrefixBearer);
+
+    OrderModel takeOrderByPriorityInStatusEarring();
 }

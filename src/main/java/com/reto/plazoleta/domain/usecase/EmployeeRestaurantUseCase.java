@@ -4,6 +4,7 @@ import com.reto.plazoleta.domain.api.IEmployeeServicePort;
 import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
 import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
 import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
+import com.reto.plazoleta.domain.model.OrderPriorityOrganizer;
 import com.reto.plazoleta.domain.model.User;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 
 public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
 
@@ -198,5 +200,33 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
         if (!idRestaurantFromOrder.equals(idRestaurantWhereEmployeeWorks)) {
             throw new OrderNotExistsException("The employee no belongs to this restaurant");
         }
+    }
+
+    @Override
+    public OrderModel takeOrderByPriorityInStatusEarring() {
+        String tokenWithPrefixBearer = this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated();
+        User authenticatedEmployeeData = getUserAuthenticated(tokenWithPrefixBearer);
+        EmployeeRestaurantModel restaurantEmployeeData = getRestaurantEmployeeWhereWorksByIdUserEmployee(authenticatedEmployeeData.getIdUser());
+        List<OrderModel> ordersFromARestaurantWithoutOrganizing = getAllOrdersForARestaurantInPendingStatus(restaurantEmployeeData.getIdRestaurant());
+        PriorityQueue<OrderModel> priorityQueue = new PriorityQueue<>(ordersFromARestaurantWithoutOrganizing.size(), new OrderPriorityOrganizer());
+        priorityQueue.addAll(ordersFromARestaurantWithoutOrganizing);
+        return addEmployeeToOrderAndChangeTheirStatusInPreparation(priorityQueue.poll(), restaurantEmployeeData);
+    }
+
+    private User getUserAuthenticated(String tokenWithPrefixBearer) {
+        return this.userGateway.getUserByEmailInTheToken(getEmailFromUserAuthenticatedByToken(tokenWithPrefixBearer), tokenWithPrefixBearer);
+    }
+
+    private List<OrderModel> getAllOrdersForARestaurantInPendingStatus(Long idRestaurantWhereWorkEmployee) {
+        List<OrderModel> orders = this.orderPersistencePort.findAllOrderByRestaurantIdAndStatusOrderEarring(idRestaurantWhereWorkEmployee);
+        if (orders.isEmpty())
+            throw new NoDataFoundException();
+        return orders;
+    }
+
+    private OrderModel addEmployeeToOrderAndChangeTheirStatusInPreparation(OrderModel orderModelToUpdated, EmployeeRestaurantModel chef) {
+        orderModelToUpdated.setStatus(StatusOrder.EN_PREPARACION);
+        orderModelToUpdated.setEmployeeRestaurantModel(chef);
+        return this.orderPersistencePort.saveOrder(orderModelToUpdated);
     }
 }

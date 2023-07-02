@@ -1,6 +1,6 @@
 package com.reto.plazoleta.infraestructure.drivenadapter.jpa.persistence;
 
-import com.reto.plazoleta.domain.model.DishModel;
+import com.reto.plazoleta.domain.model.dishes.DishModel;
 import com.reto.plazoleta.domain.spi.persistence.IDishPersistencePort;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.mapper.IDishEntityMapper;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.IDishRepository;

@@ -8,7 +8,7 @@ import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
 import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
 import com.reto.plazoleta.domain.model.User;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
-import com.reto.plazoleta.domain.model.DishModel;
+import com.reto.plazoleta.domain.model.dishes.DishModel;
 import com.reto.plazoleta.domain.model.OrderDishModel;
 import com.reto.plazoleta.domain.model.OrderModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;

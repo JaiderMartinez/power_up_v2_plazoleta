@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -34,6 +36,9 @@ public class DishEntity {
     private String urlImageDish;
     @Column(name = "activo")
     private Boolean state;
+    @Column(name = "tipo_plato")
+    @Enumerated(EnumType.STRING)
+    private TypeDish typeDish;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_restaurante", referencedColumnName = "idRestaurant")
@@ -42,4 +47,16 @@ public class DishEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_categoria", referencedColumnName = "idCategory")
     private CategoryEntity categoryEntity;
+
+    public DishEntity(Long idDish, String name, String description, Double price, String urlImageDish,
+                      Boolean state, RestaurantEntity restaurantEntity, CategoryEntity categoryEntity) {
+        this.idDish = idDish;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.urlImageDish = urlImageDish;
+        this.state = state;
+        this.restaurantEntity = restaurantEntity;
+        this.categoryEntity = categoryEntity;
+    }
 }

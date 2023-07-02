@@ -14,7 +14,7 @@ import com.reto.plazoleta.application.mapper.responsemapper.IOwnerResponseMapper
 import com.reto.plazoleta.application.mapper.responsemapper.IEmployeeResponseMapper;
 import com.reto.plazoleta.domain.api.IEmployeeServicePort;
 import com.reto.plazoleta.domain.api.IOwnerRestaurantServicePort;
-import com.reto.plazoleta.domain.model.DishModel;
+import com.reto.plazoleta.domain.model.dishes.DishModel;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -38,4 +38,10 @@ public class OrderDishEntity {
 
     @Column(name = "cantidad")
     private Integer amount;
+    @Column(name = "gramos")
+    private Integer gramsDish;
+    @Column(name = "acompañante_plato")
+    private String sideDish;
+    @Column(name = "sabor_postre")
+    private String flavor;
 }
