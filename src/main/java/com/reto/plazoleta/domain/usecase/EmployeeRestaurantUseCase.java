@@ -4,12 +4,12 @@ import com.reto.plazoleta.domain.api.IEmployeeServicePort;
 import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
 import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
 import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
-import com.reto.plazoleta.domain.model.OrderPriorityOrganizer;
+import com.reto.plazoleta.domain.model.orders.OrderPriorityOrganizer;
 import com.reto.plazoleta.domain.model.User;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
 import com.reto.plazoleta.domain.model.MessageSmsModel;
-import com.reto.plazoleta.domain.model.OrderModel;
+import com.reto.plazoleta.domain.model.orders.OrderModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;
 import com.reto.plazoleta.domain.spi.persistence.IEmployeeRestaurantPersistencePort;
 import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
@@ -208,9 +208,9 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
         User authenticatedEmployeeData = getUserAuthenticated(tokenWithPrefixBearer);
         EmployeeRestaurantModel restaurantEmployeeData = getRestaurantEmployeeWhereWorksByIdUserEmployee(authenticatedEmployeeData.getIdUser());
         List<OrderModel> ordersFromARestaurantWithoutOrganizing = getAllOrdersForARestaurantInPendingStatus(restaurantEmployeeData.getIdRestaurant());
-        PriorityQueue<OrderModel> priorityQueue = new PriorityQueue<>(ordersFromARestaurantWithoutOrganizing.size(), new OrderPriorityOrganizer());
-        priorityQueue.addAll(ordersFromARestaurantWithoutOrganizing);
-        return addEmployeeToOrderAndChangeTheirStatusInPreparation(priorityQueue.poll(), restaurantEmployeeData);
+        PriorityQueue<OrderModel> highestPriorityOrderQueue = new PriorityQueue<>(ordersFromARestaurantWithoutOrganizing.size(), new OrderPriorityOrganizer().reversed());
+        highestPriorityOrderQueue.addAll(ordersFromARestaurantWithoutOrganizing);
+        return addEmployeeToOrderAndChangeTheirStatusInPreparation(highestPriorityOrderQueue.poll(), restaurantEmployeeData);
     }
 
     private User getUserAuthenticated(String tokenWithPrefixBearer) {
@@ -228,5 +228,16 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
         orderModelToUpdated.setStatus(StatusOrder.EN_PREPARACION);
         orderModelToUpdated.setEmployeeRestaurantModel(chef);
         return this.orderPersistencePort.saveOrder(orderModelToUpdated);
+    }
+
+    @Override
+    public List<OrderModel> pendingOrdersWithLowPriority() {
+        String tokenWithPrefixBearer = this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated();
+        User employee = getUserAuthenticated(tokenWithPrefixBearer);
+        EmployeeRestaurantModel restaurantEmployeeData = getRestaurantEmployeeWhereWorksByIdUserEmployee(employee.getIdUser());
+        List<OrderModel> ordersFromARestaurantWithoutOrganizing = getAllOrdersForARestaurantInPendingStatus(restaurantEmployeeData.getIdRestaurant());
+        PriorityQueue<OrderModel> lowestOrderPriorityQueue = new PriorityQueue<>(ordersFromARestaurantWithoutOrganizing.size(), new OrderPriorityOrganizer());
+        lowestOrderPriorityQueue.addAll(ordersFromARestaurantWithoutOrganizing);
+        return new ArrayList<>(lowestOrderPriorityQueue);
     }
 }

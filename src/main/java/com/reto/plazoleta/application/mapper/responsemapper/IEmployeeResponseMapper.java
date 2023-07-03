@@ -5,7 +5,7 @@ import com.reto.plazoleta.application.dto.response.OrderDeliveredResponseDto;
 import com.reto.plazoleta.application.dto.response.OrderNotificationResponseDto;
 import com.reto.plazoleta.application.dto.response.RestaurantEmployeeResponseDto;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
-import com.reto.plazoleta.domain.model.OrderModel;
+import com.reto.plazoleta.domain.model.orders.OrderModel;
 import org.mapstruct.Mapper;
 
 @Mapper

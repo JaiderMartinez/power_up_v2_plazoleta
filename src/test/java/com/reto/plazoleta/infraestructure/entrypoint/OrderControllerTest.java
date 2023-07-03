@@ -47,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class OrderControllerTest {
 
     private static final String TAKE_ORDER_PATH = "/micro-small-square/restaurant/take-order";
+    private static final String PENDING_ORDERS_WITH_LOW_PRIORITY_PATH = "/micro-small-square/restaurant/pending-orders";
     private static final String EMAIL_EMPLOYEE = "employee@employee";
     private static final String PASSWORD_EMPLOYEE = "123";
     private static final String ROL_EMPLOYEE = "EMPLEADO";
@@ -72,10 +73,10 @@ class OrderControllerTest {
     void initializeTestEnvironment() {
         final RestaurantEntity restaurantEntitySaved = this.restaurantRepository.save(new RestaurantEntity(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L));
-        this.categoryRepository.save(new CategoryEntity(1L, TypeDish.SOPA, ""));
+        this.categoryRepository.save(new CategoryEntity(1L, TypeDish.SOPAS, ""));
         this.categoryRepository.save(new CategoryEntity(2L, TypeDish.CARNE, ""));
         DishEntity dishSoup = this.dishRepository.save(new DishEntity(1L, "Caldo", "description", 300000.0, "http://image.com", true,
-                                                        restaurantEntitySaved, new CategoryEntity(1L, TypeDish.SOPA, ""))
+                                                        restaurantEntitySaved, new CategoryEntity(1L, TypeDish.SOPAS, ""))
         );
         DishEntity dishMeat = this.dishRepository.save(new DishEntity(2L, "Brochetas de cordero", "description", 300000.0, "http://image.com", true,
                                                         restaurantEntitySaved, new CategoryEntity(2L, TypeDish.CARNE, ""))
@@ -117,6 +118,42 @@ class OrderControllerTest {
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_EMPLOYEE, TOKEN_WITH_PREFIX_BEARER)).thenReturn(employee);
         this.orderRepository.deleteAll();
         this.mockMvc.perform(MockMvcRequestBuilders.get(TAKE_ORDER_PATH)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
+                .andExpect(status().isNoContent());
+    }
+
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_pendingOrdersWithLowPriority_withRequestCorrect_shouldReturnOkStatusAndOrderList() throws Exception {
+        User employee = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_EMPLOYEE, ROL_EMPLOYEE);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_EMPLOYEE, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_EMPLOYEE, TOKEN_WITH_PREFIX_BEARER)).thenReturn(employee);
+        this.mockMvc.perform(MockMvcRequestBuilders.get(PENDING_ORDERS_WITH_LOW_PRIORITY_PATH)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].idOrder").value(1))
+                .andExpect(jsonPath("$[0].date").value(LocalDate.now().toString()))
+                .andExpect(jsonPath("$[0].status").value("PENDIENTE"))
+                .andExpect(jsonPath("$[0].dishes[0].idDish").value(1))
+                .andExpect(jsonPath("$[0].dishes[0].typeDish").value("Sopas"))
+                .andExpect(jsonPath("$[0].dishes[0].sideDish").value("Arroz"))
+                .andExpect(jsonPath("$[1].idOrder").value(2))
+                .andExpect(jsonPath("$[1].date").value(LocalDate.now().toString()))
+                .andExpect(jsonPath("$[1].status").value("PENDIENTE"))
+                .andExpect(jsonPath("$[1].dishes[0].idDish").value(2))
+                .andExpect(jsonPath("$[1].dishes[0].typeDish").value("Carne"))
+                .andExpect(jsonPath("$[1].dishes[0].grams").value(500));
+    }
+
+    @Transactional
+    @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
+    @Test
+    void test_pendingOrdersWithLowPriority_withRequestCorrectButNoOrdersFound_shouldReturnNotContentStatus() throws Exception {
+        User employee = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_EMPLOYEE, ROL_EMPLOYEE);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_EMPLOYEE, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_EMPLOYEE, TOKEN_WITH_PREFIX_BEARER)).thenReturn(employee);
+        this.orderRepository.deleteAll();
+        this.mockMvc.perform(MockMvcRequestBuilders.get(PENDING_ORDERS_WITH_LOW_PRIORITY_PATH)
                         .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
                 .andExpect(status().isNoContent());
     }

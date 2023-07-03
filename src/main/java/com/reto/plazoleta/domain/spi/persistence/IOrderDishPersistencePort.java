@@ -1,6 +1,6 @@
 package com.reto.plazoleta.domain.spi.persistence;
 
-import com.reto.plazoleta.domain.model.OrderDishModel;
+import com.reto.plazoleta.domain.model.orders.OrderDishModel;
 
 import java.util.List;
 

@@ -11,7 +11,6 @@ import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.CategoryEntit
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.DishEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.RestaurantEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.TypeDish;
-import com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.request.UserDto;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.ICategoryRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.IDishRepository;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.repository.IRestaurantRepository;
@@ -79,10 +78,10 @@ class OwnerControllerTest {
     void initializeTestEnvironment() {
         this.restaurantRepository.save(new RestaurantEntity(1L, "salado", "bellavista",
                 "+123456779", "urlLogo", 108438453L, 15L));
-        this.categoryRepository.save(new CategoryEntity(1L, TypeDish.SOPA, "salado"));
+        this.categoryRepository.save(new CategoryEntity(1L, TypeDish.SOPAS, "salado"));
 
         this.dishRepository.save(new DishEntity(1L, "name", "description", 300000.0, "http://image.com", true, new RestaurantEntity(1L, "salado",
-                "bellavista", "+123456779", "urlLogo", 108438453L, 15L), new CategoryEntity(1L, TypeDish.SOPA, "salado")));
+                "bellavista", "+123456779", "urlLogo", 108438453L, 15L), new CategoryEntity(1L, TypeDish.SOPAS, "salado")));
     }
 
     @WithMockUser(username = USERNAME_OWNER, password = PASSWORD_OWNER, roles = {ROL_OWNER})
@@ -156,7 +155,7 @@ class OwnerControllerTest {
     void test_updateDishPriceAndDescription_withUpdateDishRequestDto_ShouldStatusOk() throws Exception {
         final DishEntity dishSavedEntityExpected = this.dishRepository.save(new DishEntity(1L, "name", "descriptionDish", 15000.0, "http://imagen.jpeg",
                 true, new RestaurantEntity(1L, "salado", "bellavista", "+123456779", "urlLogo", 108438453L, 15L),
-                        new CategoryEntity(1L, TypeDish.SOPA, "salado")));
+                        new CategoryEntity(1L, TypeDish.SOPAS, "salado")));
         UpdateDishRequestDto updateDishRequestDto = new UpdateDishRequestDto(1L, 1L, 20.0, "description");
 
         mockMvc.perform(MockMvcRequestBuilders.patch(UPDATE_DISH)
@@ -174,7 +173,7 @@ class OwnerControllerTest {
     void test_updateDishPriceAndDescription_withInvalidRestaurant_ShouldThrowObjectNotFoundExceptionRestaurantNotPermitted() throws Exception {
         RestaurantEntity restaurantOwnerDish = new RestaurantEntity(2L, "salado", "bellavista", "+123456779", "urlLogo", 108438453L, 15L);
 
-        DishEntity dish = new DishEntity(1L, "name", "descriptionDish", 15000.0, "http://imagen.jpeg", true, restaurantOwnerDish, new CategoryEntity(1L, TypeDish.SOPA, "salado"));
+        DishEntity dish = new DishEntity(1L, "name", "descriptionDish", 15000.0, "http://imagen.jpeg", true, restaurantOwnerDish, new CategoryEntity(1L, TypeDish.SOPAS, "salado"));
         restaurantRepository.save(restaurantOwnerDish);
         dishRepository.save(dish);
 
@@ -266,7 +265,7 @@ class OwnerControllerTest {
         restaurantEntityExpected.setIdRestaurant(2L);
         restaurantEntityExpected.setIdOwner(18L);
         this.restaurantRepository.save(restaurantEntityExpected);
-        this.dishRepository.save(new DishEntity(1L, "name", "description", 300000.0, "http://image.com", true, restaurantEntityExpected, new CategoryEntity(1L, TypeDish.SOPA, "salado")));
+        this.dishRepository.save(new DishEntity(1L, "name", "description", 300000.0, "http://image.com", true, restaurantEntityExpected, new CategoryEntity(1L, TypeDish.SOPAS, "salado")));
 
         User userEmployeeFoundByTokenWhereNotHasARestaurant = new User();
         userEmployeeFoundByTokenWhereNotHasARestaurant.setIdUser(15L);

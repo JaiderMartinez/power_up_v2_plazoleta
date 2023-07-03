@@ -1,6 +1,6 @@
 package com.reto.plazoleta.domain.spi.persistence;
 
-import com.reto.plazoleta.domain.model.OrderModel;
+import com.reto.plazoleta.domain.model.orders.OrderModel;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.StatusOrder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
