@@ -19,4 +19,6 @@ public interface IEmployeeServicePort {
     OrderModel changeOrderStatusToDelivered(Long orderPin, String tokenWithPrefixBearer);
 
     OrderModel takeOrderByPriorityInStatusEarring();
+
+    List<OrderModel> pendingOrdersWithLowPriority();
 }

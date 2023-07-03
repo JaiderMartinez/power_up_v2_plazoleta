@@ -25,7 +25,7 @@ public class OrderPriorityOrganizer implements Comparator<OrderModel> {
     public int compare(OrderModel order, OrderModel nextOrder) {
         int orderPriority = calculateOrderDishesPriorityTotal(order.getOrdersDishesModel());
         int nextOrderPriority = calculateOrderDishesPriorityTotal(nextOrder.getOrdersDishesModel());
-        return Integer.compare(nextOrderPriority, orderPriority);
+        return Integer.compare(orderPriority, nextOrderPriority);
     }
 
     private int calculateOrderDishesPriorityTotal(List<OrderDishModel> orderDishes) {

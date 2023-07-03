@@ -73,10 +73,10 @@ class OrderControllerTest {
     void initializeTestEnvironment() {
         final RestaurantEntity restaurantEntitySaved = this.restaurantRepository.save(new RestaurantEntity(1L, "name", "address", "3019273456",
                 "http://image-logo.com", 10297345345L, 1L));
-        this.categoryRepository.save(new CategoryEntity(1L, TypeDish.SOPA, ""));
+        this.categoryRepository.save(new CategoryEntity(1L, TypeDish.SOPAS, ""));
         this.categoryRepository.save(new CategoryEntity(2L, TypeDish.CARNE, ""));
         DishEntity dishSoup = this.dishRepository.save(new DishEntity(1L, "Caldo", "description", 300000.0, "http://image.com", true,
-                                                        restaurantEntitySaved, new CategoryEntity(1L, TypeDish.SOPA, ""))
+                                                        restaurantEntitySaved, new CategoryEntity(1L, TypeDish.SOPAS, ""))
         );
         DishEntity dishMeat = this.dishRepository.save(new DishEntity(2L, "Brochetas de cordero", "description", 300000.0, "http://image.com", true,
                                                         restaurantEntitySaved, new CategoryEntity(2L, TypeDish.CARNE, ""))
@@ -134,8 +134,8 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$[0].idOrder").value(1))
                 .andExpect(jsonPath("$[0].date").value(LocalDate.now().toString()))
                 .andExpect(jsonPath("$[0].status").value("PENDIENTE"))
-                .andExpect(jsonPath("$[0].dishes[0].idDish").value(2))
-                .andExpect(jsonPath("$[0].dishes[0].typeDish").value("Caldo"))
+                .andExpect(jsonPath("$[0].dishes[0].idDish").value(1))
+                .andExpect(jsonPath("$[0].dishes[0].typeDish").value("Sopas"))
                 .andExpect(jsonPath("$[0].dishes[0].sideDish").value("Arroz"))
                 .andExpect(jsonPath("$[1].idOrder").value(2))
                 .andExpect(jsonPath("$[1].date").value(LocalDate.now().toString()))
