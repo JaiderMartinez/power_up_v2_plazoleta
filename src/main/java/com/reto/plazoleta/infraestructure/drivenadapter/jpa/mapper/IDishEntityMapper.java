@@ -1,6 +1,6 @@
 package com.reto.plazoleta.infraestructure.drivenadapter.jpa.mapper;
 
-import com.reto.plazoleta.domain.model.DishModel;
+import com.reto.plazoleta.domain.model.dishes.DishModel;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.DishEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

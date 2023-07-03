@@ -3,7 +3,10 @@ package com.reto.plazoleta.domain.usecase;
 import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
 import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
 import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
+import com.reto.plazoleta.domain.model.CategoryModel;
+import com.reto.plazoleta.domain.model.OrderDishModel;
 import com.reto.plazoleta.domain.model.User;
+import com.reto.plazoleta.domain.model.dishes.MeatDish;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
 import com.reto.plazoleta.domain.model.OrderModel;
@@ -29,6 +32,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -480,5 +484,52 @@ class EmployeeRestaurantUseCaseTest {
                 () ->this.employeeRestaurantUseCase.changeOrderStatusToDelivered(33334L, TOKEN_WITH_PREFIX_BEARER));
         //Then
         assertEquals("The employee no belongs to this restaurant", messageException.getMessage());
+    }
+
+    @Test
+    void test_takeOrderByPriorityInStatusEarring_shouldReturnOrderWithHigherPriority() {
+        //Given
+        User employeeAuthenticated = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
+        EmployeeRestaurantModel restaurantEmployee = new EmployeeRestaurantModel(1L, 1L, 1L);
+        RestaurantModel restaurantFromOrder = new RestaurantModel(1L, "name", "address", "3019273456",
+                "http://image-logo.com", 10297345345L, 1L);
+        OrderModel orderFoundModel = new OrderModel(1L,2L, LocalDate.now(),StatusOrder.PENDIENTE, restaurantEmployee, restaurantFromOrder);
+        MeatDish meatDish = new MeatDish(1L, "Albóndigas", "description", 300000.0, "http://image.com", true,
+                                            restaurantFromOrder, new CategoryModel(1L, "Carne", ""), 500
+        );
+        orderFoundModel.setOrdersDishesModel(Collections.singletonList(new OrderDishModel(1L, orderFoundModel, meatDish, 5, 500, null, null)));
+        when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
+        when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN);
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(employeeAuthenticated);
+        when(this.employeeRestaurantPersistencePort.findByIdUserEmployee(restaurantEmployee.getIdUserEmployee())).thenReturn(restaurantEmployee);
+        when(this.orderPersistencePort.findAllOrderByRestaurantIdAndStatusOrderEarring(restaurantEmployee.getIdRestaurant())).thenReturn(Collections.singletonList(orderFoundModel));
+        orderFoundModel.setStatus(StatusOrder.EN_PREPARACION);
+        orderFoundModel.setEmployeeRestaurantModel(restaurantEmployee);
+        when(this.orderPersistencePort.saveOrder(orderFoundModel)).thenReturn(orderFoundModel);
+        //When
+        OrderModel resultOrderTaken = this.employeeRestaurantUseCase.takeOrderByPriorityInStatusEarring();
+        //Then
+        assertEquals(1L, resultOrderTaken.getIdOrder());
+        assertEquals(orderFoundModel.getStatus(), resultOrderTaken.getStatus());
+        assertEquals(orderFoundModel.getDate(), resultOrderTaken.getDate());
+        assertEquals(orderFoundModel.getRestaurantModel().getIdRestaurant(), resultOrderTaken.getRestaurantModel().getIdRestaurant());
+        assertEquals(restaurantEmployee.getIdRestaurantEmployee(), resultOrderTaken.getEmployeeRestaurantModel().getIdRestaurantEmployee());
+        assertEquals(restaurantEmployee.getIdUserEmployee(), resultOrderTaken.getEmployeeRestaurantModel().getIdUserEmployee());
+        assertEquals(meatDish.getGrams(), resultOrderTaken.getOrdersDishesModel().get(0).getGramsDish());
+    }
+
+    @Test
+    void test_takeOrderByPriorityInStatusEarring_withNoOrderFound_shouldThrowNoDataFoundException() {
+        //Given
+        User employeeAuthenticated = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
+        EmployeeRestaurantModel restaurantEmployee = new EmployeeRestaurantModel(1L, 1L, 1L);
+        when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
+        when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN);
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(employeeAuthenticated);
+        when(this.employeeRestaurantPersistencePort.findByIdUserEmployee(restaurantEmployee.getIdUserEmployee())).thenReturn(restaurantEmployee);
+        when(this.orderPersistencePort.findAllOrderByRestaurantIdAndStatusOrderEarring(restaurantEmployee.getIdRestaurant())).thenReturn(Collections.emptyList());
+        //When & Then
+        assertThrows(NoDataFoundException.class,
+                () ->this.employeeRestaurantUseCase.takeOrderByPriorityInStatusEarring());
     }
 }

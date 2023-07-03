@@ -1,6 +1,6 @@
 package com.reto.plazoleta.domain.api;
 
-import com.reto.plazoleta.domain.model.DishModel;
+import com.reto.plazoleta.domain.model.dishes.DishModel;
 
 public interface IOwnerRestaurantServicePort {
 

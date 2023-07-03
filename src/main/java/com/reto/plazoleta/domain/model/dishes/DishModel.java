@@ -1,4 +1,7 @@
-package com.reto.plazoleta.domain.model;
+package com.reto.plazoleta.domain.model.dishes;
+
+import com.reto.plazoleta.domain.model.CategoryModel;
+import com.reto.plazoleta.domain.model.RestaurantModel;
 
 public class DishModel {
 
