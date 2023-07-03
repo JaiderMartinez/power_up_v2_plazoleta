@@ -1,5 +1,7 @@
-package com.reto.plazoleta.domain.model;
+package com.reto.plazoleta.domain.model.orders;
 
+import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
+import com.reto.plazoleta.domain.model.RestaurantModel;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.StatusOrder;
 
 import java.time.LocalDate;

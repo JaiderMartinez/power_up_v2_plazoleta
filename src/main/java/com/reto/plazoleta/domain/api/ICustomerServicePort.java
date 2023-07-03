@@ -1,7 +1,7 @@
 package com.reto.plazoleta.domain.api;
 
 import com.reto.plazoleta.domain.model.dishes.DishModel;
-import com.reto.plazoleta.domain.model.OrderModel;
+import com.reto.plazoleta.domain.model.orders.OrderModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;
 import org.springframework.data.domain.Page;
 

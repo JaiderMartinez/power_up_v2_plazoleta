@@ -4,8 +4,8 @@ import com.reto.plazoleta.application.dto.response.pending_orders.PendingDishRes
 import com.reto.plazoleta.application.dto.response.pending_orders.PendingOrderResponseDto;
 import com.reto.plazoleta.application.dto.response.takenorder.DishTypeOrderedResponseDto;
 import com.reto.plazoleta.application.dto.response.takenorder.OrderTakenResponseDto;
-import com.reto.plazoleta.domain.model.OrderDishModel;
-import com.reto.plazoleta.domain.model.OrderModel;
+import com.reto.plazoleta.domain.model.orders.OrderDishModel;
+import com.reto.plazoleta.domain.model.orders.OrderModel;
 import com.reto.plazoleta.domain.model.dishes.DishModel;
 import com.reto.plazoleta.domain.model.dishes.FlanDessertDish;
 import com.reto.plazoleta.domain.model.dishes.IceCreamDessertDish;

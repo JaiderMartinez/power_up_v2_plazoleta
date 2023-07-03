@@ -1,7 +1,7 @@
 package com.reto.plazoleta.infraestructure.drivenadapter.jpa.mapper;
 
-import com.reto.plazoleta.domain.model.OrderDishModel;
-import com.reto.plazoleta.domain.model.OrderModel;
+import com.reto.plazoleta.domain.model.orders.OrderDishModel;
+import com.reto.plazoleta.domain.model.orders.OrderModel;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.OrderDishEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.OrderEntity;
 import org.mapstruct.Mapper;

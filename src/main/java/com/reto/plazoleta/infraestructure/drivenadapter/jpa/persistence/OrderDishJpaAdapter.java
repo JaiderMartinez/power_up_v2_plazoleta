@@ -1,6 +1,6 @@
 package com.reto.plazoleta.infraestructure.drivenadapter.jpa.persistence;
 
-import com.reto.plazoleta.domain.model.OrderDishModel;
+import com.reto.plazoleta.domain.model.orders.OrderDishModel;
 import com.reto.plazoleta.domain.spi.persistence.IOrderDishPersistencePort;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.OrderDishEntity;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.mapper.IOrderEntityMapper;

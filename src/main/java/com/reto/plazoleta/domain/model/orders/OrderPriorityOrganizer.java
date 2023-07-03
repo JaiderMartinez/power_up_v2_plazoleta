@@ -1,4 +1,4 @@
-package com.reto.plazoleta.domain.model;
+package com.reto.plazoleta.domain.model.orders;
 
 import com.reto.plazoleta.domain.model.dishes.DessertDish;
 import com.reto.plazoleta.domain.model.dishes.DishModel;
@@ -25,6 +25,9 @@ public class OrderPriorityOrganizer implements Comparator<OrderModel> {
     public int compare(OrderModel order, OrderModel nextOrder) {
         int orderPriority = calculateOrderDishesPriorityTotal(order.getOrdersDishesModel());
         int nextOrderPriority = calculateOrderDishesPriorityTotal(nextOrder.getOrdersDishesModel());
+        if (orderPriority == nextOrderPriority) {
+            return Integer.compare(order.getIdOrder().intValue(), nextOrder.getIdOrder().intValue());
+        }
         return Integer.compare(orderPriority, nextOrderPriority);
     }
 

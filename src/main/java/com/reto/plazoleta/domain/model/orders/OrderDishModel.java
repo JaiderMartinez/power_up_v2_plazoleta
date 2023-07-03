@@ -1,4 +1,4 @@
-package com.reto.plazoleta.domain.model;
+package com.reto.plazoleta.domain.model.orders;
 
 import com.reto.plazoleta.domain.model.dishes.DishModel;
 

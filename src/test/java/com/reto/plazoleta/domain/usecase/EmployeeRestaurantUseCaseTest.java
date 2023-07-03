@@ -4,12 +4,13 @@ import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
 import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
 import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
 import com.reto.plazoleta.domain.model.CategoryModel;
-import com.reto.plazoleta.domain.model.OrderDishModel;
+import com.reto.plazoleta.domain.model.dishes.SoupDish;
+import com.reto.plazoleta.domain.model.orders.OrderDishModel;
 import com.reto.plazoleta.domain.model.User;
 import com.reto.plazoleta.domain.model.dishes.MeatDish;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
-import com.reto.plazoleta.domain.model.OrderModel;
+import com.reto.plazoleta.domain.model.orders.OrderModel;
 import com.reto.plazoleta.domain.model.RestaurantModel;
 import com.reto.plazoleta.domain.spi.persistence.IEmployeeRestaurantPersistencePort;
 import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
@@ -32,6 +33,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -531,5 +533,58 @@ class EmployeeRestaurantUseCaseTest {
         //When & Then
         assertThrows(NoDataFoundException.class,
                 () ->this.employeeRestaurantUseCase.takeOrderByPriorityInStatusEarring());
+    }
+
+    @Test
+    void test_pendingOrdersWithLowPriority_shouldReturnOrdersSortedByLowPriority() {
+        //Given
+        User employeeAuthenticated = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
+        EmployeeRestaurantModel restaurantEmployee = new EmployeeRestaurantModel(1L, 1L, 1L);
+        RestaurantModel restaurantFromOrder = new RestaurantModel(1L, "name", "address", "3019273456",
+                "http://image-logo.com", 10297345345L, 1L);
+        OrderModel orderMeat = new OrderModel(1L,2L, LocalDate.now(),StatusOrder.PENDIENTE, restaurantEmployee, restaurantFromOrder);
+        MeatDish meatDish = new MeatDish(1L, "Albóndigas", "description", 300000.0, "http://image.com", true,
+                restaurantFromOrder, new CategoryModel(1L, "Carne", ""), 500
+        );
+        orderMeat.setOrdersDishesModel(Collections.singletonList(new OrderDishModel(1L, orderMeat, meatDish, 5, 500, null, null)));
+
+        OrderModel orderSoup = new OrderModel(2L,2L, LocalDate.now(),StatusOrder.PENDIENTE, restaurantEmployee, restaurantFromOrder);
+        SoupDish soupDish = new SoupDish(1L, "Albóndigas", "description", 300000.0, "http://image.com", true,
+                restaurantFromOrder, new CategoryModel(1L, "Carne", ""), "Yuca"
+        );
+        orderSoup.setOrdersDishesModel(Collections.singletonList(new OrderDishModel(1L, orderSoup, soupDish, 5, null, "Yuca", null)));
+        when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
+        when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN);
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(employeeAuthenticated);
+        when(this.employeeRestaurantPersistencePort.findByIdUserEmployee(restaurantEmployee.getIdUserEmployee())).thenReturn(restaurantEmployee);
+        when(this.orderPersistencePort.findAllOrderByRestaurantIdAndStatusOrderEarring(restaurantEmployee.getIdRestaurant())).thenReturn(Arrays.asList(orderMeat, orderSoup));
+        //When
+        List<OrderModel> ordersSortedByLowPriority = this.employeeRestaurantUseCase.pendingOrdersWithLowPriority();
+        //Then
+        assertEquals(orderSoup.getIdOrder(), ordersSortedByLowPriority.get(0).getIdOrder());
+        assertEquals(orderSoup.getStatus(), ordersSortedByLowPriority.get(0).getStatus());
+        assertEquals(orderSoup.getDate(), ordersSortedByLowPriority.get(0).getDate());
+        assertEquals(soupDish.getSideDish(), ordersSortedByLowPriority.get(0).getOrdersDishesModel().get(0).getSideDish());
+        assertEquals(orderSoup.getRestaurantModel().getIdRestaurant(), ordersSortedByLowPriority.get(0).getRestaurantModel().getIdRestaurant());
+        assertEquals(orderMeat.getIdOrder(), ordersSortedByLowPriority.get(1).getIdOrder());
+        assertEquals(orderMeat.getStatus(), ordersSortedByLowPriority.get(1).getStatus());
+        assertEquals(orderMeat.getDate(), ordersSortedByLowPriority.get(1).getDate());
+        assertEquals(meatDish.getGrams(), ordersSortedByLowPriority.get(1).getOrdersDishesModel().get(0).getGramsDish());
+        assertEquals(orderMeat.getRestaurantModel().getIdRestaurant(), ordersSortedByLowPriority.get(1).getRestaurantModel().getIdRestaurant());
+    }
+
+    @Test
+    void test_pendingOrdersWithLowPriority_withNoOrdersFound_shouldThrowNoDataFoundException() {
+        //Given
+        User employeeAuthenticated = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, "EMPLEADO");
+        EmployeeRestaurantModel restaurantEmployee = new EmployeeRestaurantModel(1L, 1L, 1L);
+        when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
+        when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN);
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(employeeAuthenticated);
+        when(this.employeeRestaurantPersistencePort.findByIdUserEmployee(restaurantEmployee.getIdUserEmployee())).thenReturn(restaurantEmployee);
+        when(this.orderPersistencePort.findAllOrderByRestaurantIdAndStatusOrderEarring(restaurantEmployee.getIdRestaurant())).thenReturn(Collections.emptyList());
+        //When & Then
+        assertThrows(NoDataFoundException.class,
+                () ->this.employeeRestaurantUseCase.pendingOrdersWithLowPriority());
     }
 }
