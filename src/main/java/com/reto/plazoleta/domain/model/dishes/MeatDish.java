@@ -14,6 +14,11 @@ public class MeatDish extends DishModel {
         this.grams = grams;
     }
 
+    public MeatDish(Long idDish, Integer grams) {
+        super(idDish);
+        this.grams = grams;
+    }
+
     public MeatDish(Long idDish, String name, String descriptionDish, Double price,
                     String imageDish, Boolean stateDish, RestaurantModel restaurantModel,
                     CategoryModel categoryModel) {

@@ -6,7 +6,13 @@ import com.reto.plazoleta.domain.exceptions.DishNotExistsException;
 import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
 import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
 import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
+import com.reto.plazoleta.domain.model.CategoryModel;
 import com.reto.plazoleta.domain.model.User;
+import com.reto.plazoleta.domain.model.dishes.FlanDessertDish;
+import com.reto.plazoleta.domain.model.dishes.IceCreamDessertDish;
+import com.reto.plazoleta.domain.model.dishes.MeatDish;
+import com.reto.plazoleta.domain.model.dishes.SoupDish;
+import com.reto.plazoleta.domain.model.orders.OrderDishPriorityComparator;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.dishes.DishModel;
 import com.reto.plazoleta.domain.model.orders.OrderDishModel;
@@ -16,6 +22,7 @@ import com.reto.plazoleta.domain.spi.persistence.IDishPersistencePort;
 import com.reto.plazoleta.domain.spi.persistence.IOrderDishPersistencePort;
 import com.reto.plazoleta.domain.spi.persistence.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.persistence.IRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.token.ITokenServiceProviderPort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.StatusOrder;
 import com.reto.plazoleta.domain.exceptions.NoDataFoundException;
@@ -25,25 +32,34 @@ import org.springframework.data.domain.PageRequest;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class CustomerUseCase implements ICustomerServicePort {
 
+    private static final String MEAT_DISH_TYPE = "CARNE";
+    private static final String SOUP_DISH_TYPE = "SOPAS";
+    private static final String FLAN_DESSERT_DISH_TYPE = "POSTRE_FLAN";
+    private static final String ICE_CREAM_DESSERT_DISH_TYPE = "POSTRE_HELADO";
     private final IOrderPersistencePort orderPersistencePort;
     private final IRestaurantPersistencePort restaurantPersistencePort;
     private final IDishPersistencePort dishPersistencePort;
     private final IUserGateway userGateway;
     private final JwtProvider jwtProvider;
     private final IOrderDishPersistencePort orderDishPersistencePort;
+    private final ITokenServiceProviderPort tokenServiceProviderPort;
 
     public CustomerUseCase(IOrderPersistencePort orderPersistencePort, IRestaurantPersistencePort restaurantPersistencePort,
                            IDishPersistencePort dishPersistencePort, IUserGateway userGateway,
-                           JwtProvider jwtProvider, IOrderDishPersistencePort orderDishPersistencePort) {
+                           JwtProvider jwtProvider, IOrderDishPersistencePort orderDishPersistencePort,
+                           ITokenServiceProviderPort tokenServiceProviderPort) {
         this.orderPersistencePort = orderPersistencePort;
         this.restaurantPersistencePort = restaurantPersistencePort;
         this.dishPersistencePort = dishPersistencePort;
         this.userGateway = userGateway;
         this.jwtProvider = jwtProvider;
         this.orderDishPersistencePort = orderDishPersistencePort;
+        this.tokenServiceProviderPort = tokenServiceProviderPort;
     }
 
     @Override
@@ -149,5 +165,86 @@ public class CustomerUseCase implements ICustomerServicePort {
         } else if (!orderModelToValidate.getStatus().equals(StatusOrder.PENDIENTE)) {
             throw new OrderInProcessException("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse");
         }
+    }
+
+    @Override
+    public OrderModel addSingleDishOrder(OrderModel orderRequest) {
+        validateIfRestaurantExists(orderRequest.getRestaurantModel().getIdRestaurant());
+        String tokenWithPrefixBearer = this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated();
+        User customer = getUserByEmail(getEmailFromToken(tokenWithPrefixBearer), tokenWithPrefixBearer);
+        orderRequest.setStatus(StatusOrder.PENDIENTE);
+        orderRequest.setIdUserCustomer(customer.getIdUser());
+        orderRequest.setOrdersDishesModel(getOrdersDishesOrganizedByPriority(orderRequest));
+        return this.orderPersistencePort.saveOrderAndOrdersDishes(orderRequest);
+    }
+
+    private void validateIfRestaurantExists(Long idRestaurant) {
+        if (!this.restaurantPersistencePort.existRestaurantById(idRestaurant)) {
+            throw new RestaurantNotExistException("");
+        }
+    }
+
+    private List<OrderDishModel> getOrdersDishesOrganizedByPriority(OrderModel orderRequest) {
+        Queue<OrderDishModel> organizeDishesByHighPriority = new PriorityQueue<>(orderRequest.getOrdersDishesModel().size(), new OrderDishPriorityComparator());
+        for (OrderDishModel orderDishModel : orderRequest.getOrdersDishesModel()) {
+            DishModel dishCompleteData = this.dishPersistencePort.findById(orderDishModel.getDishModel().getIdDish());
+            validateIfDishExists(dishCompleteData);
+            orderDishModel.setDishModel(getDishType(orderDishModel.getDishModel(), dishCompleteData));
+            orderDishModel.setOrderModel(orderRequest);
+            organizeDishesByHighPriority.offer(orderDishModel);
+        }
+        return new ArrayList<>(organizeDishesByHighPriority);
+    }
+
+    private DishModel getDishType(DishModel searchDishType, DishModel dishWithDataComplete) {
+        CategoryModel categoryModelType = dishWithDataComplete.getCategoryModel();
+        String dishType = categoryModelType.getName();
+        if (searchDishType instanceof MeatDish && dishType.equalsIgnoreCase(MEAT_DISH_TYPE)) {
+            return validateGramsFromMeatDish(buildMeatDish(searchDishType, dishWithDataComplete));
+        } else if (searchDishType instanceof SoupDish && dishType.equalsIgnoreCase(SOUP_DISH_TYPE)) {
+            return buildSoupDish(searchDishType, dishWithDataComplete);
+        } else if (searchDishType instanceof FlanDessertDish && dishType.equalsIgnoreCase(FLAN_DESSERT_DISH_TYPE)) {
+            return buildFlanDessertDish(searchDishType, dishWithDataComplete);
+        } else if (searchDishType instanceof IceCreamDessertDish && dishType.equalsIgnoreCase(ICE_CREAM_DESSERT_DISH_TYPE)) {
+            return buildIceCreamDessertDish(searchDishType, dishWithDataComplete);
+        }
+        throw new DishNotExistsException("");
+    }
+
+    private MeatDish buildMeatDish(DishModel dishTypeMeat, DishModel dishWithDataComplete) {
+        dishTypeMeat.updateAllDataFromAllFieldsFromDishModel(dishWithDataComplete);
+        return ((MeatDish) dishTypeMeat);
+    }
+
+    private MeatDish validateGramsFromMeatDish(MeatDish meatDish) {
+        if ( !(meatDish.getGrams() >= 250 && meatDish.getGrams() <= 750) ) {
+            throw new DishNotExistsException("");
+        }
+        return meatDish;
+    }
+
+    private SoupDish buildSoupDish(DishModel dishTypeSoupDish, DishModel dishWithDataComplete) {
+        dishTypeSoupDish.updateAllDataFromAllFieldsFromDishModel(dishWithDataComplete);
+        return (SoupDish) dishTypeSoupDish;
+    }
+
+    private FlanDessertDish buildFlanDessertDish(DishModel dishTypeFlanDessertDish, DishModel dishWithDataComplete) {
+        dishTypeFlanDessertDish.updateAllDataFromAllFieldsFromDishModel(dishWithDataComplete);
+        return (FlanDessertDish) dishTypeFlanDessertDish;
+    }
+
+    private IceCreamDessertDish buildIceCreamDessertDish(DishModel dishTypeIceCreamDessertDish, DishModel dishWithDataComplete) {
+        dishTypeIceCreamDessertDish.updateAllDataFromAllFieldsFromDishModel(dishWithDataComplete);
+        return (IceCreamDessertDish) dishTypeIceCreamDessertDish;
+    }
+
+    private void validateIfDishExists(DishModel dishToValidate) {
+        if (dishToValidate == null) {
+            throw new DishNotExistsException("");
+        }
+    }
+
+    private String getEmailFromToken(String tokenWithPrefixBearer) {
+        return this.tokenServiceProviderPort.getEmailFromToken(tokenWithPrefixBearer);
     }
 }

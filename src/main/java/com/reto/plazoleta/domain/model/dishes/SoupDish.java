@@ -14,6 +14,11 @@ public class SoupDish extends DishModel {
         this.sideDish = sideDish;
     }
 
+    public SoupDish(Long idDish, String sideDish) {
+        super(idDish);
+        this.sideDish = sideDish;
+    }
+
     public SoupDish(Long idDish, String name, String descriptionDish, Double price,
                     String imageDish, Boolean stateDish, RestaurantModel restaurantModel,
                     CategoryModel categoryModel) {

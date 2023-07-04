@@ -17,6 +17,10 @@ public class DishModel {
     public DishModel() {
     }
 
+    public DishModel(Long idDish) {
+        this.idDish = idDish;
+    }
+
     public DishModel(Long idDish, String name, String descriptionDish, Double price, String imageDish, Boolean stateDish, RestaurantModel restaurantModel, CategoryModel categoryModel) {
         this.idDish = idDish;
         this.name = name;
@@ -90,5 +94,15 @@ public class DishModel {
 
     public void setCategoryModel(CategoryModel categoryModel) {
         this.categoryModel = categoryModel;
+    }
+
+    public void updateAllDataFromAllFieldsFromDishModel(DishModel dishModel) {
+        this.name = dishModel.getName();
+        this.description = dishModel.getDescription();
+        this.price = dishModel.getPrice();
+        this.urlImageDish = dishModel.getUrlImageDish();
+        this.state = dishModel.getState();
+        this.restaurantModel = dishModel.getRestaurantModel();
+        this.categoryModel = dishModel.getCategoryModel();
     }
 }

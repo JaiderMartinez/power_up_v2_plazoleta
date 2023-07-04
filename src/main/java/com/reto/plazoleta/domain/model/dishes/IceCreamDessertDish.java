@@ -14,6 +14,11 @@ public class IceCreamDessertDish extends DessertDish {
         this.flavor = flavor;
     }
 
+    public IceCreamDessertDish(Long idDish, String flavor) {
+        super(idDish);
+        this.flavor = flavor;
+    }
+
     public IceCreamDessertDish(Long idDish, String name, String descriptionDish, Double price,
                                String imageDish, Boolean stateDish, RestaurantModel restaurantModel,
                                CategoryModel categoryModel) {

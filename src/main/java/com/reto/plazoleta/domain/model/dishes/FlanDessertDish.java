@@ -14,6 +14,11 @@ public class FlanDessertDish extends DessertDish {
         this.topping = topping;
     }
 
+    public FlanDessertDish(Long idDish, String topping) {
+        super(idDish);
+        this.topping = topping;
+    }
+
     public FlanDessertDish(Long idDish, String name, String descriptionDish, Double price,
                            String imageDish, Boolean stateDish, RestaurantModel restaurantModel,
                            CategoryModel categoryModel) {

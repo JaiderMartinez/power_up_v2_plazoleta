@@ -70,24 +70,23 @@ public class OrderPersistenceMapper {
         return new OrderDishModel(
                 orderDishEntity.getIdOrderDish(),
                 mapOrderEntityToOrderModelWithoutListOrdersDishes(orderDishEntity.getOrderEntity()),
-                convertDishEntityToDishModel(orderDishEntity.getDishEntity(), orderDishEntity),
-                orderDishEntity.getAmount(),
-                orderDishEntity.getGramsDish(),
-                orderDishEntity.getSideDish(),
-                orderDishEntity.getFlavor()
+                convertDishEntityToDishModel(orderDishEntity),
+                orderDishEntity.getAmount()
         );
     }
 
-    private DishModel convertDishEntityToDishModel(DishEntity dishEntity, OrderDishEntity orderDishEntity) {
-        String dishType = dishEntity.getCategoryEntity().getName().toString();
-        if (dishType.equalsIgnoreCase(TypeDish.CARNE.toString())) {
-            return convertToMeatDishModel(dishEntity, orderDishEntity.getGramsDish());
-        } else if (dishType.equalsIgnoreCase(TypeDish.SOPAS.toString())) {
-            return convertToSoupDishModel(dishEntity, orderDishEntity.getSideDish());
-        } else if (dishType.equalsIgnoreCase(TypeDish.POSTRE_FLAN.toString())) {
-            return convertToFlanDessertDishModel(dishEntity, orderDishEntity.getSideDish());
-        } else if (dishType.equalsIgnoreCase(TypeDish.POSTRE_HELADO.toString())) {
-            return convertToIceCreamDessertDishModel(dishEntity, orderDishEntity.getFlavor());
+    private DishModel convertDishEntityToDishModel(OrderDishEntity orderDishEntity) {
+        DishEntity dish = orderDishEntity.getDishEntity();
+        CategoryEntity typeOfDish = dish.getCategoryEntity();
+        String nameFromDishType = typeOfDish.getName().toString();
+        if (nameFromDishType.equalsIgnoreCase(TypeDish.CARNE.toString())) {
+            return convertToMeatDishModel( dish, orderDishEntity.getGramsDish());
+        } else if (nameFromDishType.equalsIgnoreCase(TypeDish.SOPAS.toString())) {
+            return convertToSoupDishModel( dish, orderDishEntity.getSideDish());
+        } else if (nameFromDishType.equalsIgnoreCase(TypeDish.POSTRE_FLAN.toString())) {
+            return convertToFlanDessertDishModel( dish, orderDishEntity.getSideDish());
+        } else if (nameFromDishType.equalsIgnoreCase(TypeDish.POSTRE_HELADO.toString())) {
+            return convertToIceCreamDessertDishModel( dish, orderDishEntity.getFlavor());
         } else {
             return null;
         }
@@ -158,13 +157,125 @@ public class OrderPersistenceMapper {
     }
 
     private OrderModel mapOrderEntityToOrderModelWithoutListOrdersDishes(OrderEntity orderEntity) {
-        return new OrderModel(
-                orderEntity.getIdOrder(),
-                orderEntity.getIdUserCustomer(),
-                orderEntity.getDate(),
-                orderEntity.getStatus(),
-                convertEntityToEmployeeRestaurantModel(orderEntity.getEmployeeRestaurantEntity()),
-                convertEntityToRestaurantModel(orderEntity.getRestaurantEntity())
-        );
+        if (orderEntity != null) {
+            return new OrderModel(
+                    orderEntity.getIdOrder(),
+                    orderEntity.getIdUserCustomer(),
+                    orderEntity.getDate(),
+                    orderEntity.getStatus(),
+                    convertEntityToEmployeeRestaurantModel(orderEntity.getEmployeeRestaurantEntity()),
+                    convertEntityToRestaurantModel(orderEntity.getRestaurantEntity())
+            );
+        }
+        return null;
+    }
+
+    public static OrderEntity convertOrderModelToOrderEntity(OrderModel orderModelRequest) {
+        return OrderEntity.builder()
+                .idOrder(orderModelRequest.getIdOrder())
+                .idUserCustomer(orderModelRequest.getIdUserCustomer())
+                .date(orderModelRequest.getDate())
+                .status(orderModelRequest.getStatus())
+                .employeeRestaurantEntity(mapEmployeeRestaurantModelToEmployeeRestaurantEntity(orderModelRequest.getEmployeeRestaurantModel()))
+                .restaurantEntity(mapRestaurantModelToRestaurantEntity(orderModelRequest.getRestaurantModel()))
+                .ordersDishesEntity(orderModelRequest.getOrdersDishesModel().stream()
+                        .map(orderDishModel -> mapOrderDishModelToOrderDishEntity(orderDishModel))
+                        .collect(Collectors.toList())
+                )
+                .build();
+    }
+
+    private EmployeeRestaurantEntity mapEmployeeRestaurantModelToEmployeeRestaurantEntity(EmployeeRestaurantModel employeeRestaurantModelRequest) {
+        if (employeeRestaurantModelRequest != null) {
+            return EmployeeRestaurantEntity.builder()
+                    .idRestaurantEmployee(employeeRestaurantModelRequest.getIdRestaurantEmployee())
+                    .idUserEmployee(employeeRestaurantModelRequest.getIdUserEmployee())
+                    .idRestaurant(employeeRestaurantModelRequest.getIdRestaurant())
+                    .build();
+        }
+        return null;
+    }
+
+    private RestaurantEntity mapRestaurantModelToRestaurantEntity(RestaurantModel restaurantModelRequest) {
+        if (restaurantModelRequest != null) {
+            return RestaurantEntity.builder()
+                    .idRestaurant(restaurantModelRequest.getIdRestaurant())
+                    .name(restaurantModelRequest.getName())
+                    .phone(restaurantModelRequest.getPhone())
+                    .address(restaurantModelRequest.getAddress())
+                    .urlLogo(restaurantModelRequest.getUrlLogo())
+                    .nit(restaurantModelRequest.getNit())
+                    .idOwner(restaurantModelRequest.getIdOwner())
+                    .build();
+        }
+        return null;
+    }
+
+    private OrderDishEntity mapOrderDishModelToOrderDishEntity(OrderDishModel orderDishModel) {
+        return OrderDishEntity.builder()
+                .idOrderDish(orderDishModel.getIdOrderDish())
+                .orderEntity(mapOrderModelWithoutListOrdersDishesToOrderEntity(orderDishModel.getOrderModel()))
+                .dishEntity(mapDishModelToDishEntity(orderDishModel.getDishModel()))
+                .amount(orderDishModel.getAmount())
+                .gramsDish(dishModelToIntegerAsGramsOfMeat(orderDishModel.getDishModel()))
+                .sideDish(dishModelToStringAsSoupOrFlanSideDish(orderDishModel.getDishModel()))
+                .flavor(dishModelToStringAsIceCreamFlavor(orderDishModel.getDishModel()))
+                .build();
+    }
+
+    private OrderEntity mapOrderModelWithoutListOrdersDishesToOrderEntity(OrderModel orderModel) {
+        return OrderEntity.builder()
+                .idOrder(orderModel.getIdOrder())
+                .idUserCustomer(orderModel.getIdUserCustomer())
+                .date(orderModel.getDate())
+                .status(orderModel.getStatus())
+                .employeeRestaurantEntity(mapEmployeeRestaurantModelToEmployeeRestaurantEntity(orderModel.getEmployeeRestaurantModel()))
+                .restaurantEntity(mapRestaurantModelToRestaurantEntity(orderModel.getRestaurantModel()))
+                .ordersDishesEntity(Collections.emptyList())
+                .build();
+    }
+
+    private DishEntity mapDishModelToDishEntity(DishModel dishModel) {
+        return DishEntity.builder()
+                .idDish(dishModel.getIdDish())
+                .name(dishModel.getName())
+                .description(dishModel.getDescription())
+                .price(dishModel.getPrice())
+                .urlImageDish(dishModel.getUrlImageDish())
+                .state(dishModel.getState())
+                .restaurantEntity(mapRestaurantModelToRestaurantEntity(dishModel.getRestaurantModel()))
+                .categoryEntity(mapCategoryModelToCategoryEntity(dishModel.getCategoryModel()))
+                .build();
+    }
+
+    private CategoryEntity mapCategoryModelToCategoryEntity(CategoryModel categoryModel) {
+        return CategoryEntity.builder()
+                .idCategory(categoryModel.getIdCategory())
+                .description(categoryModel.getDescription())
+                .name(TypeDish.valueOf(categoryModel.getName()))
+                .build();
+    }
+
+    private Integer dishModelToIntegerAsGramsOfMeat(DishModel dish) {
+        if (dish instanceof MeatDish) {
+            return ((MeatDish) dish).getGrams();
+        }
+        return null;
+    }
+
+    private String dishModelToStringAsSoupOrFlanSideDish(DishModel dish) {
+        if (dish instanceof SoupDish) {
+            return ((SoupDish) dish).getSideDish();
+        } else if (dish instanceof FlanDessertDish) {
+            return ((FlanDessertDish) dish).getTopping();
+        }
+        return null;
+    }
+
+    private String dishModelToStringAsIceCreamFlavor(DishModel dish) {
+        if (dish instanceof IceCreamDessertDish) {
+            return ((IceCreamDessertDish) dish).getFlavor();
+        }
+        return null;
     }
 }

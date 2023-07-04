@@ -6,6 +6,7 @@ import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
 import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
 import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
 import com.reto.plazoleta.domain.model.User;
+import com.reto.plazoleta.domain.model.dishes.MeatDish;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.CategoryModel;
 import com.reto.plazoleta.domain.model.dishes.DishModel;
@@ -16,6 +17,7 @@ import com.reto.plazoleta.domain.spi.persistence.IDishPersistencePort;
 import com.reto.plazoleta.domain.spi.persistence.IOrderDishPersistencePort;
 import com.reto.plazoleta.domain.spi.persistence.IOrderPersistencePort;
 import com.reto.plazoleta.domain.spi.persistence.IRestaurantPersistencePort;
+import com.reto.plazoleta.domain.spi.token.ITokenServiceProviderPort;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
 import com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.StatusOrder;
 import com.reto.plazoleta.domain.exceptions.NoDataFoundException;
@@ -35,13 +37,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerUseCaseTest {
+
+    private static final String EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN = "customer@customer.com";
+    private static final String TOKEN_WITH_PREFIX_BEARER = "Bearer + Token";
 
     @InjectMocks
     private CustomerUseCase customerUseCase;
@@ -64,8 +70,8 @@ class CustomerUseCaseTest {
     @Mock
     private JwtProvider jwtProvider;
 
-    private static final String EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN = "customer@customer.com";
-    private static final String TOKEN_WITH_PREFIX_BEARER = "Bearer + Token";
+    @Mock
+    private ITokenServiceProviderPort tokenServiceProviderPort;
 
     @Test
     void test_findAllOrderByNameAsc_withIntAsSizeItemsGreaterThanZero_ShouldReturnListRestaurantPageableWithAllFields() {
@@ -88,8 +94,8 @@ class CustomerUseCaseTest {
     @Test
     void test_findAllOrderByNameAsc_withIntAsSizeItemsGreaterThanZeroAndNoDataFound_ShouldThrowNoDataFoundException() {
         //Given
-        Integer numberPage = 0;
-        Integer sizeItems = 10;
+        int numberPage = 0;
+        int sizeItems = 10;
         when(restaurantPersistencePort.findAllByOrderByNameAsc(PageRequest.of(numberPage, sizeItems))).thenReturn(Page.empty());
         // When & Then
         Assertions.assertThrows(
@@ -162,7 +168,7 @@ class CustomerUseCaseTest {
         when(this.jwtProvider.getAuthentication("+ Token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, null));
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
         when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantModelExpected);
-        when(this.orderPersistencePort.findByIdUserCustomerAndIdRestaurant(1L, userAuthenticatedByToken.getIdUser())).thenReturn(asList(orderModelExpected));
+        when(this.orderPersistencePort.findByIdUserCustomerAndIdRestaurant(1L, userAuthenticatedByToken.getIdUser())).thenReturn(Collections.singletonList(orderModelExpected));
         //When
         CustomerHasAOrderInProcessException messageException = assertThrows(
                 CustomerHasAOrderInProcessException.class,
@@ -193,7 +199,7 @@ class CustomerUseCaseTest {
 
         OrderModel orderModelRequest = new OrderModel();
         orderModelRequest.setRestaurantModel(restaurantModelExpected);
-        orderModelRequest.setOrdersDishesModel(asList(new OrderDishModel(1L, orderModelExpected, dishModelRequest, 4)));
+        orderModelRequest.setOrdersDishesModel(Collections.singletonList(new OrderDishModel(1L, orderModelExpected, dishModelRequest, 4)));
 
         when(this.jwtProvider.getAuthentication("+ Token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, null));
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
@@ -228,7 +234,7 @@ class CustomerUseCaseTest {
 
         OrderModel orderModelRequest = new OrderModel();
         orderModelRequest.setRestaurantModel(restaurantModelExpected);
-        orderModelRequest.setOrdersDishesModel(asList(new OrderDishModel(1L, orderModelExpected, dishModelRequest, 4)));
+        orderModelRequest.setOrdersDishesModel(Collections.singletonList(new OrderDishModel(1L, orderModelExpected, dishModelRequest, 4)));
 
         when(this.jwtProvider.getAuthentication("+ Token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, null));
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(userAuthenticatedByToken);
@@ -336,8 +342,8 @@ class CustomerUseCaseTest {
         categoryModelExpected.setIdCategory(1L);
         List<DishModel> dishesWithVariableActiveAndOrderByCategory = new ArrayList<>();
         dishesWithVariableActiveAndOrderByCategory.add(new DishModel(1L, "name", "description", 3000000.0, "http://imagen.png", true, restaurantModelExpected, categoryModelExpected));
-        Integer numberPageRequest = 0;
-        Integer sizeItemsByPage = 2;
+        int numberPageRequest = 0;
+        int sizeItemsByPage = 2;
         Page<DishModel> dishesExpected = new PageImpl<>(dishesWithVariableActiveAndOrderByCategory, PageRequest.of(numberPageRequest, sizeItemsByPage), dishesWithVariableActiveAndOrderByCategory.size());
         when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantModelExpected);
         when(this.dishPersistencePort.getAllDishesActiveOfARestaurantOrderByCategoryAscending(PageRequest.of(numberPageRequest, sizeItemsByPage), restaurantModelExpected.getIdRestaurant()))
@@ -376,8 +382,8 @@ class CustomerUseCaseTest {
         //Given
         RestaurantModel restaurantModelExpected = new RestaurantModel();
         restaurantModelExpected.setIdRestaurant(1L);
-        Integer numberPageRequest = 0;
-        Integer sizeItemsByPage = 2;
+        int numberPageRequest = 0;
+        int sizeItemsByPage = 2;
         when(this.restaurantPersistencePort.findByIdRestaurant(1L)).thenReturn(restaurantModelExpected);
         when(this.dishPersistencePort.getAllDishesActiveOfARestaurantOrderByCategoryAscending(PageRequest.of(numberPageRequest, sizeItemsByPage), restaurantModelExpected.getIdRestaurant()))
                                                                 .thenReturn(Page.empty());
@@ -387,5 +393,102 @@ class CustomerUseCaseTest {
                 () ->  this.customerUseCase.getAllDishesActivePaginatedFromARestaurantOrderByCategoryAscending(numberPageRequest, sizeItemsByPage, restaurantModelExpected.getIdRestaurant()));
         //Then
         assertEquals("No content", messageException.getMessage());
+    }
+
+    @Test
+    void test_addSingleDishOrder_withRequestParamOrderModelCorrect_shouldReturnOrderModelSaved() {
+        //Given
+        User customerOwnerOrder = new User();
+        customerOwnerOrder.setIdUser(1L);
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setIdRestaurant(1L);
+        CategoryModel dishType = new CategoryModel(1L, "CARNE", "");
+        MeatDish meatDish = new MeatDish(1L, "name", "description", 3000000.0, "http://imagen.png", true, restaurant, dishType, 500);
+        OrderDishModel orderDishFromOrderValid = new OrderDishModel();
+        orderDishFromOrderValid.setDishModel(meatDish);
+
+        OrderModel orderValid = new OrderModel(1L, 1L, LocalDate.now(), null, null, restaurant, null);
+        orderDishFromOrderValid.setOrderModel(orderValid);
+        orderValid.setOrdersDishesModel(Collections.singletonList(orderDishFromOrderValid));
+        when(this.restaurantPersistencePort.existRestaurantById(restaurant.getIdRestaurant())).thenReturn(true);
+        when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
+        when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN);
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customerOwnerOrder);
+        when(this.dishPersistencePort.findById(meatDish.getIdDish())).thenReturn(meatDish);
+        when(this.orderPersistencePort.saveOrderAndOrdersDishes(orderValid)).thenReturn(orderValid);
+        //When
+        OrderModel orderSaved = this.customerUseCase.addSingleDishOrder(orderValid);
+        //Then
+        assertEquals(orderValid.getIdOrder(), orderSaved.getIdOrder());
+        assertEquals(orderValid.getDate(), orderSaved.getDate());
+        assertEquals(customerOwnerOrder.getIdUser(), orderSaved.getIdUserCustomer());
+        assertEquals(MeatDish.class, orderSaved.getOrdersDishesModel().get(0).getDishModel().getClass());
+        assertEquals(meatDish.getGrams(), ((MeatDish)orderSaved.getOrdersDishesModel().get(0).getDishModel()).getGrams());
+    }
+
+    @Test
+    void test_addSingleDishOrder_withIdRestaurantInvalid_shouldThrowRestaurantNotExistException() {
+        //Given
+        RestaurantModel restaurantNotExist = new RestaurantModel();
+        restaurantNotExist.setIdRestaurant(10000000L);
+        OrderModel orderInvalidNotFoundRestaurant = new OrderModel(1L, 1L, LocalDate.now(), null, null, restaurantNotExist, null);
+        when(this.restaurantPersistencePort.existRestaurantById(restaurantNotExist.getIdRestaurant())).thenReturn(false);
+        //When & Then
+        assertThrows(
+                RestaurantNotExistException.class,
+                () ->   this.customerUseCase.addSingleDishOrder(orderInvalidNotFoundRestaurant));
+
+    }
+
+    @Test
+    void test_addSingleDishOrder_withWrongOrderBecauseDishDoesNotExist_shouldReturnThrowDishNotExistsException() {
+        //Given
+        User customerOwnerOrder = new User();
+        customerOwnerOrder.setIdUser(1L);
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setIdRestaurant(1L);
+        CategoryModel dishType = new CategoryModel(1L, "CARNE", "");
+        MeatDish meatDish = new MeatDish(1L, "name", "description", 3000000.0, "http://imagen.png", true, restaurant, dishType, 500);
+        OrderDishModel orderDishFromOrderValid = new OrderDishModel();
+        orderDishFromOrderValid.setDishModel(meatDish);
+
+        OrderModel orderWithDishNotExists = new OrderModel(1L, 1L, LocalDate.now(), null, null, restaurant, null);
+        orderDishFromOrderValid.setOrderModel(orderWithDishNotExists);
+        orderWithDishNotExists.setOrdersDishesModel(Collections.singletonList(orderDishFromOrderValid));
+        when(this.restaurantPersistencePort.existRestaurantById(restaurant.getIdRestaurant())).thenReturn(true);
+        when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
+        when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN);
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customerOwnerOrder);
+        when(this.dishPersistencePort.findById(meatDish.getIdDish())).thenReturn(null);
+        //When & Then
+        assertThrows(
+                DishNotExistsException.class,
+                () ->   this.customerUseCase.addSingleDishOrder(orderWithDishNotExists));
+    }
+
+    @Test
+    void test_addSingleDishOrder_withTypeOfDishMeatBeingGreaterThan750Grams_shouldReturnThrowDishNotExistsException() {
+        //Given
+        User customerOwnerOrder = new User();
+        customerOwnerOrder.setIdUser(1L);
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setIdRestaurant(1L);
+        CategoryModel dishType = new CategoryModel(1L, "CARNE", "");
+        MeatDish meatDishWith900Grams = new MeatDish(1L, "name", "description", 3000000.0, "http://imagen.png", true, restaurant, dishType, 900);
+        OrderDishModel orderDishFromOrderValid = new OrderDishModel();
+        orderDishFromOrderValid.setDishModel(meatDishWith900Grams);
+
+        OrderModel orderWithDishNotExists = new OrderModel(1L, 1L, LocalDate.now(), null, null, restaurant, null);
+        orderDishFromOrderValid.setOrderModel(orderWithDishNotExists);
+        orderWithDishNotExists.setOrdersDishesModel(Collections.singletonList(orderDishFromOrderValid));
+        when(this.restaurantPersistencePort.existRestaurantById(restaurant.getIdRestaurant())).thenReturn(true);
+        when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
+        when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN);
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customerOwnerOrder);
+        when(this.dishPersistencePort.findById(meatDishWith900Grams.getIdDish())).thenReturn(meatDishWith900Grams);
+        //When & Then
+        assertThrows(
+                DishNotExistsException.class,
+                () ->   this.customerUseCase.addSingleDishOrder(orderWithDishNotExists));
     }
 }
