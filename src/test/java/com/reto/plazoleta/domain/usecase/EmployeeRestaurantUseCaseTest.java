@@ -499,7 +499,7 @@ class EmployeeRestaurantUseCaseTest {
         MeatDish meatDish = new MeatDish(1L, "Albóndigas", "description", 300000.0, "http://image.com", true,
                                             restaurantFromOrder, new CategoryModel(1L, "Carne", ""), 500
         );
-        orderFoundModel.setOrdersDishesModel(Collections.singletonList(new OrderDishModel(1L, orderFoundModel, meatDish, 5, 500, null, null)));
+        orderFoundModel.setOrdersDishesModel(Collections.singletonList(new OrderDishModel(1L, orderFoundModel, meatDish, 5)));
         when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
         when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN);
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(employeeAuthenticated);

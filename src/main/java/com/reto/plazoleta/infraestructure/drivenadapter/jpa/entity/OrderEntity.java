@@ -6,8 +6,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -52,6 +53,7 @@ public class OrderEntity {
     @JoinColumn(name = "id_restaurante", referencedColumnName = "idRestaurant")
     private RestaurantEntity restaurantEntity;
 
-    @OneToMany(mappedBy = "orderEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "orderEntity", orphanRemoval = true)
+    @Cascade(CascadeType.ALL)
     private List<OrderDishEntity> ordersDishesEntity;
 }

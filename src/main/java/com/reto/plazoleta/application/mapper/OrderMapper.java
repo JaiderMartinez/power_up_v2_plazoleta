@@ -1,9 +1,12 @@
 package com.reto.plazoleta.application.mapper;
 
+import com.reto.plazoleta.application.dto.request.SingleDishOrderRequestDto;
+import com.reto.plazoleta.application.dto.response.SingleDishOrderResponseDto;
 import com.reto.plazoleta.application.dto.response.pending_orders.PendingDishResponseDto;
 import com.reto.plazoleta.application.dto.response.pending_orders.PendingOrderResponseDto;
 import com.reto.plazoleta.application.dto.response.takenorder.DishTypeOrderedResponseDto;
 import com.reto.plazoleta.application.dto.response.takenorder.OrderTakenResponseDto;
+import com.reto.plazoleta.domain.model.RestaurantModel;
 import com.reto.plazoleta.domain.model.orders.OrderDishModel;
 import com.reto.plazoleta.domain.model.orders.OrderModel;
 import com.reto.plazoleta.domain.model.dishes.DishModel;
@@ -13,6 +16,8 @@ import com.reto.plazoleta.domain.model.dishes.MeatDish;
 import com.reto.plazoleta.domain.model.dishes.SoupDish;
 import lombok.experimental.UtilityClass;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @UtilityClass
@@ -159,6 +164,78 @@ public class OrderMapper {
                 .typeDish(TYPE_DISH_DESSERT)
                 .typeDessert(TYPE_DISH_FLAN_DESSERT)
                 .flavor(iceCreamDessertDish.getFlavor())
+                .build();
+    }
+
+    public static OrderModel singleDishOrderRequestDtoToOrderModel(SingleDishOrderRequestDto singleDishOrderRequestDto, Long idRestaurant) {
+        return new OrderModel(
+                null,
+                null,
+                LocalDate.now(),
+                null,
+                null,
+                longAsIdRestaurantToRestaurantModel(idRestaurant),
+                Collections.singletonList(dishFromOrderRequestDtoToOrderDishModel(singleDishOrderRequestDto))
+        );
+    }
+
+    private RestaurantModel longAsIdRestaurantToRestaurantModel(Long idRestaurant) {
+        return new RestaurantModel(
+                idRestaurant,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
+    private OrderDishModel dishFromOrderRequestDtoToOrderDishModel(SingleDishOrderRequestDto singleDishOrderRequestDto) {
+        return new OrderDishModel(
+                null,
+                null,
+                singleDishOrderRequestDtoToDishModel(singleDishOrderRequestDto),
+                1
+        );
+    }
+
+    private DishModel singleDishOrderRequestDtoToDishModel(SingleDishOrderRequestDto singleDishOrderRequestDto) {
+        String typeDish = singleDishOrderRequestDto.getTypeDish();
+        if (typeDish.equalsIgnoreCase(TYPE_DISH_MEAT)) {
+            return buildSingleDishOrderRequestDtoToMeatDish(singleDishOrderRequestDto);
+        } else if (typeDish.equalsIgnoreCase(TYPE_DISH_SOUP)) {
+            return buildSingleDishOrderRequestDtoToSoupDish(singleDishOrderRequestDto);
+        } else if (typeDish.equalsIgnoreCase(TYPE_DISH_DESSERT)) {
+            String typeDessert = singleDishOrderRequestDto.getTypeDessert();
+            if (typeDessert.equalsIgnoreCase(TYPE_DISH_FLAN_DESSERT)) {
+                return buildSingleDishOrderRequestDtoToFlanDessertDish(singleDishOrderRequestDto);
+            } else if (typeDessert.equalsIgnoreCase(TYPE_DISH_ICE_CREAM_DESSERT)) {
+                return buildSingleDishOrderRequestDtoToIceCreamDessertDish(singleDishOrderRequestDto);
+            }
+        }
+        return null;
+    }
+
+    private MeatDish buildSingleDishOrderRequestDtoToMeatDish(SingleDishOrderRequestDto singleMeatDishRequest) {
+        return new MeatDish(singleMeatDishRequest.getIdDish(), singleMeatDishRequest.getGrams());
+    }
+
+    private SoupDish buildSingleDishOrderRequestDtoToSoupDish(SingleDishOrderRequestDto singleSoupDishRequest) {
+        return new SoupDish(singleSoupDishRequest.getIdDish(), singleSoupDishRequest.getSideDish());
+    }
+
+    private FlanDessertDish buildSingleDishOrderRequestDtoToFlanDessertDish(SingleDishOrderRequestDto singleFlanDessertDishRequest) {
+        return new FlanDessertDish(singleFlanDessertDishRequest.getIdDish(), singleFlanDessertDishRequest.getSideDish());
+    }
+
+    private IceCreamDessertDish buildSingleDishOrderRequestDtoToIceCreamDessertDish(SingleDishOrderRequestDto singleIceCreamDessertDishRequest) {
+        return new IceCreamDessertDish(singleIceCreamDessertDishRequest.getIdDish(), singleIceCreamDessertDishRequest.getFlavor());
+    }
+
+    public static SingleDishOrderResponseDto orderModelToSingleDishOrderResponseDto(OrderModel orderModel) {
+        return SingleDishOrderResponseDto.builder()
+                .idOrder(orderModel.getIdOrder())
                 .build();
     }
 }

@@ -18,4 +18,6 @@ public interface IOrderPersistencePort {
     OrderModel findByIdOrder(Long idOrder);
 
     List<OrderModel> findAllOrderByRestaurantIdAndStatusOrderEarring(Long idRestaurant);
+
+    OrderModel saveOrderAndOrdersDishes(OrderModel orderModel);
 }

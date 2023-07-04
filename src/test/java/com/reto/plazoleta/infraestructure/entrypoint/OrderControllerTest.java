@@ -1,5 +1,7 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reto.plazoleta.application.dto.request.SingleDishOrderRequestDto;
 import com.reto.plazoleta.domain.model.User;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.infraestructure.configuration.security.jwt.JwtProvider;
@@ -48,12 +50,17 @@ class OrderControllerTest {
 
     private static final String TAKE_ORDER_PATH = "/micro-small-square/restaurant/take-order";
     private static final String PENDING_ORDERS_WITH_LOW_PRIORITY_PATH = "/micro-small-square/restaurant/pending-orders";
+    private static final String ADD_SINGLE_DISH_ORDER__PATH = "/micro-small-square/restaurant/1/add-order";
     private static final String EMAIL_EMPLOYEE = "employee@employee";
+    private static final String EMAIL_CUSTOMER = "customer@customer";
     private static final String PASSWORD_EMPLOYEE = "123";
     private static final String ROL_EMPLOYEE = "EMPLEADO";
+    private static final String ROL_CUSTOMER = "EMPLEADO";
     private static final String TOKEN_WITH_PREFIX_BEARER = "Bearer + token";
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private IOrderRepository orderRepository;
     @Autowired
@@ -156,5 +163,25 @@ class OrderControllerTest {
         this.mockMvc.perform(MockMvcRequestBuilders.get(PENDING_ORDERS_WITH_LOW_PRIORITY_PATH)
                         .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER))
                 .andExpect(status().isNoContent());
+    }
+
+    @Transactional
+    @WithMockUser(username = EMAIL_CUSTOMER, password = PASSWORD_EMPLOYEE, roles = {ROL_CUSTOMER})
+    @Test
+    void test_addSingleDishOrder_withRequestParamValid_shouldReturnCreatedStatusAndIdOrderSaved() throws Exception {
+        this.orderRepository.deleteAll();
+        User customer = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_EMPLOYEE, ROL_EMPLOYEE);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_CUSTOMER, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customer);
+        SingleDishOrderRequestDto singleMeatDishOrderRequestDto = SingleDishOrderRequestDto.builder()
+                                                                .idDish(2L)
+                                                                .typeDish("carne")
+                                                                .grams(350)
+                                                                .build();
+        this.mockMvc.perform(MockMvcRequestBuilders.post(ADD_SINGLE_DISH_ORDER__PATH)
+                .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
+                        .content(this.objectMapper.writeValueAsString(singleMeatDishOrderRequestDto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.idOrder").value(1));
     }
 }

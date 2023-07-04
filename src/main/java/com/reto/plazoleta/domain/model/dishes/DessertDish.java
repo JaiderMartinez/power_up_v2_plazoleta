@@ -8,6 +8,10 @@ public class DessertDish extends DishModel {
     public DessertDish() {
     }
 
+    public DessertDish(Long idDish) {
+        super(idDish);
+    }
+
     public DessertDish(Long idDish, String name, String descriptionDish, Double price,
                        String imageDish, Boolean stateDish, RestaurantModel restaurantModel,
                        CategoryModel categoryModel) {
