@@ -71,10 +71,7 @@ public class OrderPersistenceMapper {
                 orderDishEntity.getIdOrderDish(),
                 mapOrderEntityToOrderModelWithoutListOrdersDishes(orderDishEntity.getOrderEntity()),
                 convertDishEntityToDishModel(orderDishEntity),
-                orderDishEntity.getAmount(),
-                orderDishEntity.getGramsDish(),
-                orderDishEntity.getSideDish(),
-                orderDishEntity.getFlavor()
+                orderDishEntity.getAmount()
         );
     }
 

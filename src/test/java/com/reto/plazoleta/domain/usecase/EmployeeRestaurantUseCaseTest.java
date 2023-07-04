@@ -517,7 +517,6 @@ class EmployeeRestaurantUseCaseTest {
         assertEquals(orderFoundModel.getRestaurantModel().getIdRestaurant(), resultOrderTaken.getRestaurantModel().getIdRestaurant());
         assertEquals(restaurantEmployee.getIdRestaurantEmployee(), resultOrderTaken.getEmployeeRestaurantModel().getIdRestaurantEmployee());
         assertEquals(restaurantEmployee.getIdUserEmployee(), resultOrderTaken.getEmployeeRestaurantModel().getIdUserEmployee());
-        assertEquals(meatDish.getGrams(), resultOrderTaken.getOrdersDishesModel().get(0).getGramsDish());
     }
 
     @Test
@@ -546,13 +545,13 @@ class EmployeeRestaurantUseCaseTest {
         MeatDish meatDish = new MeatDish(1L, "Albóndigas", "description", 300000.0, "http://image.com", true,
                 restaurantFromOrder, new CategoryModel(1L, "Carne", ""), 500
         );
-        orderMeat.setOrdersDishesModel(Collections.singletonList(new OrderDishModel(1L, orderMeat, meatDish, 5, 500, null, null)));
+        orderMeat.setOrdersDishesModel(Collections.singletonList(new OrderDishModel(1L, orderMeat, meatDish, 5)));
 
         OrderModel orderSoup = new OrderModel(2L,2L, LocalDate.now(),StatusOrder.PENDIENTE, restaurantEmployee, restaurantFromOrder);
         SoupDish soupDish = new SoupDish(1L, "Albóndigas", "description", 300000.0, "http://image.com", true,
                 restaurantFromOrder, new CategoryModel(1L, "Carne", ""), "Yuca"
         );
-        orderSoup.setOrdersDishesModel(Collections.singletonList(new OrderDishModel(1L, orderSoup, soupDish, 5, null, "Yuca", null)));
+        orderSoup.setOrdersDishesModel(Collections.singletonList(new OrderDishModel(1L, orderSoup, soupDish, 5)));
         when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
         when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN);
         when(this.userGateway.getUserByEmailInTheToken(EMAIL_TAKEN_FROM_EMPLOYEE_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(employeeAuthenticated);
@@ -564,12 +563,10 @@ class EmployeeRestaurantUseCaseTest {
         assertEquals(orderSoup.getIdOrder(), ordersSortedByLowPriority.get(0).getIdOrder());
         assertEquals(orderSoup.getStatus(), ordersSortedByLowPriority.get(0).getStatus());
         assertEquals(orderSoup.getDate(), ordersSortedByLowPriority.get(0).getDate());
-        assertEquals(soupDish.getSideDish(), ordersSortedByLowPriority.get(0).getOrdersDishesModel().get(0).getSideDish());
         assertEquals(orderSoup.getRestaurantModel().getIdRestaurant(), ordersSortedByLowPriority.get(0).getRestaurantModel().getIdRestaurant());
         assertEquals(orderMeat.getIdOrder(), ordersSortedByLowPriority.get(1).getIdOrder());
         assertEquals(orderMeat.getStatus(), ordersSortedByLowPriority.get(1).getStatus());
         assertEquals(orderMeat.getDate(), ordersSortedByLowPriority.get(1).getDate());
-        assertEquals(meatDish.getGrams(), ordersSortedByLowPriority.get(1).getOrdersDishesModel().get(0).getGramsDish());
         assertEquals(orderMeat.getRestaurantModel().getIdRestaurant(), ordersSortedByLowPriority.get(1).getRestaurantModel().getIdRestaurant());
     }
 
