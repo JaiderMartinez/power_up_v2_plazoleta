@@ -231,4 +231,20 @@ class OrderControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.DISH_NOT_EXISTS.getMessage()));
     }
+
+    @WithMockUser(username = EMAIL_CUSTOMER, password = PASSWORD_EMPLOYEE, roles = {ROL_CUSTOMER})
+    @Test
+    void test_addSingleDishOrder_withTypeOfDishMeatBeingGreaterThan750Grams_shouldReturnNotFoundStatus() throws Exception {
+        User customer = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_CUSTOMER, ROL_CUSTOMER);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_CUSTOMER, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customer);
+        SingleDishOrderRequestDto meatDishWith900Grams = new SingleDishOrderRequestDto(1L, "Carne", null, null, null, 900);
+        long idRestaurantValid = 1;
+        this.mockMvc.perform(MockMvcRequestBuilders.post(String.format(ADD_SINGLE_DISH_ORDER_PATH, idRestaurantValid))
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
+                        .content(this.objectMapper.writeValueAsString(meatDishWith900Grams))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.DISH_NOT_EXISTS.getMessage()));
+    }
 }

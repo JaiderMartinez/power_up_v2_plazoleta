@@ -200,7 +200,7 @@ public class CustomerUseCase implements ICustomerServicePort {
         CategoryModel categoryModelType = dishWithDataComplete.getCategoryModel();
         String dishType = categoryModelType.getName();
         if (searchDishType instanceof MeatDish && dishType.equalsIgnoreCase(MEAT_DISH_TYPE)) {
-            return buildMeatDish(searchDishType, dishWithDataComplete);
+            return validateGramsFromMeatDish(buildMeatDish(searchDishType, dishWithDataComplete));
         } else if (searchDishType instanceof SoupDish && dishType.equalsIgnoreCase(SOUP_DISH_TYPE)) {
             return buildSoupDish(searchDishType, dishWithDataComplete);
         } else if (searchDishType instanceof FlanDessertDish && dishType.equalsIgnoreCase(FLAN_DESSERT_DISH_TYPE)) {
@@ -214,6 +214,13 @@ public class CustomerUseCase implements ICustomerServicePort {
     private MeatDish buildMeatDish(DishModel dishTypeMeat, DishModel dishWithDataComplete) {
         dishTypeMeat.updateAllDataFromAllFieldsFromDishModel(dishWithDataComplete);
         return ((MeatDish) dishTypeMeat);
+    }
+
+    private MeatDish validateGramsFromMeatDish(MeatDish meatDish) {
+        if ( !(meatDish.getGrams() >= 250 && meatDish.getGrams() <= 750) ) {
+            throw new DishNotExistsException("");
+        }
+        return meatDish;
     }
 
     private SoupDish buildSoupDish(DishModel dishTypeSoupDish, DishModel dishWithDataComplete) {

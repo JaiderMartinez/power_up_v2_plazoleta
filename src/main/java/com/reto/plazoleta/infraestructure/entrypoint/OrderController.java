@@ -61,7 +61,8 @@ public class OrderController {
             @ApiResponse(responseCode = "201", description = "Registered single dish order"),
             @ApiResponse(responseCode = "403", description = "Role other than customer", content = @Content),
             @ApiResponse(responseCode = "404", description = "The dish not exist", content = @Content),
-            @ApiResponse(responseCode = "404", description = "The restaurant not exist", content = @Content)
+            @ApiResponse(responseCode = "404", description = "The restaurant not exist", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Dish type meat grams its range is different between 250 to 750", content = @Content)
     })
     @PostMapping(value = "{idRestaurant}/add-order")
     @PreAuthorize(value = "hasRole('CLIENTE')")
