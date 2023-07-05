@@ -17,5 +17,5 @@ public interface IOrderHandler {
 
     SingleDishOrderResponseDto addSingleDishOrder(SingleDishOrderRequestDto singleDishOrderRequestDto, Long idRestaurant);
 
-    List<OrderDishTypeDtoResponse> addDishesToOrderWithMultipleDishesType(List<OrderDishTypeRequestDto> ordersDishesTypeRequest, Long idRestaurantFromOrder);
+    List<OrderDishTypeDtoResponse> addOrderWithMultipleDishesType(List<OrderDishTypeRequestDto> ordersDishesTypeRequest, Long idRestaurantFromOrder);
 }

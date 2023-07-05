@@ -51,9 +51,9 @@ public class OrderHandlerImplementation implements IOrderHandler {
 
     @Transactional
     @Override
-    public List<OrderDishTypeDtoResponse> addDishesToOrderWithMultipleDishesType(List<OrderDishTypeRequestDto> ordersDishesTypeRequest, Long idRestaurantFromOrder) {
+    public List<OrderDishTypeDtoResponse> addOrderWithMultipleDishesType(List<OrderDishTypeRequestDto> ordersDishesTypeRequest, Long idRestaurantFromOrder) {
         final OrderModel orderModelWithMultipleDishes = orderMapper.ordersDishesTypeRequestToOrderModel(ordersDishesTypeRequest, idRestaurantFromOrder);
-        final OrderModel registeredOrderWithDishType = this.customerServicePort.addDishesToOrderWithMultipleDishesType(orderModelWithMultipleDishes);
+        final OrderModel registeredOrderWithDishType = this.customerServicePort.addOrderWithMultipleDishesType(orderModelWithMultipleDishes);
         return orderMapper.mapOrderModelToOrderDishTypeDtoResponse(registeredOrderWithDishType);
     }
 }

@@ -17,5 +17,5 @@ public interface ICustomerServicePort {
 
     OrderModel addSingleDishOrder(OrderModel orderRequest);
 
-    OrderModel addDishesToOrderWithMultipleDishesType(OrderModel orderWithMultipleDishes);
+    OrderModel addOrderWithMultipleDishesType(OrderModel orderWithMultipleDishes);
 }

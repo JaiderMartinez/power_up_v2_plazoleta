@@ -271,7 +271,7 @@ public class CustomerUseCase implements ICustomerServicePort {
     }
 
     @Override
-    public OrderModel addDishesToOrderWithMultipleDishesType(OrderModel orderWithMultipleDishes) {
+    public OrderModel addOrderWithMultipleDishesType(OrderModel orderWithMultipleDishes) {
         validateIfRestaurantExists(orderWithMultipleDishes.getRestaurantModel().getIdRestaurant());
         String tokenWithPrefixBearer = this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated();
         User customer = getUserByEmail(getEmailFromToken(tokenWithPrefixBearer), tokenWithPrefixBearer);

@@ -1,6 +1,7 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reto.plazoleta.application.dto.request.OrderDishTypeRequestDto;
 import com.reto.plazoleta.application.dto.request.SingleDishOrderRequestDto;
 import com.reto.plazoleta.domain.model.User;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
@@ -37,6 +38,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.mockito.Mockito.when;
@@ -53,6 +55,7 @@ class OrderControllerTest {
     private static final String TAKE_ORDER_PATH = "/micro-small-square/restaurant/take-order";
     private static final String PENDING_ORDERS_WITH_LOW_PRIORITY_PATH = "/micro-small-square/restaurant/pending-orders";
     private static final String ADD_SINGLE_DISH_ORDER_PATH = "/micro-small-square/restaurant/%d/add-order";
+    private static final String ADD_ORDER_WITH_DISH_LIST_PATH = "/micro-small-square/restaurant/%d/add-orders";
     private static final String EMAIL_EMPLOYEE = "employee@employee";
     private static final String EMAIL_CUSTOMER = "customer@customer";
     private static final String PASSWORD_EMPLOYEE = "123";
@@ -131,6 +134,7 @@ class OrderControllerTest {
                 .andExpect(status().isNoContent());
     }
 
+    @Transactional
     @WithMockUser(username = EMAIL_EMPLOYEE, password = PASSWORD_EMPLOYEE, roles = {ROL_EMPLOYEE})
     @Test
     void test_pendingOrdersWithLowPriority_withRequestCorrect_shouldReturnOkStatusAndOrderList() throws Exception {
@@ -243,6 +247,89 @@ class OrderControllerTest {
         this.mockMvc.perform(MockMvcRequestBuilders.post(String.format(ADD_SINGLE_DISH_ORDER_PATH, idRestaurantValid))
                         .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
                         .content(this.objectMapper.writeValueAsString(meatDishWith900Grams))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.DISH_NOT_EXISTS.getMessage()));
+    }
+
+    @Transactional
+    @WithMockUser(username = EMAIL_CUSTOMER, password = PASSWORD_EMPLOYEE, roles = {ROL_CUSTOMER})
+    @Test
+    void test_addOrderWithMultipleDishesType_withRequestParamValid_shouldReturnCreatedStatusAndIdOrderSaved() throws Exception {
+        User customer = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_CUSTOMER, ROL_CUSTOMER);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_CUSTOMER, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customer);
+        OrderDishTypeRequestDto meatDishRequest = new OrderDishTypeRequestDto(2L, "carne", null, null, null, 350);
+        OrderDishTypeRequestDto soupDishRequest = new OrderDishTypeRequestDto(1L, "sopas", null, "arroz", null, null);
+        long idRestaurantValid = 1;
+        this.mockMvc.perform(MockMvcRequestBuilders.post(String.format(ADD_ORDER_WITH_DISH_LIST_PATH, idRestaurantValid))
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
+                        .content(this.objectMapper.writeValueAsString(Arrays.asList(meatDishRequest, soupDishRequest)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$[0].idDish").value(2))
+                .andExpect(jsonPath("$[1].idDish").value(1));
+    }
+
+    @WithMockUser(username = EMAIL_CUSTOMER, password = PASSWORD_EMPLOYEE, roles = {ROL_CUSTOMER})
+    @Test
+    void test_addOrderWithMultipleDishesType_withRequestParamIdRestaurantNotExist_shouldReturnNotFoundStatus() throws Exception {
+        User customer = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_CUSTOMER, ROL_CUSTOMER);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_CUSTOMER, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customer);
+        OrderDishTypeRequestDto meatDishRequest = new OrderDishTypeRequestDto(2L, "carne", null, null, null, 350);
+        long restaurantWithIdNotFound = 30000000;
+        this.mockMvc.perform(MockMvcRequestBuilders.post(String.format(ADD_ORDER_WITH_DISH_LIST_PATH, restaurantWithIdNotFound))
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
+                        .content(this.objectMapper.writeValueAsString(Collections.singletonList(meatDishRequest)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.RESTAURANT_NOT_EXIST.getMessage()));
+    }
+
+    @WithMockUser(username = EMAIL_CUSTOMER, password = PASSWORD_EMPLOYEE, roles = {ROL_CUSTOMER})
+    @Test
+    void test_addOrderWithMultipleDishesType_withRequestParamIdDishNotExists_shouldReturnNotFoundStatus() throws Exception {
+        User customer = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_CUSTOMER, ROL_CUSTOMER);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_CUSTOMER, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customer);
+        OrderDishTypeRequestDto meatDishRequest = new OrderDishTypeRequestDto(10000000L, "carne", null, null, null, 350);
+        long idRestaurantValid = 1;
+        this.mockMvc.perform(MockMvcRequestBuilders.post(String.format(ADD_ORDER_WITH_DISH_LIST_PATH, idRestaurantValid))
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
+                        .content(this.objectMapper.writeValueAsString(Collections.singletonList(meatDishRequest)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.DISH_NOT_EXISTS.getMessage()));
+    }
+
+    @WithMockUser(username = EMAIL_CUSTOMER, password = PASSWORD_EMPLOYEE, roles = {ROL_CUSTOMER})
+    @Test
+    void test_addOrderWithMultipleDishesType_withRequestParamDifferentTypeOfDishThanIdDish_shouldReturnNotFoundStatus() throws Exception {
+        User customer = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_CUSTOMER, ROL_CUSTOMER);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_CUSTOMER, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customer);
+        OrderDishTypeRequestDto meatDishRequest = new OrderDishTypeRequestDto(2L, "sopas", null, "arroz", null, 350);
+        long idRestaurantValid = 1;
+        this.mockMvc.perform(MockMvcRequestBuilders.post(String.format(ADD_ORDER_WITH_DISH_LIST_PATH, idRestaurantValid))
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
+                        .content(this.objectMapper.writeValueAsString(Collections.singletonList(meatDishRequest)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.DISH_NOT_EXISTS.getMessage()));
+    }
+
+    @WithMockUser(username = EMAIL_CUSTOMER, password = PASSWORD_EMPLOYEE, roles = {ROL_CUSTOMER})
+    @Test
+    void test_addOrderWithMultipleDishesType_withTypeOfDishMeatBeingGreaterThan750Grams_shouldReturnNotFoundStatus() throws Exception {
+        User customer = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_CUSTOMER, ROL_CUSTOMER);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_CUSTOMER, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customer);
+        OrderDishTypeRequestDto meatDishWith900Grams = new OrderDishTypeRequestDto(2L, "carne", null, null, null, 900);
+        long idRestaurantValid = 1;
+        this.mockMvc.perform(MockMvcRequestBuilders.post(String.format(ADD_ORDER_WITH_DISH_LIST_PATH, idRestaurantValid))
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
+                        .content(this.objectMapper.writeValueAsString(Collections.singletonList(meatDishWith900Grams)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.DISH_NOT_EXISTS.getMessage()));
