@@ -15,16 +15,16 @@ public class OrderDishPriorityComparator implements Comparator<OrderDishModel> {
     private static final String YUCCA_GARNISH_SOUP_DISH = "Yuca";
     private static final String POTATO_GARNISH_SOUP_DISH = "Papa";
     private static final int YUCCA_PRIORITY = 30;
-    private static final int POTATO_PRIORITY = 23;
-    private static final int RICE_PRIORITY = 18;
+    private static final int POTATO_PRIORITY = 25;
+    private static final int RICE_PRIORITY = 20;
     private static final int FLAN_DESSERT_PRIORITY = 15;
-    private static final int ICE_CREAM_DESSERT_PRIORITY = 11;
+    private static final int ICE_CREAM_DESSERT_PRIORITY = 10;
 
     @Override
     public int compare(OrderDishModel orderDishCurrent, OrderDishModel orderDishNext) {
         int orderDishPriority = calculateOrderDishPriorityTotal(orderDishCurrent);
         int nextOrderDishPriority = calculateOrderDishPriorityTotal(orderDishNext);
-        return orderDishPriority - nextOrderDishPriority;
+        return Integer.compare(orderDishPriority, nextOrderDishPriority);
     }
 
     private int calculateOrderDishPriorityTotal(OrderDishModel orderDish) {

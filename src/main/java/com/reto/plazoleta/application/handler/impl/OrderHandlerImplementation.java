@@ -1,6 +1,8 @@
 package com.reto.plazoleta.application.handler.impl;
 
+import com.reto.plazoleta.application.dto.request.OrderDishTypeRequestDto;
 import com.reto.plazoleta.application.dto.request.SingleDishOrderRequestDto;
+import com.reto.plazoleta.application.dto.response.OrderDishTypeDtoResponse;
 import com.reto.plazoleta.application.dto.response.SingleDishOrderResponseDto;
 import com.reto.plazoleta.application.dto.response.pending_orders.PendingOrderResponseDto;
 import com.reto.plazoleta.application.dto.response.takenorder.OrderTakenResponseDto;
@@ -45,5 +47,13 @@ public class OrderHandlerImplementation implements IOrderHandler {
         final OrderModel orderModelRequest = orderMapper.singleDishOrderRequestDtoToOrderModel(singleDishOrderRequestDto, idRestaurant);
         final OrderModel orderModelResponse = this.customerServicePort.addSingleDishOrder(orderModelRequest);
         return orderMapper.orderModelToSingleDishOrderResponseDto(orderModelResponse);
+    }
+
+    @Transactional
+    @Override
+    public List<OrderDishTypeDtoResponse> addDishesToOrderWithMultipleDishesType(List<OrderDishTypeRequestDto> ordersDishesTypeRequest, Long idRestaurantFromOrder) {
+        final OrderModel orderModelWithMultipleDishes = orderMapper.ordersDishesTypeRequestToOrderModel(ordersDishesTypeRequest, idRestaurantFromOrder);
+        final OrderModel registeredOrderWithDishType = this.customerServicePort.addDishesToOrderWithMultipleDishesType(orderModelWithMultipleDishes);
+        return orderMapper.mapOrderModelToOrderDishTypeDtoResponse(registeredOrderWithDishType);
     }
 }

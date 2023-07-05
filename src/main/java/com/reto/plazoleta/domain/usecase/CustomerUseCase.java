@@ -3,6 +3,7 @@ package com.reto.plazoleta.domain.usecase;
 import com.reto.plazoleta.domain.api.ICustomerServicePort;
 import com.reto.plazoleta.domain.exceptions.CustomerHasAOrderInProcessException;
 import com.reto.plazoleta.domain.exceptions.DishNotExistsException;
+import com.reto.plazoleta.domain.exceptions.EmptyFieldsException;
 import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
 import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
 import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
@@ -174,7 +175,7 @@ public class CustomerUseCase implements ICustomerServicePort {
         User customer = getUserByEmail(getEmailFromToken(tokenWithPrefixBearer), tokenWithPrefixBearer);
         orderRequest.setStatus(StatusOrder.PENDIENTE);
         orderRequest.setIdUserCustomer(customer.getIdUser());
-        orderRequest.setOrdersDishesModel(getOrdersDishesOrganizedByPriority(orderRequest));
+        orderRequest.setOrdersDishesModel(new ArrayList<>(getOrdersDishesOrganizedByPriority(orderRequest)));
         return this.orderPersistencePort.saveOrderAndOrdersDishes(orderRequest);
     }
 
@@ -184,8 +185,8 @@ public class CustomerUseCase implements ICustomerServicePort {
         }
     }
 
-    private List<OrderDishModel> getOrdersDishesOrganizedByPriority(OrderModel orderRequest) {
-        Queue<OrderDishModel> organizeDishesByHighPriority = new PriorityQueue<>(orderRequest.getOrdersDishesModel().size(), new OrderDishPriorityComparator());
+    private Queue<OrderDishModel> getOrdersDishesOrganizedByPriority(OrderModel orderRequest) {
+        Queue<OrderDishModel> organizeDishesByHighPriority = new PriorityQueue<>(orderRequest.getOrdersDishesModel().size(), new OrderDishPriorityComparator().reversed());
         for (OrderDishModel orderDishModel : orderRequest.getOrdersDishesModel()) {
             DishModel dishCompleteData = this.dishPersistencePort.findById(orderDishModel.getDishModel().getIdDish());
             validateIfDishExists(dishCompleteData);
@@ -193,7 +194,7 @@ public class CustomerUseCase implements ICustomerServicePort {
             orderDishModel.setOrderModel(orderRequest);
             organizeDishesByHighPriority.offer(orderDishModel);
         }
-        return new ArrayList<>(organizeDishesByHighPriority);
+        return organizeDishesByHighPriority;
     }
 
     private DishModel getDishType(DishModel searchDishType, DishModel dishWithDataComplete) {
@@ -202,11 +203,11 @@ public class CustomerUseCase implements ICustomerServicePort {
         if (searchDishType instanceof MeatDish && dishType.equalsIgnoreCase(MEAT_DISH_TYPE)) {
             return validateGramsFromMeatDish(buildMeatDish(searchDishType, dishWithDataComplete));
         } else if (searchDishType instanceof SoupDish && dishType.equalsIgnoreCase(SOUP_DISH_TYPE)) {
-            return buildSoupDish(searchDishType, dishWithDataComplete);
+            return validateFieldSideDishIfIsEmptyFromSoupDish(buildSoupDish(searchDishType, dishWithDataComplete));
         } else if (searchDishType instanceof FlanDessertDish && dishType.equalsIgnoreCase(FLAN_DESSERT_DISH_TYPE)) {
-            return buildFlanDessertDish(searchDishType, dishWithDataComplete);
+            return validateFlanDessertDishFieldEmpty(buildFlanDessertDish(searchDishType, dishWithDataComplete));
         } else if (searchDishType instanceof IceCreamDessertDish && dishType.equalsIgnoreCase(ICE_CREAM_DESSERT_DISH_TYPE)) {
-            return buildIceCreamDessertDish(searchDishType, dishWithDataComplete);
+            return validateIceCreamDessertDishFieldEmpty(buildIceCreamDessertDish(searchDishType, dishWithDataComplete));
         }
         throw new DishNotExistsException("");
     }
@@ -228,14 +229,35 @@ public class CustomerUseCase implements ICustomerServicePort {
         return (SoupDish) dishTypeSoupDish;
     }
 
+    private SoupDish validateFieldSideDishIfIsEmptyFromSoupDish(SoupDish soupDish) {
+        if (soupDish.getSideDish() == null) {
+            throw new EmptyFieldsException("");
+        }
+        return soupDish;
+    }
+
     private FlanDessertDish buildFlanDessertDish(DishModel dishTypeFlanDessertDish, DishModel dishWithDataComplete) {
         dishTypeFlanDessertDish.updateAllDataFromAllFieldsFromDishModel(dishWithDataComplete);
         return (FlanDessertDish) dishTypeFlanDessertDish;
     }
 
+    private FlanDessertDish validateFlanDessertDishFieldEmpty(FlanDessertDish flanDessertDish) {
+        if (flanDessertDish.getTopping()  == null) {
+            throw new EmptyFieldsException("");
+        }
+        return flanDessertDish;
+    }
+
     private IceCreamDessertDish buildIceCreamDessertDish(DishModel dishTypeIceCreamDessertDish, DishModel dishWithDataComplete) {
         dishTypeIceCreamDessertDish.updateAllDataFromAllFieldsFromDishModel(dishWithDataComplete);
         return (IceCreamDessertDish) dishTypeIceCreamDessertDish;
+    }
+
+    private IceCreamDessertDish validateIceCreamDessertDishFieldEmpty(IceCreamDessertDish iceCreamDessertDish) {
+        if (iceCreamDessertDish.getFlavor() == null) {
+            throw new EmptyFieldsException("");
+        }
+        return iceCreamDessertDish;
     }
 
     private void validateIfDishExists(DishModel dishToValidate) {
@@ -246,5 +268,16 @@ public class CustomerUseCase implements ICustomerServicePort {
 
     private String getEmailFromToken(String tokenWithPrefixBearer) {
         return this.tokenServiceProviderPort.getEmailFromToken(tokenWithPrefixBearer);
+    }
+
+    @Override
+    public OrderModel addDishesToOrderWithMultipleDishesType(OrderModel orderWithMultipleDishes) {
+        validateIfRestaurantExists(orderWithMultipleDishes.getRestaurantModel().getIdRestaurant());
+        String tokenWithPrefixBearer = this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated();
+        User customer = getUserByEmail(getEmailFromToken(tokenWithPrefixBearer), tokenWithPrefixBearer);
+        orderWithMultipleDishes.setStatus(StatusOrder.PENDIENTE);
+        orderWithMultipleDishes.setIdUserCustomer(customer.getIdUser());
+        orderWithMultipleDishes.setOrdersDishesModel(new ArrayList<>(getOrdersDishesOrganizedByPriority(orderWithMultipleDishes)));
+        return this.orderPersistencePort.saveOrderAndOrdersDishes(orderWithMultipleDishes);
     }
 }
