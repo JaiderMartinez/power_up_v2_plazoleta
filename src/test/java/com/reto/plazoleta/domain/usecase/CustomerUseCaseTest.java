@@ -2,11 +2,14 @@ package com.reto.plazoleta.domain.usecase;
 
 import com.reto.plazoleta.domain.exceptions.CustomerHasAOrderInProcessException;
 import com.reto.plazoleta.domain.exceptions.DishNotExistsException;
+import com.reto.plazoleta.domain.exceptions.EmptyFieldsException;
 import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
 import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
 import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
 import com.reto.plazoleta.domain.model.User;
+import com.reto.plazoleta.domain.model.dishes.FlanDessertDish;
 import com.reto.plazoleta.domain.model.dishes.MeatDish;
+import com.reto.plazoleta.domain.model.dishes.SoupDish;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.CategoryModel;
 import com.reto.plazoleta.domain.model.dishes.DishModel;
@@ -34,6 +37,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -490,5 +494,133 @@ class CustomerUseCaseTest {
         assertThrows(
                 DishNotExistsException.class,
                 () ->   this.customerUseCase.addSingleDishOrder(orderWithDishNotExists));
+    }
+
+    @Test
+    void test_addOrderWithMultipleDishesType_withRequestParamOrderModelCorrect_shouldReturnOrderModelSaved() {
+        //Given
+        User customerOwnerOrder = new User();
+        customerOwnerOrder.setIdUser(1L);
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setIdRestaurant(1L);
+        CategoryModel dishType = new CategoryModel(1L, "SOPAS", "");
+        SoupDish soupDish = new SoupDish(1L, "name", "description", 3000000.0, "http://imagen.png", true, restaurant, dishType, "arroz");
+        OrderDishModel orderDishFromOrderValid = new OrderDishModel();
+        orderDishFromOrderValid.setDishModel(soupDish);
+
+        OrderModel orderValid = new OrderModel(1L, 1L, LocalDate.now(), null, null, restaurant, null);
+        orderDishFromOrderValid.setOrderModel(orderValid);
+        orderValid.setOrdersDishesModel(Collections.singletonList(orderDishFromOrderValid));
+        when(this.restaurantPersistencePort.existRestaurantById(restaurant.getIdRestaurant())).thenReturn(true);
+        when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
+        when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN);
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customerOwnerOrder);
+        when(this.dishPersistencePort.findById(soupDish.getIdDish())).thenReturn(soupDish);
+        when(this.orderPersistencePort.saveOrderAndOrdersDishes(orderValid)).thenReturn(orderValid);
+        //When
+        OrderModel orderSaved = this.customerUseCase.addOrderWithMultipleDishesType(orderValid);
+        //Then
+        assertEquals(orderValid.getIdOrder(), orderSaved.getIdOrder());
+        assertEquals(orderValid.getDate(), orderSaved.getDate());
+        assertEquals(customerOwnerOrder.getIdUser(), orderSaved.getIdUserCustomer());
+        assertEquals(SoupDish.class, orderSaved.getOrdersDishesModel().get(0).getDishModel().getClass());
+        assertEquals(soupDish.getSideDish(), ((SoupDish)orderSaved.getOrdersDishesModel().get(0).getDishModel()).getSideDish());
+    }
+
+    @Test
+    void test_addOrderWithMultipleDishesType_withIdRestaurantInvalid_shouldThrowRestaurantNotExistException() {
+        //Given
+        RestaurantModel restaurantNotExist = new RestaurantModel();
+        restaurantNotExist.setIdRestaurant(10000000L);
+        OrderModel orderInvalidNotFoundRestaurant = new OrderModel(1L, 1L, LocalDate.now(), null, null, restaurantNotExist, null);
+        when(this.restaurantPersistencePort.existRestaurantById(restaurantNotExist.getIdRestaurant())).thenReturn(false);
+        //When & Then
+        assertThrows(
+                RestaurantNotExistException.class,
+                () ->   this.customerUseCase.addOrderWithMultipleDishesType(orderInvalidNotFoundRestaurant));
+
+    }
+
+    @Test
+    void test_addOrderWithMultipleDishesType_withWrongOrderBecauseDishTypeNotIsEqualsTheDish_shouldReturnThrowDishNotExistsException() {
+        //Given
+        User customerOwnerOrder = new User();
+        customerOwnerOrder.setIdUser(1L);
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setIdRestaurant(1L);
+        CategoryModel dishType = new CategoryModel(1L, "SOPAS", "");
+        MeatDish meatDishWhereDishTypeIsSoup = new MeatDish(1L, "name", "description", 300000.0, "http://imagen.png", true, restaurant, dishType, 500);
+        OrderDishModel orderDishFromOrderValid = new OrderDishModel();
+        orderDishFromOrderValid.setDishModel(meatDishWhereDishTypeIsSoup);
+
+        OrderModel orderWithDishNotExists = new OrderModel(1L, 1L, LocalDate.now(), null, null, restaurant, null);
+        orderDishFromOrderValid.setOrderModel(orderWithDishNotExists);
+        orderWithDishNotExists.setOrdersDishesModel(Collections.singletonList(orderDishFromOrderValid));
+        when(this.restaurantPersistencePort.existRestaurantById(restaurant.getIdRestaurant())).thenReturn(true);
+        when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
+        when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN);
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customerOwnerOrder);
+        when(this.dishPersistencePort.findById(meatDishWhereDishTypeIsSoup.getIdDish())).thenReturn(meatDishWhereDishTypeIsSoup);
+        //When & Then
+        assertThrows(
+                DishNotExistsException.class,
+                () ->   this.customerUseCase.addOrderWithMultipleDishesType(orderWithDishNotExists));
+    }
+
+    @Test
+    void test_addOrderWithMultipleDishesType_withTypeOfDishMeatBeingGreaterThan750Grams_shouldReturnThrowDishNotExistsException() {
+        //Given
+        User customerOwnerOrder = new User();
+        customerOwnerOrder.setIdUser(1L);
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setIdRestaurant(1L);
+        CategoryModel dishType = new CategoryModel(1L, "CARNE", "");
+        MeatDish meatDishWith900Grams = new MeatDish(1L, "name", "description", 3000000.0, "http://imagen.png", true, restaurant, dishType, 900);
+        OrderDishModel orderDishFromOrderValid = new OrderDishModel();
+        orderDishFromOrderValid.setDishModel(meatDishWith900Grams);
+
+        OrderModel orderWithDishNotExists = new OrderModel(1L, 1L, LocalDate.now(), null, null, restaurant, null);
+        orderDishFromOrderValid.setOrderModel(orderWithDishNotExists);
+        orderWithDishNotExists.setOrdersDishesModel(Collections.singletonList(orderDishFromOrderValid));
+        when(this.restaurantPersistencePort.existRestaurantById(restaurant.getIdRestaurant())).thenReturn(true);
+        when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
+        when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN);
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customerOwnerOrder);
+        when(this.dishPersistencePort.findById(meatDishWith900Grams.getIdDish())).thenReturn(meatDishWith900Grams);
+        //When & Then
+        assertThrows(
+                DishNotExistsException.class,
+                () ->   this.customerUseCase.addOrderWithMultipleDishesType(orderWithDishNotExists));
+    }
+
+    @Test
+    void test_addOrderWithMultipleDishesType_withFieldsEmptyInTheDish_shouldReturnThrowEmptyFieldsException() {
+        //Given
+        User customerOwnerOrder = new User();
+        customerOwnerOrder.setIdUser(1L);
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setIdRestaurant(1L);
+        CategoryModel dishTypeMeat = new CategoryModel(1L, "CARNE", "");
+        CategoryModel dishTypeFlanDessert = new CategoryModel(2L, "POSTRE_FLAN", "");
+        MeatDish meatDish = new MeatDish(1L, "name", "description", 300000.0, "http://imagen.png", true, restaurant, dishTypeMeat, 500);
+        FlanDessertDish flanDessertDishWithToppingEmpty = new FlanDessertDish(2L, "name", "description", 300000.0, "http://imagen.png", true, restaurant, dishTypeFlanDessert, "");
+        OrderDishModel orderDishTypeMeat = new OrderDishModel(null, null, meatDish, 1);
+
+        OrderDishModel orderDishTypeFlanDessert = new OrderDishModel(null, null, flanDessertDishWithToppingEmpty, 1);
+
+        OrderModel order = new OrderModel(1L, 1L, LocalDate.now(), null, null, restaurant, null);
+        orderDishTypeMeat.setOrderModel(order);
+        orderDishTypeFlanDessert.setOrderModel(order);
+        order.setOrdersDishesModel(Arrays.asList(orderDishTypeMeat, orderDishTypeFlanDessert));
+        when(this.restaurantPersistencePort.existRestaurantById(restaurant.getIdRestaurant())).thenReturn(true);
+        when(this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated()).thenReturn(TOKEN_WITH_PREFIX_BEARER);
+        when(this.tokenServiceProviderPort.getEmailFromToken(TOKEN_WITH_PREFIX_BEARER)).thenReturn(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN);
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_FROM_USER_AUTHENTICATED_BY_TOKEN, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customerOwnerOrder);
+        when(this.dishPersistencePort.findById(meatDish.getIdDish())).thenReturn(meatDish);
+        when(this.dishPersistencePort.findById(flanDessertDishWithToppingEmpty.getIdDish())).thenReturn(flanDessertDishWithToppingEmpty);
+        //When & Then
+        assertThrows(
+                EmptyFieldsException.class,
+                () ->   this.customerUseCase.addOrderWithMultipleDishesType(order));
     }
 }

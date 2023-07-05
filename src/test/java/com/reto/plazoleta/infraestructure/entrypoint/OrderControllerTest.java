@@ -334,4 +334,20 @@ class OrderControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ExceptionResponse.DISH_NOT_EXISTS.getMessage()));
     }
+
+    @WithMockUser(username = EMAIL_CUSTOMER, password = PASSWORD_EMPLOYEE, roles = {ROL_CUSTOMER})
+    @Test
+    void test_addOrderWithMultipleDishesType_withFieldsEmptyInTheRequestParam_shouldReturnConflictStatus() throws Exception {
+        User customer = new User(1L, "name", "lastName", 10937745L, "3094369283", EMAIL_CUSTOMER, ROL_CUSTOMER);
+        when(this.jwtProvider.getAuthentication("+ token")).thenReturn(new UsernamePasswordAuthenticationToken(EMAIL_CUSTOMER, null));
+        when(this.userGateway.getUserByEmailInTheToken(EMAIL_CUSTOMER, TOKEN_WITH_PREFIX_BEARER)).thenReturn(customer);
+        OrderDishTypeRequestDto meatDishWith900Grams = new OrderDishTypeRequestDto(2L, "carne", null, null, null, null);
+        long idRestaurantValid = 1;
+        this.mockMvc.perform(MockMvcRequestBuilders.post(String.format(ADD_ORDER_WITH_DISH_LIST_PATH, idRestaurantValid))
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_WITH_PREFIX_BEARER)
+                        .content(this.objectMapper.writeValueAsString(Collections.singletonList(meatDishWith900Grams)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value(ExceptionResponse.EMPTY_FIELDS.getMessage()));
+    }
 }
