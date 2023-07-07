@@ -11,9 +11,9 @@ import java.util.Comparator;
 
 public class OrderDishPriorityComparator implements Comparator<OrderDishModel> {
 
-    private static final String RICE_GARNISH_SOUP_DISH = "Arroz";
-    private static final String YUCCA_GARNISH_SOUP_DISH = "Yuca";
-    private static final String POTATO_GARNISH_SOUP_DISH = "Papa";
+    private static final String RICE_GARNISH_SOUP_DISH = "ARROZ";
+    private static final String YUCCA_GARNISH_SOUP_DISH = "YUCA";
+    private static final String POTATO_GARNISH_SOUP_DISH = "PAPA";
     private static final int YUCCA_PRIORITY = 30;
     private static final int POTATO_PRIORITY = 25;
     private static final int RICE_PRIORITY = 20;
@@ -43,7 +43,7 @@ public class OrderDishPriorityComparator implements Comparator<OrderDishModel> {
     }
 
     private int calculatePriorityOfSoupDish(SoupDish soupDish) {
-        String sideDish = soupDish.getSideDish();
+        String sideDish = soupDish.getSideDish().toUpperCase();
         switch (sideDish) {
             case YUCCA_GARNISH_SOUP_DISH:
                 return YUCCA_PRIORITY;

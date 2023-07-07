@@ -13,7 +13,7 @@ import com.reto.plazoleta.domain.model.dishes.FlanDessertDish;
 import com.reto.plazoleta.domain.model.dishes.IceCreamDessertDish;
 import com.reto.plazoleta.domain.model.dishes.MeatDish;
 import com.reto.plazoleta.domain.model.dishes.SoupDish;
-import com.reto.plazoleta.domain.model.orders.OrderDishPriorityComparator;
+import com.reto.plazoleta.domain.model.orders.OrderProcessor;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.dishes.DishModel;
 import com.reto.plazoleta.domain.model.orders.OrderDishModel;
@@ -33,8 +33,6 @@ import org.springframework.data.domain.PageRequest;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
 
 public class CustomerUseCase implements ICustomerServicePort {
 
@@ -175,7 +173,7 @@ public class CustomerUseCase implements ICustomerServicePort {
         User customer = getUserByEmail(getEmailFromToken(tokenWithPrefixBearer), tokenWithPrefixBearer);
         orderRequest.setStatus(StatusOrder.PENDIENTE);
         orderRequest.setIdUserCustomer(customer.getIdUser());
-        orderRequest.setOrdersDishesModel(new ArrayList<>(getOrdersDishesOrganizedByPriority(orderRequest)));
+        orderRequest.setOrdersDishesModel(getOrdersDishesOrganizedByPriority(orderRequest));
         return this.orderPersistencePort.saveOrderAndOrdersDishes(orderRequest);
     }
 
@@ -185,21 +183,22 @@ public class CustomerUseCase implements ICustomerServicePort {
         }
     }
 
-    private Queue<OrderDishModel> getOrdersDishesOrganizedByPriority(OrderModel orderRequest) {
-        Queue<OrderDishModel> organizeDishesByHighPriority = new PriorityQueue<>(orderRequest.getOrdersDishesModel().size(), new OrderDishPriorityComparator().reversed());
+    private List<OrderDishModel> getOrdersDishesOrganizedByPriority(OrderModel orderRequest) {
+        OrderProcessor orderProcessor = new OrderProcessor();
         for (OrderDishModel orderDishModel : orderRequest.getOrdersDishesModel()) {
             DishModel dishCompleteData = this.dishPersistencePort.findById(orderDishModel.getDishModel().getIdDish());
             validateIfDishExists(dishCompleteData);
             orderDishModel.setDishModel(getDishType(orderDishModel.getDishModel(), dishCompleteData));
             orderDishModel.setOrderModel(orderRequest);
-            organizeDishesByHighPriority.offer(orderDishModel);
+
+            orderProcessor.addOrderDish(orderDishModel);
         }
-        return organizeDishesByHighPriority;
+        return orderProcessor.getOrdersDishesAsList();
     }
 
     private DishModel getDishType(DishModel searchDishType, DishModel dishWithDataComplete) {
-        CategoryModel categoryModelType = dishWithDataComplete.getCategoryModel();
-        String dishType = categoryModelType.getName();
+        CategoryModel categoryModel = dishWithDataComplete.getCategoryModel();
+        String dishType = categoryModel.getName();
         if (searchDishType instanceof MeatDish && dishType.equalsIgnoreCase(MEAT_DISH_TYPE)) {
             return validateGramsFromMeatDish(
                     buildMeatDish(searchDishType, dishWithDataComplete)
@@ -288,7 +287,7 @@ public class CustomerUseCase implements ICustomerServicePort {
         User customer = getUserByEmail(getEmailFromToken(tokenWithPrefixBearer), tokenWithPrefixBearer);
         orderWithMultipleDishes.setStatus(StatusOrder.PENDIENTE);
         orderWithMultipleDishes.setIdUserCustomer(customer.getIdUser());
-        orderWithMultipleDishes.setOrdersDishesModel(new ArrayList<>(getOrdersDishesOrganizedByPriority(orderWithMultipleDishes)));
+        orderWithMultipleDishes.setOrdersDishesModel(getOrdersDishesOrganizedByPriority(orderWithMultipleDishes));
         return this.orderPersistencePort.saveOrderAndOrdersDishes(orderWithMultipleDishes);
     }
 }
