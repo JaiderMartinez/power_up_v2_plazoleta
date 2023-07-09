@@ -16,4 +16,6 @@ public interface ICustomerServicePort {
     OrderModel cancelOrder(Long idOrder, String tokenWithPrefixBearer);
 
     OrderModel addSingleDishOrder(OrderModel orderRequest);
+
+    OrderModel addOrderWithMultipleDishesType(OrderModel orderWithMultipleDishes);
 }
