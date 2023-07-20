@@ -4,8 +4,10 @@ import com.reto.plazoleta.domain.api.IEmployeeServicePort;
 import com.reto.plazoleta.domain.exceptions.RestaurantNotExistException;
 import com.reto.plazoleta.domain.exceptions.OrderInProcessException;
 import com.reto.plazoleta.domain.exceptions.OrderNotExistsException;
+import com.reto.plazoleta.domain.model.orders.OrderDishModel;
 import com.reto.plazoleta.domain.model.orders.OrderPriorityOrganizer;
 import com.reto.plazoleta.domain.model.User;
+import com.reto.plazoleta.domain.model.orders.OrderProcessor;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.model.EmployeeRestaurantModel;
 import com.reto.plazoleta.domain.model.MessageSmsModel;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
 public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
 
@@ -231,13 +234,20 @@ public class EmployeeRestaurantUseCase implements IEmployeeServicePort {
     }
 
     @Override
-    public List<OrderModel> pendingOrdersWithLowPriority() {
+    public List<OrderDishModel> pendingOrdersWithLowPriority() {
         String tokenWithPrefixBearer = this.tokenServiceProviderPort.getTokenWithPrefixBearerFromUserAuthenticated();
         User employee = getUserAuthenticated(tokenWithPrefixBearer);
         EmployeeRestaurantModel restaurantEmployeeData = getRestaurantEmployeeWhereWorksByIdUserEmployee(employee.getIdUser());
-        List<OrderModel> ordersFromARestaurantWithoutOrganizing = getAllOrdersForARestaurantInPendingStatus(restaurantEmployeeData.getIdRestaurant());
-        PriorityQueue<OrderModel> lowestOrderPriorityQueue = new PriorityQueue<>(ordersFromARestaurantWithoutOrganizing.size(), new OrderPriorityOrganizer());
-        lowestOrderPriorityQueue.addAll(ordersFromARestaurantWithoutOrganizing);
-        return new ArrayList<>(lowestOrderPriorityQueue);
+        OrderProcessor orderProcessor = new OrderProcessor();
+        orderProcessor.addAllOrderDish( getOrdersDishesInPendingStatus(
+                getAllOrdersForARestaurantInPendingStatus( restaurantEmployeeData.getIdRestaurant() )
+        ));
+        return orderProcessor.getOrdersDishesOrderedByHigherPriority();
+    }
+
+    private List<OrderDishModel> getOrdersDishesInPendingStatus(List<OrderModel> orders) {
+        return orders.stream()
+                .flatMap(orderModel -> orderModel.getOrdersDishesModel().stream())
+                .collect(Collectors.toList());
     }
 }

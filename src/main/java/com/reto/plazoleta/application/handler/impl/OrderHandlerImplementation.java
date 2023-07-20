@@ -3,8 +3,8 @@ package com.reto.plazoleta.application.handler.impl;
 import com.reto.plazoleta.application.dto.request.OrderDishTypeRequestDto;
 import com.reto.plazoleta.application.dto.request.SingleDishOrderRequestDto;
 import com.reto.plazoleta.application.dto.response.OrderDishTypeDtoResponse;
+import com.reto.plazoleta.application.dto.response.PendingDishResponseDto;
 import com.reto.plazoleta.application.dto.response.SingleDishOrderResponseDto;
-import com.reto.plazoleta.application.dto.response.pending_orders.PendingOrderResponseDto;
 import com.reto.plazoleta.application.dto.response.takenorder.OrderTakenResponseDto;
 import com.reto.plazoleta.application.handler.IOrderHandler;
 import com.reto.plazoleta.application.mapper.OrderMapper;
@@ -35,9 +35,9 @@ public class OrderHandlerImplementation implements IOrderHandler {
     }
 
     @Override
-    public List<PendingOrderResponseDto> pendingOrdersWithLowPriority() {
+    public List<PendingDishResponseDto> pendingOrdersWithLowPriority() {
         return this.employeeServicePort.pendingOrdersWithLowPriority().stream()
-                .map(orderModel -> orderMapper.orderModelToPendingOrderResponseDto(orderModel))
+                .map(orderDishModel -> orderMapper.orderDishModelToPendingDishResponseDto(orderDishModel))
                 .collect(Collectors.toList());
     }
 

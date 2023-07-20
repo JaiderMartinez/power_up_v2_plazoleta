@@ -1,4 +1,4 @@
-package com.reto.plazoleta.application.dto.response.pending_orders;
+package com.reto.plazoleta.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -15,6 +15,8 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PendingDishResponseDto {
 
+    private Long idOrder;
+    private Long idOrderDish;
     private Long idDish;
     private String typeDish;
     private String typeDessert;

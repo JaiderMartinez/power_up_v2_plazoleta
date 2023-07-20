@@ -30,7 +30,19 @@ public class OrderProcessor {
         this.dishesOrdersByQueueType.put(dishType, ordersDishesOfADishType);
     }
 
-    public List<OrderDishModel> getOrdersDishesAsList() {
+    public void addAllOrderDish(List<OrderDishModel> ordersDishes) {
+        ordersDishes.forEach( orderDishModel -> {
+                    String dishType = orderDishModel.getDishModel().getCategoryModel().getName();
+                    PriorityQueue<OrderDishModel> ordersDishesOfADishType = this.dishesOrdersByQueueType
+                            .computeIfAbsent(dishType, value ->
+                                    new PriorityQueue<>(new OrderDishPriorityComparator().reversed()));
+                    ordersDishesOfADishType.add(orderDishModel);
+                    this.dishesOrdersByQueueType.put(dishType, ordersDishesOfADishType);
+                }
+        );
+    }
+
+    public List<OrderDishModel> getOrdersDishesOrderedByHigherPriority() {
         return this.dishesOrdersByQueueType.values()
                 .stream()
                 .flatMap(Collection::stream)

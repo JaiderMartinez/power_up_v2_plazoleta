@@ -193,7 +193,7 @@ public class CustomerUseCase implements ICustomerServicePort {
 
             orderProcessor.addOrderDish(orderDishModel);
         }
-        return orderProcessor.getOrdersDishesAsList();
+        return orderProcessor.getOrdersDishesOrderedByHigherPriority();
     }
 
     private DishModel getDishType(DishModel searchDishType, DishModel dishWithDataComplete) {

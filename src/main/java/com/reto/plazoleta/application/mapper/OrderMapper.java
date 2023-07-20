@@ -4,8 +4,7 @@ import com.reto.plazoleta.application.dto.request.OrderDishTypeRequestDto;
 import com.reto.plazoleta.application.dto.request.SingleDishOrderRequestDto;
 import com.reto.plazoleta.application.dto.response.OrderDishTypeDtoResponse;
 import com.reto.plazoleta.application.dto.response.SingleDishOrderResponseDto;
-import com.reto.plazoleta.application.dto.response.pending_orders.PendingDishResponseDto;
-import com.reto.plazoleta.application.dto.response.pending_orders.PendingOrderResponseDto;
+import com.reto.plazoleta.application.dto.response.PendingDishResponseDto;
 import com.reto.plazoleta.application.dto.response.takenorder.DishTypeOrderedResponseDto;
 import com.reto.plazoleta.application.dto.response.takenorder.OrderTakenResponseDto;
 import com.reto.plazoleta.domain.model.RestaurantModel;
@@ -100,21 +99,11 @@ public class OrderMapper {
                 .build();
     }
 
-    public static PendingOrderResponseDto orderModelToPendingOrderResponseDto(OrderModel order) {
-        return PendingOrderResponseDto.builder()
-                .idOrder(order.getIdOrder())
-                .idUserCustomer(order.getIdUserCustomer())
-                .date(order.getDate())
-                .status(order.getStatus().toString())
-                .dishes(order.getOrdersDishesModel().stream()
-                        .map(OrderMapper::orderDishModelToPendingDishResponseDto)
-                        .collect(Collectors.toList()))
-                .build();
-    }
-
-    private PendingDishResponseDto orderDishModelToPendingDishResponseDto(OrderDishModel orderDish) {
+    public static PendingDishResponseDto orderDishModelToPendingDishResponseDto(OrderDishModel orderDish) {
         PendingDishResponseDto pendingDishResponseDto = dishModelToPendingDishResponseDto(orderDish.getDishModel());
         return PendingDishResponseDto.builder()
+                .idOrder(orderDish.getOrderModel().getIdOrder())
+                .idOrderDish(orderDish.getIdOrderDish())
                 .idDish(orderDish.getDishModel().getIdDish())
                 .typeDish(pendingDishResponseDto != null ? pendingDishResponseDto.getTypeDish() : null)
                 .typeDessert(pendingDishResponseDto != null ? pendingDishResponseDto.getTypeDessert() : null)

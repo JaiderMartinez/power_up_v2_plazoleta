@@ -558,16 +558,16 @@ class EmployeeRestaurantUseCaseTest {
         when(this.employeeRestaurantPersistencePort.findByIdUserEmployee(restaurantEmployee.getIdUserEmployee())).thenReturn(restaurantEmployee);
         when(this.orderPersistencePort.findAllOrderByRestaurantIdAndStatusOrderEarring(restaurantEmployee.getIdRestaurant())).thenReturn(Arrays.asList(orderMeat, orderSoup));
         //When
-        List<OrderModel> ordersSortedByLowPriority = this.employeeRestaurantUseCase.pendingOrdersWithLowPriority();
+        List<OrderDishModel> ordersSortedByLowPriority = this.employeeRestaurantUseCase.pendingOrdersWithLowPriority();
         //Then
-        assertEquals(orderSoup.getIdOrder(), ordersSortedByLowPriority.get(0).getIdOrder());
-        assertEquals(orderSoup.getStatus(), ordersSortedByLowPriority.get(0).getStatus());
-        assertEquals(orderSoup.getDate(), ordersSortedByLowPriority.get(0).getDate());
-        assertEquals(orderSoup.getRestaurantModel().getIdRestaurant(), ordersSortedByLowPriority.get(0).getRestaurantModel().getIdRestaurant());
-        assertEquals(orderMeat.getIdOrder(), ordersSortedByLowPriority.get(1).getIdOrder());
-        assertEquals(orderMeat.getStatus(), ordersSortedByLowPriority.get(1).getStatus());
-        assertEquals(orderMeat.getDate(), ordersSortedByLowPriority.get(1).getDate());
-        assertEquals(orderMeat.getRestaurantModel().getIdRestaurant(), ordersSortedByLowPriority.get(1).getRestaurantModel().getIdRestaurant());
+        assertEquals(orderSoup.getIdOrder(), ordersSortedByLowPriority.get(0).getOrderModel().getIdOrder());
+        assertEquals(orderSoup.getStatus(), ordersSortedByLowPriority.get(0).getOrderModel().getStatus());
+        assertEquals(orderSoup.getDate(), ordersSortedByLowPriority.get(0).getOrderModel().getDate());
+        assertEquals(orderSoup.getRestaurantModel().getIdRestaurant(), ordersSortedByLowPriority.get(0).getOrderModel().getRestaurantModel().getIdRestaurant());
+        assertEquals(orderMeat.getIdOrder(), ordersSortedByLowPriority.get(1).getOrderModel().getIdOrder());
+        assertEquals(orderMeat.getStatus(), ordersSortedByLowPriority.get(1).getOrderModel().getStatus());
+        assertEquals(orderMeat.getDate(), ordersSortedByLowPriority.get(1).getOrderModel().getDate());
+        assertEquals(orderMeat.getRestaurantModel().getIdRestaurant(), ordersSortedByLowPriority.get(1).getOrderModel().getRestaurantModel().getIdRestaurant());
     }
 
     @Test

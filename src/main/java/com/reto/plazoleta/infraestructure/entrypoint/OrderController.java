@@ -4,7 +4,7 @@ import com.reto.plazoleta.application.dto.request.OrderDishTypeRequestDto;
 import com.reto.plazoleta.application.dto.request.SingleDishOrderRequestDto;
 import com.reto.plazoleta.application.dto.response.OrderDishTypeDtoResponse;
 import com.reto.plazoleta.application.dto.response.SingleDishOrderResponseDto;
-import com.reto.plazoleta.application.dto.response.pending_orders.PendingOrderResponseDto;
+import com.reto.plazoleta.application.dto.response.PendingDishResponseDto;
 import com.reto.plazoleta.application.dto.response.takenorder.OrderTakenResponseDto;
 import com.reto.plazoleta.application.handler.IOrderHandler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,7 +54,7 @@ public class OrderController {
     })
     @GetMapping(value = "pending-orders")
     @PreAuthorize(value = "hasRole('EMPLEADO')")
-    public ResponseEntity<List<PendingOrderResponseDto>> pendingOrdersWithLowPriority() {
+    public ResponseEntity<List<PendingDishResponseDto>> pendingOrdersWithLowPriority() {
         return ResponseEntity.ok(this.orderHandler.pendingOrdersWithLowPriority());
     }
 
