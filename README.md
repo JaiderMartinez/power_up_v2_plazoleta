@@ -38,4 +38,33 @@ Reemplaza <TOKEN> con tu token de autenticación válido, cuando iniciaste sesio
     <li>Entregar pedido.</li>
 </ul>
 
+## Ejecutar
+
+1. Empaquetar microservicio usando el comando en la raiz del proyecto
+`./gradlew build
+`
+2. Ejecutar microservicio
+`java -jar ./build/libs/plazoleta-1.0.jar
+`
+## Sobre Pruebas de Mutacion con PITEST
+
+Es una herramienta que nos ayuda a evaluar la calidad de las pruebas unitarias. 
+PITEST introduce cambios deliberados (mutaciones) en el código para verificar si las pruebas existentes detectan estos cambios.
+
+Evaluación de Resultados:
+* Si las pruebas fallan debido a la mutación, el mutante es "asesinado", lo cual es deseable.
+* Si las pruebas pasan a pesar de la mutación, el mutante "sobrevive", lo que indica que las pruebas pueden no ser suficientemente robustas.
+
+PITEST genera un informe que muestra qué mutantes fueron asesinados y cuáles sobrevivieron, proporcionando métricas sobre la efectividad de las pruebas unitarias.
+
+### Ejecuta PITEST
+
+Usa el comando:
+`./gradlew pitest
+`
+
+Busca los resultados en la siguiente direccion: `/build/reports/pitest/`
+
+<img src="https://drive.google.com/uc?export=view&id=1WAx-MPkGaO-vz5LD2zau57DmY9_fl9ql" alt="Ejemplo del informe generado por pitest" width="400" height="300">
+
 ## Siguiente Microservicio <a href="https://github.com/JaiderMartinez/backend_power_mensajeria.git">Mensajeria</a>
