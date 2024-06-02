@@ -2,10 +2,13 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '2.7.11'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'jacoco'
+	id 'info.solidsoft.pitest' version 'latest.release'
+
 }
 
 group = 'com.reto'
-version = '0.0.1-SNAPSHOT'
+version = '1.0'
 sourceCompatibility = '11'
 
 configurations {
@@ -52,4 +55,35 @@ tasks.named('test') {
 
 compileJava {
 	options.compilerArgs = ['-Amapstruct.defaultComponentModel=spring']
+}
+
+jacoco {
+	toolVersion = "0.8.8"
+}
+
+test {
+	finalizedBy jacocoTestReport
+	jacoco {
+		excludes = ['com.reto.plazoleta.infraestructure.drivenadapter.jpa.entity.*',
+					'com.reto.plazoleta.infraestructure.drivenadapter.webclients.dto.*',
+					'com.reto.plazoleta.domain.model.*',
+					'com.reto.plazoleta.application.dto.*']
+	}
+}
+
+pitest {
+	targetClasses = [
+			'com.reto.plazoleta.domain.usecase.*',
+			'com.reto.plazoleta.infraestructure.entrypoint.*'
+	]
+	pitestVersion = 'latest.release'
+	//mutationThreshold = 80
+	outputFormats = ['HTML']
+	threads = Runtime.getRuntime().availableProcessors()
+	timestampedReports = false
+	junit5PluginVersion = '1.0.0'
+	verbose = false
+	//mutators = ['ALL']
+
+	println "Available processors: ${Runtime.runtime.availableProcessors()}"
 }

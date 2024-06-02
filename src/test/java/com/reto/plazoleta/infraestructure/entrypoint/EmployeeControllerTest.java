@@ -1,5 +1,6 @@
 package com.reto.plazoleta.infraestructure.entrypoint;
 
+import com.reto.plazoleta.BaseIT;
 import com.reto.plazoleta.domain.model.User;
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.domain.spi.clients.IMessengerServiceProviderPort;
@@ -35,15 +36,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
-@DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class EmployeeControllerTest {
+class EmployeeControllerTest extends BaseIT {
 
-    @Autowired
-    private MockMvc mockMvc;
     @MockBean
     private IUserGateway userGateway;
     @MockBean
