@@ -1,5 +1,10 @@
 <h1 align="center">Plaza de comidas</h1>
 
+# Requerimientos
+
+- Java 11
+- gradle-7.6.1
+
 # Microservicio Plazoleta
 
 <img src="https://img.shields.io/badge/%E2%98%95%20Java-%23c98524.svg?style=logoColor=white" alt="Logo Java" />
@@ -38,4 +43,57 @@ Reemplaza <TOKEN> con tu token de autenticación válido, cuando iniciaste sesio
     <li>Entregar pedido.</li>
 </ul>
 
-## Siguiente Microservicio <a href="https://github.com/JaiderMartinez/backend_power_mensajeria.git">Mensajeria</a>
+## Ejecutar
+
+1. Empaquetar microservicio usando el comando en la raiz del proyecto
+`./gradlew build
+`
+2. Ejecutar microservicio
+`java -jar ./build/libs/plazoleta-1.0.jar
+`
+## Sobre Pruebas de Mutacion con PITEST
+
+Es una herramienta que nos ayuda a evaluar la calidad de las pruebas unitarias. 
+PITEST introduce cambios deliberados (mutaciones) en el código para verificar si las pruebas existentes detectan estos cambios.
+
+Evaluación de Resultados:
+* Si las pruebas fallan debido a la mutación, el mutante es "asesinado", lo cual es deseable.
+* Si las pruebas pasan a pesar de la mutación, el mutante "sobrevive", lo que indica que las pruebas pueden no ser suficientemente robustas.
+
+PITEST genera un informe que muestra qué mutantes fueron asesinados y cuáles sobrevivieron, proporcionando métricas sobre la efectividad de las pruebas unitarias.
+
+### Ejecuta PITEST
+
+Usa el comando:
+`./gradlew pitest
+`
+
+Busca los resultados en la siguiente direccion: `/build/reports/pitest/`
+
+<img src="https://drive.google.com/uc?export=view&id=1WAx-MPkGaO-vz5LD2zau57DmY9_fl9ql" alt="Ejemplo del informe generado por pitest" width="400" height="300">
+
+## Arquitectura montanda en la nube AWS
+
+- El despliegue se realizara en la nube de AWS. Servicios usado:
+    * ECR: Repositorio de la imagen.
+    * ECS: Ejecucion de la API.
+    * API GATEWAY: Exponer nuestra API.
+    * LOAD BALANCER: Balanceo interno para la API
+    * PARAMETER STORE: Almacenar nuestras variables de entorno para diferentes ambientes.
+
+![Arquitectura V5-DESPLIEGUE](https://drive.google.com/uc?export=view&id=1mKVzP2Qy3WRH_PUhweA0yGwj2BgFSKA3)
+
+- Levantar servicios de aws usando AWS CloudFormation, pasos:
+
+1. Descargar el siguiente archivo en esta ruta: **deployment/templates/template.json**
+2. Iniciar sesion en la consola de AWS
+2. Dirgirse al servicio AWS CloudFormation
+3. Ir a la seccion de Pilas (Stack)
+4. Dar click en Crear Pila -> con recursos nuevos(estándar)   
+5. En la seccion de Especificar plantilla -> seleccionar Cargar un archivo de plantilla
+6. Dar click en Elegir archivo y cargar **template.json**
+
+## Otros Microservicios 
+
+- <a href="https://github.com/JaiderMartinez/power_up_v2_usuarios">Usuarios</a>
+- <a href="https://github.com/JaiderMartinez/backend_power_mensajeria.git">Mensajeria</a>
