@@ -1,5 +1,10 @@
 <h1 align="center">Plaza de comidas</h1>
 
+# Requerimientos
+
+- Java 11
+- gradle-7.6.1
+
 # Microservicio Plazoleta
 
 <img src="https://img.shields.io/badge/%E2%98%95%20Java-%23c98524.svg?style=logoColor=white" alt="Logo Java" />
@@ -67,4 +72,28 @@ Busca los resultados en la siguiente direccion: `/build/reports/pitest/`
 
 <img src="https://drive.google.com/uc?export=view&id=1WAx-MPkGaO-vz5LD2zau57DmY9_fl9ql" alt="Ejemplo del informe generado por pitest" width="400" height="300">
 
-## Siguiente Microservicio <a href="https://github.com/JaiderMartinez/backend_power_mensajeria.git">Mensajeria</a>
+## Arquitectura montanda en la nube AWS
+
+- El despliegue se realizara en la nube de AWS. Servicios usado:
+    * ECR: Repositorio de la imagen.
+    * ECS: Ejecucion de la API.
+    * API GATEWAY: Exponer nuestra API.
+    * LOAD BALANCER: Balanceo interno para la API
+    * PARAMETER STORE: Almacenar nuestras variables de entorno para diferentes ambientes.
+
+![Arquitectura V5-DESPLIEGUE](https://drive.google.com/uc?export=view&id=1mKVzP2Qy3WRH_PUhweA0yGwj2BgFSKA3)
+
+- Levantar servicios de aws usando AWS CloudFormation, pasos:
+
+1. Descargar el siguiente archivo en esta ruta: **deployment/templates/template.json**
+2. Iniciar sesion en la consola de AWS
+2. Dirgirse al servicio AWS CloudFormation
+3. Ir a la seccion de Pilas (Stack)
+4. Dar click en Crear Pila -> con recursos nuevos(estándar)   
+5. En la seccion de Especificar plantilla -> seleccionar Cargar un archivo de plantilla
+6. Dar click en Elegir archivo y cargar **template.json**
+
+## Otros Microservicios 
+
+- <a href="https://github.com/JaiderMartinez/power_up_v2_usuarios">Usuarios</a>
+- <a href="https://github.com/JaiderMartinez/backend_power_mensajeria.git">Mensajeria</a>
