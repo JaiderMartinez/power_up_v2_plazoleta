@@ -1,0 +1,423 @@
+{
+	"info": {
+		"_postman_id": "7dc3b18d-ad69-42bb-92a8-3de5bb324456",
+		"name": "plazoleta",
+		"description": "Plaza de comidas",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "24323551"
+	},
+	"item": [
+		{
+			"name": "admin",
+			"item": [
+				{
+					"name": "crear restaurante",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJpYXQiOjE2ODgyNTQ0MTIsImV4cCI6MTY5MDg0NjQxMiwicm9sIjpbIlJPTEVfQURNSU5JU1RSQURPUiJdfQ.j9mGOKWr-1seTWH097LLTaPuI12O_JVctOQCFhYClEg"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\" : \"Plaza de platos\",\r\n    \"address\" : \"a 7-101, Cl. 8 #7-1, Villa Del Rosario, Norte de Santander\",\r\n    \"phone\" : \"+573143134077\",\r\n    \"urlLogo\" : \"https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcROh9dh1cBtKadguMALbKd9w51y59BiGn4mFkwhSCD_S7nKgi5T\", \r\n    \"nit\" : 353534,\r\n    \"idOwner\" : 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:9090/micro-small-square/restaurant"
+					},
+					"response": []
+				}
+			],
+			"description": "Administrador del software de la plaza de comidas."
+		},
+		{
+			"name": "owner",
+			"item": [
+				{
+					"name": "crear plato",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckBvd25lci5jb20iLCJpYXQiOjE2ODgyNTU0NDIsImV4cCI6MTY5MDg0NzQ0MiwibGFzdE5hbWUiOiJNYXJ0aW5leiIsIm5hbWUiOiJKb3NlIiwicm9sIjpbIlJPTEVfUFJPUElFVEFSSU8iXX0._DIK3Y0yvyji4_6AytSbdc3fjjVfK9UL1I9DgOHsN5U"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\" : \"sopa\",\r\n    \"description\" : \"variado\",\r\n    \"price\" : 20000.0,\r\n    \"urlImageDish\" : \"http://image.png\",\r\n    \"idCategory\" : 1,\r\n    \"idRestaurant\" : 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:9090/micro-small-square/restaurant/dish"
+					},
+					"response": []
+				},
+				{
+					"name": "actualizar precio y descripcion del plato",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckBvd25lci5jb20iLCJpYXQiOjE2ODc0NjM0OTMsImV4cCI6MTY5MDA1NTQ5MywibGFzdE5hbWUiOiJvd25lciIsIm5hbWUiOiJPd25lciIsInJvbCI6WyJST0xFX1BST1BJRVRBUklPIl19.3iVdQnIdBhIVqNMtCODcjS5oF87YMGK7tASiZ7huyaE"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"idDish\" : 1,\r\n    \"price\" : 330000,\r\n    \"description\" : \"variedad de pollos\",\r\n    \"idRestaurant\" : 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:9090/micro-small-square/restaurant/dish/update"
+					},
+					"response": []
+				},
+				{
+					"name": "habilitar o desabilitar plato",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckBvd25lci5jb20iLCJpYXQiOjE2ODc0NjI5MTMsImV4cCI6MTY5MDA1NDkxMywibGFzdE5hbWUiOiJvd25lciIsIm5hbWUiOiJPd25lciIsInJvbCI6WyJST0xFX1BST1BJRVRBUklPIl19.CwuN3bKbcKnm3EIr0Smzce8m2lYezpYTnyQW7Y8d4vA"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:9090/micro-small-square/restaurant/1/dish/1/update/status/true"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "customer",
+			"item": [
+				{
+					"name": "lista de restaurantes paginados",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lckBjdXN0b21lci5jb20iLCJpYXQiOjE2ODc0NjI0ODksImV4cCI6MTY5MDA1NDQ4OSwibGFzdE5hbWUiOiJNYXJ0aW5leiIsIm5hbWUiOiJKYWlkZXIiLCJyb2wiOlsiUk9MRV9DTElFTlRFIl19.j1EyKHj7pixv36NoPSTDQEgtrq62DvCRTrpPbRnCzuU"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:9090/micro-small-square/restaurants?sizePage=3&numberPage=0",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"micro-small-square",
+								"restaurants"
+							],
+							"query": [
+								{
+									"key": "sizePage",
+									"value": "3"
+								},
+								{
+									"key": "numberPage",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listar platos paginados",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lckBjdXN0b21lci5jb20iLCJpYXQiOjE2ODc0NjI0ODksImV4cCI6MTY5MDA1NDQ4OSwibGFzdE5hbWUiOiJNYXJ0aW5leiIsIm5hbWUiOiJKYWlkZXIiLCJyb2wiOlsiUk9MRV9DTElFTlRFIl19.j1EyKHj7pixv36NoPSTDQEgtrq62DvCRTrpPbRnCzuU"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:9090/micro-small-square/restaurant/1/dishes?sizePage=7&numberPage=0",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"micro-small-square",
+								"restaurant",
+								"1",
+								"dishes"
+							],
+							"query": [
+								{
+									"key": "sizePage",
+									"value": "7"
+								},
+								{
+									"key": "numberPage",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "realizar pedido",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjbGllbnRlQGNsaWVudGUuY29tIiwiaWF0IjoxNjg4MzI3NzkzLCJleHAiOjE2OTA5MTk3OTMsImxhc3ROYW1lIjoiTWFydGluZXoiLCJuYW1lIjoiQ3VlbnRhIHNlY3VuZGFyaWEiLCJyb2wiOlsiUk9MRV9DTElFTlRFIl19.NoidysFg9nzbCe2m0bja7SylmF5u56q0dXXvMYI6KNo"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"idRestaurant\" : 1,\r\n    \"dishes\" : [\r\n        {\r\n            \"idDish\" : 5,\r\n            \"name\" : \"ensaladas\",\r\n            \"amount\" : 2\r\n        },\r\n        {\r\n            \"idDish\" : 3,\r\n            \"name\" : \"Bowl de montañero\",\r\n            \"amount\" : 5\r\n        }\r\n    ] \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:9090/micro-small-square/order"
+					},
+					"response": []
+				},
+				{
+					"name": "cancelar pedido",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lckBjdXN0b21lci5jb20iLCJpYXQiOjE2ODc0NjMzOTMsImV4cCI6MTY5MDA1NTM5MywibGFzdE5hbWUiOiJNYXJ0aW5leiIsIm5hbWUiOiJKYWlkZXIiLCJyb2wiOlsiUk9MRV9DTElFTlRFIl19.QqZ_YLnWjGHvZ7gvwqo6sZO5drn7ByXSJNxXh3kaT8g"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": "localhost:9090/micro-small-square/order/cancel/2"
+					},
+					"response": []
+				},
+				{
+					"name": "añadir pedido con un unico plato",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjbGllbnRlQGNsaWVudGUuY29tIiwiaWF0IjoxNjg4NDE2MTgyLCJleHAiOjE2OTEwMDgxODIsImxhc3ROYW1lIjoiTWFydGluZXoiLCJuYW1lIjoiQ3VlbnRhIHNlY3VuZGFyaWEiLCJyb2wiOlsiUk9MRV9DTElFTlRFIl19.EoZYbqDCS4o7JfbbCqWdjnxOBRpeGBLF8WtG3g4cNTM"
+							}
+						},
+						"method": "OPTIONS",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"idDish\": 2,\r\n    \"typeDish\":\"carne\",\r\n    \"grams\": 350\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:9090/micro-small-square/restaurant/1/add-order"
+					},
+					"response": []
+				},
+				{
+					"name": "añadir pedido con una lista de diferentes tipos de platos",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjbGllbnRlQGNsaWVudGUuY29tIiwiaWF0IjoxNjg4NDE2MTgyLCJleHAiOjE2OTEwMDgxODIsImxhc3ROYW1lIjoiTWFydGluZXoiLCJuYW1lIjoiQ3VlbnRhIHNlY3VuZGFyaWEiLCJyb2wiOlsiUk9MRV9DTElFTlRFIl19.EoZYbqDCS4o7JfbbCqWdjnxOBRpeGBLF8WtG3g4cNTM"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    \r\n    {\r\n        \"idDish\" : 5,\r\n        \"typeDish\" : \"postre\",\r\n        \"typeDessert\" : \"flan\",\r\n        \"sideDish\": \"arequipe\"\r\n    },\r\n    {\r\n        \"idDish\": 8,\r\n        \"typeDish\" : \"sopas\",\r\n        \"sideDish\" : \"Yuca\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:9090/micro-small-square/restaurant/1/add-orders"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "employee",
+			"item": [
+				{
+					"name": "filtrar pedidos por estado",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlbXBsb3llZUBlbXBsb3llZS5jb20iLCJpYXQiOjE2ODc0NjMyNjgsImV4cCI6MTY5MDA1NTI2OCwibGFzdE5hbWUiOiJlbXBsb3llZSIsIm5hbWUiOiJlbXBsb3llZSIsInJvbCI6WyJST0xFX0VNUExFQURPIl19.Y8E8dlCbE9FwhwWPNa_sKIN5-YrEbNZRr156BKplqvw"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:9090/micro-small-square/filters-orders?sizeItems=3&pageNumber=0&status=CANCELADO",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"micro-small-square",
+								"filters-orders"
+							],
+							"query": [
+								{
+									"key": "sizeItems",
+									"value": "3"
+								},
+								{
+									"key": "pageNumber",
+									"value": "0"
+								},
+								{
+									"key": "status",
+									"value": "CANCELADO"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "asignarme a uno a mas pedidos",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlbXBsb3llZUBlbXBsb3llZS5jb20iLCJpYXQiOjE2ODc0NjQzNDIsImV4cCI6MTY5MDA1NjM0MiwibGFzdE5hbWUiOiJlbXBsb3llZSIsIm5hbWUiOiJlbXBsb3llZSIsInJvbCI6WyJST0xFX0VNUExFQURPIl19.r6ABXZ5o-w2-9QIpGz7h7gsptH3OaABvAe9Gvri1lK8"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "localhost:9090/micro-small-square/restaurant/order?idOrder=2&idOrder=3",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"micro-small-square",
+								"restaurant",
+								"order"
+							],
+							"query": [
+								{
+									"key": "idOrder",
+									"value": "2"
+								},
+								{
+									"key": "idOrder",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cambiar estado del pedido a listo y notificar al cliente",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlbXBsb3llZUBlbXBsb3llZS5jb20iLCJpYXQiOjE2ODc0NjQzNDIsImV4cCI6MTY5MDA1NjM0MiwibGFzdE5hbWUiOiJlbXBsb3llZSIsIm5hbWUiOiJlbXBsb3llZSIsInJvbCI6WyJST0xFX0VNUExFQURPIl19.r6ABXZ5o-w2-9QIpGz7h7gsptH3OaABvAe9Gvri1lK8"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": "localhost:9090/micro-small-square/restaurant/order/2"
+					},
+					"response": []
+				},
+				{
+					"name": "cambiar estado del pedido a entregado",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlbXBsZWFkb0BlbXBsZWFkby5jb20iLCJpYXQiOjE2ODczODAyMjQsImV4cCI6MTY4OTk3MjIyNCwibGFzdE5hbWUiOiJKaW1lbmV6IiwibmFtZSI6Ikpvc2UiLCJyb2wiOlsiUk9MRV9FTVBMRUFETyJdfQ.5bpGKUaqY1ekp2bKs-QnEfQx23an3nm2lAxILJDZhfg"
+							}
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": "localhost:9090/micro-small-square/restaurant/order/status/delivered/33344"
+					},
+					"response": []
+				},
+				{
+					"name": "tomar pedido",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlbXBsb3llZUBlbXBsb3llZS5jb20iLCJpYXQiOjE2ODgyNjU2NjEsImV4cCI6MTY5MDg1NzY2MSwibGFzdE5hbWUiOiJKaW1lbmV6IiwibmFtZSI6Ikpvc2UiLCJyb2wiOlsiUk9MRV9FTVBMRUFETyJdfQ.lGBsIMyH_FzlPlC8scmfVDwptrIOZSSTRnS2ldpeFYk"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "localhost:9090/micro-small-square/restaurant/take-order",
+						"description": "StartFragment\n\nEndpoint que será consumido por los empleados del restaurante. Se debe retornar el pedido siguiente en orden de prioridad. Después de tomar el pedido, se elimina del listado. \\[ELIMINA EL DE MAXIMA PRIORIDAD\\]\n\nEndF"
+					},
+					"response": []
+				},
+				{
+					"name": "pedidos pendientes ordenados por prioridad baja",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlbXBsb3llZUBlbXBsb3llZS5jb20iLCJpYXQiOjE2ODgyNjU2NjEsImV4cCI6MTY5MDg1NzY2MSwibGFzdE5hbWUiOiJKaW1lbmV6IiwibmFtZSI6Ikpvc2UiLCJyb2wiOlsiUk9MRV9FTVBMRUFETyJdfQ.lGBsIMyH_FzlPlC8scmfVDwptrIOZSSTRnS2ldpeFYk"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "localhost:9090/micro-small-square/restaurant/pending-orders"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

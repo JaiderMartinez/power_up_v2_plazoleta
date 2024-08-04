@@ -1,0 +1,43 @@
+services:
+  small-square-app:
+    build:
+      context: ../
+      dockerfile: deployment/Dockerfile
+    ports:
+      - "9090:9090"
+    networks:
+      - default
+    environment:
+      - JAVA_OPTS=-Duser.timezone=America/Bogota
+      - DATASOURCE_URL=jdbc:mysql://mysql-small-square:3306/db_plazoleta?useSSL=false&allowPublicKeyRetrieval=true
+    depends_on:
+      - mysql-small-square
+      - redis
+
+  mysql-small-square:
+    container_name: food-court-mysql
+    image: mysql:8.4.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_DATABASE: "db_plazoleta"
+    networks:
+      - default
+
+  redis:
+    container_name: food-court-redis
+    image: redis
+    networks:
+      - default
+    ports:
+      - "6379:6379"
+
+networks:
+  default:
+    name: "food-court-network"
+
+volumes:
+  db-data:
+    name: "food-court-db-data"

@@ -93,6 +93,12 @@ Busca los resultados en la siguiente direccion: `/build/reports/pitest/`
 5. En la seccion de Especificar plantilla -> seleccionar Cargar un archivo de plantilla
 6. Dar click en Elegir archivo y cargar **template.json**
 
+## Redis
+
+- Entrar a redis usando el comando `redis-cli` dentro de la imagen
+- Comando para eliminar una key `DEL "userDto::2"`
+
+
 ## Otros Microservicios 
 
 - <a href="https://github.com/JaiderMartinez/power_up_v2_usuarios">Usuarios</a>
