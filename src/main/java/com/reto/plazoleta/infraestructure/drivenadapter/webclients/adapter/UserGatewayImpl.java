@@ -6,6 +6,7 @@ import com.reto.plazoleta.infraestructure.drivenadapter.webclients.exceptions.Us
 import com.reto.plazoleta.domain.spi.clients.IUserGateway;
 import com.reto.plazoleta.infraestructure.drivenadapter.webclients.mapper.IUserMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ public class UserGatewayImpl implements IUserGateway {
     }
 
     @Override
+    @Cacheable(value = "userDto", key = "'idUser'.concat(#idUser)")
     public UserDto getUserById(Long idUser, String token) {
         return webClient.get().uri(uriBuilder -> uriBuilder.path("user/verifier")
                         .queryParam("idUser", idUser)
@@ -42,6 +44,7 @@ public class UserGatewayImpl implements IUserGateway {
     }
 
     @Override
+    @Cacheable(value = "user", key = "#email")
     public User getUserByEmailInTheToken(String email, String tokenWithPrefixBearer) {
         return this.userMapper.userDtoToUser(
                 this.webClient.get().uri(uriBuilder -> uriBuilder.path("user/get-user-by-email")
